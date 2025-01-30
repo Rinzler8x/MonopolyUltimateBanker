@@ -1,16 +1,21 @@
 package com.example.monopolyultimatebanker.data.firebase
 
+data class AuthResponse(
+    val errorMessage: String? = null,
+    val result: Boolean
+)
+
 interface FirebaseAuthRepository {
 
     suspend fun signInUser(
         email: String,
         password: String,
-    ) : Boolean
+    ) : AuthResponse
 
     suspend fun logInUser(
         email: String,
         password: String,
-    ) : Boolean
+    ) : AuthResponse
 
-    suspend fun logOutUser() : Boolean
+    suspend fun logOutUser() : AuthResponse
 }
