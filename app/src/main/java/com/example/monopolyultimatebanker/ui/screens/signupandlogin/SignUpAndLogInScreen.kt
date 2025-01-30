@@ -1,34 +1,35 @@
 package com.example.monopolyultimatebanker.ui.screens.signupandlogin
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
+import com.example.monopolyultimatebanker.utils.ObserverAsEvents
+import com.example.monopolyultimatebanker.utils.SnackbarController
+import kotlinx.coroutines.launch
 
 object SignUpAndLogInDestination: NavigationDestination {
     override val route = "signInAndLogIn"
@@ -40,10 +41,33 @@ fun SignUpAndLogInScreen(
     navigateTo: () -> Unit,
     viewModel: SignUpAndLogInViewModel = hiltViewModel()
 ) {
-//    var checked by remember { mutableStateOf(true) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    ObserverAsEvents(
+        flow = SnackbarController.events,
+        key1 = snackbarHostState
+    ) { event ->
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+
+            val result = snackbarHostState.showSnackbar(
+                message = event.message,
+                actionLabel = event.action?.name,
+                duration = SnackbarDuration.Long
+            )
+
+            if(result == SnackbarResult.ActionPerformed) {
+                event.action?.action?.invoke()
+            }
+        }
+    }
     val uiState = viewModel.uiState
     Scaffold(
         snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState
+            )
         }
     ) { contentPadding ->
         Column (

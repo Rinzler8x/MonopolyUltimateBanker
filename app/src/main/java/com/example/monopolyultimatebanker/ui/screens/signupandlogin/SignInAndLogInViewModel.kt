@@ -8,10 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.firebase.AuthResponse
 import com.example.monopolyultimatebanker.data.firebase.FirebaseAuthRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
+import com.example.monopolyultimatebanker.utils.SnackbarController
+import com.example.monopolyultimatebanker.utils.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -68,7 +67,6 @@ class SignUpAndLogInViewModel @Inject constructor(
     fun onClickSignIn(
         navigateTo: () -> Unit
     ) {
-        val deferred = CompletableDeferred<Unit>()
         if(uiState.notEmpty){
             viewModelScope.launch {
                 val response: AuthResponse = firebaseAuthRepositoryImpl.signInUser(uiState.email, uiState.password)
@@ -77,18 +75,11 @@ class SignUpAndLogInViewModel @Inject constructor(
                         isLoggedIn = true,
                         userName = uiState.userName,
                         email = uiState.email,
-                        password = uiState.password
                     )
-                    uiState = userLoginPreferencesRepository.userLogin.first()
-                    deferred.complete(Unit)
+                    navigateTo()
                 } else {
-                    //TODO: Display error with Snackbar
+                    showSnackBar(response.errorMessage.toString())
                 }
-            }
-
-            viewModelScope.launch {
-                deferred.await()
-                navigateTo()
             }
         }
     }
@@ -96,32 +87,34 @@ class SignUpAndLogInViewModel @Inject constructor(
     fun onClickLogIn(
         navigateTo: () -> Unit
     ) {
-        val deferred = CompletableDeferred<Unit>()
         if(uiState.notEmpty){
             viewModelScope.launch {
                 val response: AuthResponse = firebaseAuthRepositoryImpl.logInUser(uiState.email, uiState.password)
                 if(response.result) {
-//                    userLoginPreferencesRepository.saveUserLoginPreference(
-//                        isLoggedIn = true,
-//                        userName = uiState.userName,
-//                        email = uiState.email,
-//                        password = uiState.password
-//                    )
-                    uiState = userLoginPreferencesRepository.userLogin.first()
-                    deferred.complete(Unit)
+                    userLoginPreferencesRepository.saveUserLoginPreference(
+                        isLoggedIn = true,
+                        userName = uiState.userName,
+                        email = uiState.email,
+                    )
+                    navigateTo()
                 } else {
-                    //TODO: Display error with Snackbar
+                    showSnackBar(response.errorMessage.toString())
                 }
-            }
-
-            viewModelScope.launch {
-                deferred.await()
-                navigateTo()
             }
         }
     }
 
     fun onCheckedChange(value: Boolean) {
         uiState = uiState.copy(checked = value)
+    }
+
+    private fun showSnackBar(message: String) {
+        viewModelScope.launch {
+            SnackbarController.sendEvent(
+                event = SnackbarEvent(
+                    message = message
+                )
+            )
+        }
     }
 }

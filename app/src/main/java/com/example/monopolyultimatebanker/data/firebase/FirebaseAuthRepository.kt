@@ -1,10 +1,5 @@
 package com.example.monopolyultimatebanker.data.firebase
 
-data class AuthResponse(
-    val errorMessage: String? = null,
-    val result: Boolean
-)
-
 interface FirebaseAuthRepository {
 
     suspend fun signInUser(

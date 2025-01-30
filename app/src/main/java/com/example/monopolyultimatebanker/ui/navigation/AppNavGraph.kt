@@ -1,13 +1,17 @@
 package com.example.monopolyultimatebanker.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import androidx.navigation.NavHost
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.monopolyultimatebanker.ui.screens.home.HomeDestination
 import com.example.monopolyultimatebanker.ui.screens.home.HomeScreen
 import com.example.monopolyultimatebanker.ui.screens.signupandlogin.SignUpAndLogInDestination
@@ -16,21 +20,37 @@ import com.example.monopolyultimatebanker.ui.screens.signupandlogin.SignUpAndLog
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: NavViewModel = hiltViewModel()
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = SignUpAndLogInDestination.route,
-        modifier = modifier
-    ) {
-        composable(route = SignUpAndLogInDestination.route) {
-            SignUpAndLogInScreen(
-                navigateTo = { navController.navigate(route = HomeDestination.route) }
-            )
-        }
+    val uiState by viewModel.navUiState.collectAsStateWithLifecycle()
 
-        composable(route = HomeDestination.route) {
-            HomeScreen()
+    if(uiState.isLoggedIn == null) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = modifier.fillMaxSize()
+        ) {
+            CircularProgressIndicator()
+        }
+    } else {
+        NavHost(
+            navController = navController,
+            startDestination = if(uiState.isLoggedIn!!) HomeDestination.route else SignUpAndLogInDestination.route,
+            modifier = modifier
+        ) {
+            composable(route = SignUpAndLogInDestination.route) {
+                SignUpAndLogInScreen(
+                    navigateTo = {
+                        navController.navigate(HomeDestination.route) {
+                            popUpTo(SignUpAndLogInDestination.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(route = HomeDestination.route) {
+                HomeScreen()
+            }
         }
     }
 }

@@ -14,6 +14,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
+data class UserLogin(
+    val isLoggedIn: Boolean,
+    val userName: String,
+    val email: String,
+)
+
 class UserLoginPreferencesRepository (
     private val dataStore: DataStore<Preferences>
 ){
@@ -21,10 +27,9 @@ class UserLoginPreferencesRepository (
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
         val USER_NAME = stringPreferencesKey("user_name")
         val EMAIL = stringPreferencesKey("email")
-        val PASSWORD = stringPreferencesKey("password")
     }
 
-    val userLogin: Flow<UiState> = dataStore.data
+    val userLogin: Flow<UserLogin> = dataStore.data
         .catch {
             if(it is IOException) {
                 Log.e(TAG, "Error reading UserLoginPreference.", it)
@@ -34,25 +39,22 @@ class UserLoginPreferencesRepository (
             }
         }
         .map { preferences ->
-                UiState(
-                    userName = preferences[USER_NAME]?: "",
-                    email = preferences[EMAIL]?: "",
-                    password = preferences[PASSWORD]?: "",
-                    notEmpty = false,
-                )
+            UserLogin(
+                isLoggedIn = preferences[IS_LOGGED_IN] ?: false,
+                userName = preferences[USER_NAME] ?: "",
+                email = preferences[EMAIL] ?: ""
+            )
     }
 
     suspend fun saveUserLoginPreference(
         isLoggedIn: Boolean,
         userName: String,
         email: String,
-        password: String,
     ) {
         dataStore.edit { preferences ->
             preferences[IS_LOGGED_IN] = isLoggedIn
             preferences[USER_NAME] = userName
             preferences[EMAIL] = email
-            preferences[PASSWORD] = password
         }
 
     }
