@@ -5,9 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.monopolyultimatebanker.data.firebase.AuthResponse
 import com.example.monopolyultimatebanker.data.firebase.FirebaseAuthRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -17,11 +19,12 @@ data class UiState(
     val userName: String = "",
     val email: String = "",
     val password: String = "",
-    val notEmpty: Boolean = false
+    val notEmpty: Boolean = false,
+    val checked: Boolean = true,
 )
 
 @HiltViewModel
-class SignInAndLogInViewModel @Inject constructor(
+class SignUpAndLogInViewModel @Inject constructor(
     private val firebaseAuthRepositoryImpl: FirebaseAuthRepositoryImpl,
     private val userLoginPreferencesRepository: UserLoginPreferencesRepository
 ): ViewModel() {
@@ -41,7 +44,7 @@ class SignInAndLogInViewModel @Inject constructor(
         uiState = uiState.copy(password = input.trim())
     }
 
-    fun isNotEmpty(): Boolean {
+    fun isNotEmptyForSignUp(): Boolean {
         uiState = uiState.copy(notEmpty =
             uiState.let {
                 it.userName.isNotBlank()
@@ -52,21 +55,73 @@ class SignInAndLogInViewModel @Inject constructor(
         return uiState.notEmpty
     }
 
-    fun onClickSignIn() {
+    fun isNotEmptyForLogIn(): Boolean {
+        uiState = uiState.copy(notEmpty =
+        uiState.let {
+            it.email.isNotBlank()
+                    && it.password.isNotBlank()
+        }
+        )
+        return uiState.notEmpty
+    }
+
+    fun onClickSignIn(
+        navigateTo: () -> Unit
+    ) {
+        val deferred = CompletableDeferred<Unit>()
         if(uiState.notEmpty){
             viewModelScope.launch {
-                userLoginPreferencesRepository.saveUserLoginPreference(
-                    isLoggedIn = true,
-                    userName = uiState.userName,
-                    email = uiState.email,
-                    password = uiState.password
-                )
+                val response: AuthResponse = firebaseAuthRepositoryImpl.signInUser(uiState.email, uiState.password)
+                if(response.result) {
+                    userLoginPreferencesRepository.saveUserLoginPreference(
+                        isLoggedIn = true,
+                        userName = uiState.userName,
+                        email = uiState.email,
+                        password = uiState.password
+                    )
+                    uiState = userLoginPreferencesRepository.userLogin.first()
+                    deferred.complete(Unit)
+                } else {
+                    //TODO: Display error with Snackbar
+                }
+            }
 
-                uiState = UiState()
-                delay(1000L)
-
-                uiState = userLoginPreferencesRepository.userLogin.first()
+            viewModelScope.launch {
+                deferred.await()
+                navigateTo()
             }
         }
+    }
+
+    fun onClickLogIn(
+        navigateTo: () -> Unit
+    ) {
+        val deferred = CompletableDeferred<Unit>()
+        if(uiState.notEmpty){
+            viewModelScope.launch {
+                val response: AuthResponse = firebaseAuthRepositoryImpl.logInUser(uiState.email, uiState.password)
+                if(response.result) {
+//                    userLoginPreferencesRepository.saveUserLoginPreference(
+//                        isLoggedIn = true,
+//                        userName = uiState.userName,
+//                        email = uiState.email,
+//                        password = uiState.password
+//                    )
+                    uiState = userLoginPreferencesRepository.userLogin.first()
+                    deferred.complete(Unit)
+                } else {
+                    //TODO: Display error with Snackbar
+                }
+            }
+
+            viewModelScope.launch {
+                deferred.await()
+                navigateTo()
+            }
+        }
+    }
+
+    fun onCheckedChange(value: Boolean) {
+        uiState = uiState.copy(checked = value)
     }
 }
