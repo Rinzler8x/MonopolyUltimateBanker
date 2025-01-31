@@ -34,7 +34,7 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
             } catch (e: FirebaseAuthException) {
                 AuthResponse(e.message, false)
             }
-            catch (e: Exception) { // Catch other exceptions (e.g., network issues)
+            catch (e: Exception) {
                 Log.e(TAG, "General Error", e)
                 AuthResponse(errorMessage = "An error occurred. Please try again later.", result = false)
             }
@@ -51,7 +51,7 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
             } catch (e: FirebaseAuthException) {
                 AuthResponse(e.message, false)
             }
-            catch (e: Exception) { // Catch other exceptions (e.g., network issues)
+            catch (e: Exception) {
                 Log.e(TAG, "General Error", e)
                 AuthResponse(errorMessage = "An error occurred. Please try again later.", result = false)
             }
