@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -56,6 +57,11 @@ dependencies {
     //firebase
     implementation(libs.firebase.auth)
 
+    //Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
     //navigation, viewmodel, coroutines, datastore
     implementation (libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -66,7 +72,6 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
     implementation (libs.androidx.hilt.navigation.compose)
-
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
