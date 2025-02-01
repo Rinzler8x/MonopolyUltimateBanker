@@ -78,7 +78,7 @@ class SignUpAndLogInViewModel @Inject constructor(
                     )
                     navigateTo()
                 } else {
-                    showSnackBar(response.errorMessage.toString())
+                    showSnackBar(response.errorMessage!!)
                 }
             }
         }
@@ -98,7 +98,7 @@ class SignUpAndLogInViewModel @Inject constructor(
                     )
                     navigateTo()
                 } else {
-                    showSnackBar(response.errorMessage.toString())
+                    showSnackBar(response.errorMessage!!)
                 }
             }
         }
