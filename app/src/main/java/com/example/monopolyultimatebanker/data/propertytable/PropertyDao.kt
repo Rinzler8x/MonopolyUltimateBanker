@@ -16,5 +16,5 @@ interface PropertyDao {
     fun getAllProperties(): Flow<List<Property>>
 
     @Query("SELECT * FROM property WHERE qr_code = :qrCode")
-    fun getProperty(qrCode: String)
+    fun getProperty(qrCode: String): Flow<Property>
 }
