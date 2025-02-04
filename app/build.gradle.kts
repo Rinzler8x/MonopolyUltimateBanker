@@ -44,8 +44,7 @@ android {
 }
 
 dependencies {
-
-    implementation(libs.androidx.core.ktx)
+   implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -56,6 +55,7 @@ dependencies {
 
     //firebase
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
     //Room
     implementation(libs.androidx.room.runtime)
