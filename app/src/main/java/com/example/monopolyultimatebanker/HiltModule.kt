@@ -4,12 +4,17 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.monopolyultimatebanker.data.firebase.FirebaseAuthRepository
-import com.example.monopolyultimatebanker.data.firebase.FirebaseAuthRepositoryImpl
+import com.example.monopolyultimatebanker.data.firebase.authentication.FirebaseAuthRepository
+import com.example.monopolyultimatebanker.data.firebase.authentication.FirebaseAuthRepositoryImpl
+import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepository
+import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
+import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -27,6 +32,13 @@ private val Context.userLoginDataStore: DataStore<Preferences> by preferencesDat
     name = "user_login"
 )
 
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class GameStateDataStore
+private val Context.gameStateDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "game_state"
+)
+
 @Module
 @InstallIn(SingletonComponent::class)
 object HiltModule {
@@ -35,6 +47,12 @@ object HiltModule {
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth {
         return Firebase.auth
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirestore(): FirebaseFirestore {
+        return Firebase.firestore
     }
 
     @Provides
@@ -52,6 +70,20 @@ object HiltModule {
         return UserLoginPreferencesRepository(dataStore)
     }
 
+    @Provides
+    @Singleton
+    @GameStateDataStore
+    fun provideGameStateDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return context.gameStateDataStore
+    }
+
+    @Provides
+    @Singleton
+    fun provideGamePreferencesRepository(
+        @GameStateDataStore dataStore: DataStore<Preferences>
+    ): GamePreferencesRepository {
+         return GamePreferencesRepository(dataStore)
+    }
 }
 
 @Module
@@ -61,6 +93,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindsFirebaseAuthRepository(firebaseAuthRepositoryImpl: FirebaseAuthRepositoryImpl): FirebaseAuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindsFirestoreRepository(firestoreRepositoryImpl: FirestoreRepositoryImpl): FirestoreRepository
 }
 
 
