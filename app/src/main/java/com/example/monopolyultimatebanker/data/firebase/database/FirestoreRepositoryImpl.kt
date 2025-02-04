@@ -28,26 +28,26 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     //games collection functions
 
-    override val game: Flow<List<Game>>
-        get() = flow {
-            gameScope.launch {
-                gameRef.whereEqualTo("game_id", "bro")
-                    .addSnapshotListener{ snapshot, e ->
-                        if (e != null) {
-                            Log.w(TAG, "listen:error", e)
-                            return@addSnapshotListener
-                        }
-
-                        for(dc in snapshot!!.documentChanges) {
-                            when(dc.type) {
-                                DocumentChange.Type.ADDED -> Log.d(TAG, "Game document: ${dc.document.data}")
-                                DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified game document: ${dc.document.data}")
-                                DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed game: ${dc.document.data}")
-                            }
-                        }
-                    }
-            }
-        }
+//    override val game: Flow<List<Game>>
+//        get() = flow {
+//            gameScope.launch {
+//                gameRef.whereEqualTo("game_id", "bro")
+//                    .addSnapshotListener{ snapshot, e ->
+//                        if (e != null) {
+//                            Log.w(TAG, "listen:error", e)
+//                            return@addSnapshotListener
+//                        }
+//
+//                        for(dc in snapshot!!.documentChanges) {
+//                            when(dc.type) {
+//                                DocumentChange.Type.ADDED -> Log.d(TAG, "Game document: ${dc.document.data}")
+//                                DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified game document: ${dc.document.data}")
+//                                DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed game: ${dc.document.data}")
+//                            }
+//                        }
+//                    }
+//            }
+//        }
 
     override suspend fun insertGamePlayer(gamePlayer: Game) {
         val data = hashMapOf(
@@ -73,13 +73,11 @@ class FirestoreRepositoryImpl @Inject constructor(
     override suspend fun updateGamePlayer(gamePlayer: Game) {
         withContext(Dispatchers.IO) {
             try {
-                db.collection("games").document(" r5Oo7sd2ysLkAS449F1M")
+                gameRef.document("r5Oo7sd2ysLkAS449F1M")
                     .update(
-                        mapOf(
-                            "game_id" to "bruhbruh",
-                            "player_name" to gamePlayer.playerName,
-                            "player_balance" to gamePlayer.playerBalance
-                        )
+                        "game_id","bruhbruh",
+                        "player_name", gamePlayer.playerName,
+                        "player_balance", gamePlayer.playerBalance
                     )
                     .await()
 
@@ -104,26 +102,26 @@ class FirestoreRepositoryImpl @Inject constructor(
 
     //player_properties collection function
 
-    override val playerProperties: Flow<List<PlayerProperty>>
-        get() = flow {
-            gameScope.launch {
-                playerPropertyRef.whereEqualTo("game_id", "bro")
-                    .addSnapshotListener{ snapshot, e ->
-                        if (e != null) {
-                            Log.w(TAG, "listen:error", e)
-                            return@addSnapshotListener
-                        }
-
-                        for(dc in snapshot!!.documentChanges) {
-                            when(dc.type) {
-                                DocumentChange.Type.ADDED -> Log.d(TAG, "PlayerProperty document: ${dc.document.data}")
-                                DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified PlayerProperty document: ${dc.document.data}")
-                                DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed PlayerProperty: ${dc.document.data}")
-                            }
-                        }
-                    }
-            }
-        }
+//    override val playerProperties: Flow<List<PlayerProperty>>
+//        get() = flow {
+//            gameScope.launch {
+//                playerPropertyRef.whereEqualTo("game_id", "bro")
+//                    .addSnapshotListener{ snapshot, e ->
+//                        if (e != null) {
+//                            Log.w(TAG, "listen:error", e)
+//                            return@addSnapshotListener
+//                        }
+//
+//                        for(dc in snapshot!!.documentChanges) {
+//                            when(dc.type) {
+//                                DocumentChange.Type.ADDED -> Log.d(TAG, "PlayerProperty document: ${dc.document.data}")
+//                                DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified PlayerProperty document: ${dc.document.data}")
+//                                DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed PlayerProperty: ${dc.document.data}")
+//                            }
+//                        }
+//                    }
+//            }
+//        }
 
 
     override suspend fun insertPlayerProperty(playerProperty: PlayerProperty) {
@@ -144,13 +142,11 @@ class FirestoreRepositoryImpl @Inject constructor(
             try {
                 playerPropertyRef.document(playerProperty.playerId)
                     .update(
-                        mapOf(
-                            "game_id" to "bro",
-                            "player_if" to playerProperty.playerId,
-                            "ppid" to playerProperty.ppId,
-                            "property_no" to playerProperty.propertyNo,
-                            "rent_level" to playerProperty.rentLevel
-                        )
+                        "game_id", "bro",
+                        "player_if", playerProperty.playerId,
+                        "ppid", playerProperty.ppId,
+                        "property_no", playerProperty.propertyNo,
+                        "rent_level", playerProperty.rentLevel
                     )
                     .await()
 

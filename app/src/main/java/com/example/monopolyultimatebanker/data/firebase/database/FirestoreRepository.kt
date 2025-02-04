@@ -14,7 +14,7 @@ interface FirestoreRepository {
 
     suspend fun deleteGame(playerId: String)
 
-    val game: Flow<List<Game>>
+//    val game: Flow<List<Game>>
 
 
     //player_properties
@@ -24,5 +24,5 @@ interface FirestoreRepository {
 
     suspend fun deleteAllGamePlayerProperty(playerId: String)
 
-    val playerProperties: Flow<List<PlayerProperty>>
+//    val playerProperties: Flow<List<PlayerProperty>>
 }
