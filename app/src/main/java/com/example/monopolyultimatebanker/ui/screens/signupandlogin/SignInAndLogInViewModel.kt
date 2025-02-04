@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.monopolyultimatebanker.data.firebase.AuthResponse
-import com.example.monopolyultimatebanker.data.firebase.FirebaseAuthRepositoryImpl
+import com.example.monopolyultimatebanker.data.firebase.authentication.AuthResponse
+import com.example.monopolyultimatebanker.data.firebase.authentication.FirebaseAuthRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
 import com.example.monopolyultimatebanker.utils.SnackbarController
 import com.example.monopolyultimatebanker.utils.SnackbarEvent
