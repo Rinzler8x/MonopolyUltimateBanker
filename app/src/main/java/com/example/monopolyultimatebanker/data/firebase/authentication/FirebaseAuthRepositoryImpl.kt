@@ -1,4 +1,4 @@
-package com.example.monopolyultimatebanker.data.firebase
+package com.example.monopolyultimatebanker.data.firebase.authentication
 
 import android.content.ContentValues.TAG
 import android.util.Log

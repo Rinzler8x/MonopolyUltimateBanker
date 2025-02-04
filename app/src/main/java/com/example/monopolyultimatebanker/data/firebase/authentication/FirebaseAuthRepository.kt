@@ -1,4 +1,4 @@
-package com.example.monopolyultimatebanker.data.firebase
+package com.example.monopolyultimatebanker.data.firebase.authentication
 
 interface FirebaseAuthRepository {
 
