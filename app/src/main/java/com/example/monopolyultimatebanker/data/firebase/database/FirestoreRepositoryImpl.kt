@@ -1,0 +1,179 @@
+package com.example.monopolyultimatebanker.data.firebase.database
+
+import android.content.ContentValues.TAG
+import android.util.Log
+import com.example.monopolyultimatebanker.data.gametable.Game
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerProperty
+import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
+
+
+class FirestoreRepositoryImpl @Inject constructor(
+    private val db: FirebaseFirestore,
+    private val gamePreferencesRepository: GamePreferencesRepository
+): FirestoreRepository {
+
+    private val gameRef = db.collection("games")
+    private val playerPropertyRef = db.collection("player_properties")
+    private val gameScope = CoroutineScope(Dispatchers.IO)
+
+    //games collection functions
+
+    override val game: Flow<List<Game>>
+        get() = flow {
+            gameScope.launch {
+                gameRef.whereEqualTo("game_id", "bro")
+                    .addSnapshotListener{ snapshot, e ->
+                        if (e != null) {
+                            Log.w(TAG, "listen:error", e)
+                            return@addSnapshotListener
+                        }
+
+                        for(dc in snapshot!!.documentChanges) {
+                            when(dc.type) {
+                                DocumentChange.Type.ADDED -> Log.d(TAG, "Game document: ${dc.document.data}")
+                                DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified game document: ${dc.document.data}")
+                                DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed game: ${dc.document.data}")
+                            }
+                        }
+                    }
+            }
+        }
+
+    override suspend fun insertGamePlayer(gamePlayer: Game) {
+        val data = hashMapOf(
+            "game_id" to "bruhbruh",
+            "player_balance" to gamePlayer.playerBalance,
+            "player_name" to gamePlayer.playerName
+        )
+        withContext(Dispatchers.IO) {
+            try {
+                gameRef
+                    .add(data)
+                    .addOnSuccessListener { docRef ->
+                        Log.d(TAG, "Message: ${docRef.id}")
+                    }
+                    .await()
+
+            } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun updateGamePlayer(gamePlayer: Game) {
+        withContext(Dispatchers.IO) {
+            try {
+                db.collection("games").document(" r5Oo7sd2ysLkAS449F1M")
+                    .update(
+                        mapOf(
+                            "game_id" to "bruhbruh",
+                            "player_name" to gamePlayer.playerName,
+                            "player_balance" to gamePlayer.playerBalance
+                        )
+                    )
+                    .await()
+
+            } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun deleteGame(playerId: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                gameRef.document(playerId)
+                    .delete()
+                    .await()
+
+            } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+            }
+        }
+    }
+
+    //player_properties collection function
+
+    override val playerProperties: Flow<List<PlayerProperty>>
+        get() = flow {
+            gameScope.launch {
+                playerPropertyRef.whereEqualTo("game_id", "bro")
+                    .addSnapshotListener{ snapshot, e ->
+                        if (e != null) {
+                            Log.w(TAG, "listen:error", e)
+                            return@addSnapshotListener
+                        }
+
+                        for(dc in snapshot!!.documentChanges) {
+                            when(dc.type) {
+                                DocumentChange.Type.ADDED -> Log.d(TAG, "PlayerProperty document: ${dc.document.data}")
+                                DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified PlayerProperty document: ${dc.document.data}")
+                                DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed PlayerProperty: ${dc.document.data}")
+                            }
+                        }
+                    }
+            }
+        }
+
+
+    override suspend fun insertPlayerProperty(playerProperty: PlayerProperty) {
+        withContext(Dispatchers.IO) {
+            try {
+                playerPropertyRef
+                    .add(playerProperty)
+                    .await()
+
+            } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun updatePlayerProperty(playerProperty: PlayerProperty) {
+        withContext(Dispatchers.IO) {
+            try {
+                playerPropertyRef.document(playerProperty.playerId)
+                    .update(
+                        mapOf(
+                            "game_id" to "bro",
+                            "player_if" to playerProperty.playerId,
+                            "ppid" to playerProperty.ppId,
+                            "property_no" to playerProperty.propertyNo,
+                            "rent_level" to playerProperty.rentLevel
+                        )
+                    )
+                    .await()
+
+            } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun deleteAllGamePlayerProperty(playerId: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                playerPropertyRef
+                    .whereEqualTo("player_id", playerId)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        for (document in documents) {
+                            document.reference.delete()
+                        }
+                    }
+            } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+            }
+        }
+    }
+}
