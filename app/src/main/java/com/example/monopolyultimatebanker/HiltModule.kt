@@ -4,12 +4,25 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.monopolyultimatebanker.data.eventtable.EventDao
+import com.example.monopolyultimatebanker.data.eventtable.EventRepository
+import com.example.monopolyultimatebanker.data.eventtable.EventRepositoryImpl
 import com.example.monopolyultimatebanker.data.firebase.authentication.FirebaseAuthRepository
 import com.example.monopolyultimatebanker.data.firebase.authentication.FirebaseAuthRepositoryImpl
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepository
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
+import com.example.monopolyultimatebanker.data.gametable.GameDao
+import com.example.monopolyultimatebanker.data.gametable.GameRepository
+import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyDao
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepository
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
+import com.example.monopolyultimatebanker.data.propertytable.PropertyDao
+import com.example.monopolyultimatebanker.data.propertytable.PropertyRepository
+import com.example.monopolyultimatebanker.data.propertytable.PropertyRepositoryImpl
+import com.example.monopolyultimatebanker.data.room.MonopolyDatabase
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -84,6 +97,32 @@ object HiltModule {
     ): GamePreferencesRepository {
          return GamePreferencesRepository(dataStore)
     }
+
+    @Provides
+    @Singleton
+    fun provideMonopolyDatabase(@ApplicationContext context: Context): MonopolyDatabase {
+        return MonopolyDatabase.getDatabase(context)
+    }
+
+    @Provides
+    fun providePropertyDao(database: MonopolyDatabase): PropertyDao {
+        return database.propertyDao()
+    }
+
+    @Provides
+    fun provideEventDao(database: MonopolyDatabase): EventDao {
+        return database.eventDao()
+    }
+
+    @Provides
+    fun provideGameDao(database: MonopolyDatabase): GameDao {
+        return database.gameDao()
+    }
+
+    @Provides
+    fun providePlayerPropertyDao(database: MonopolyDatabase): PlayerPropertyDao {
+        return database.playerPropertyDao()
+    }
 }
 
 @Module
@@ -97,7 +136,21 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindsFirestoreRepository(firestoreRepositoryImpl: FirestoreRepositoryImpl): FirestoreRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindsPropertyRepository(propertyRepositoryImpl: PropertyRepositoryImpl): PropertyRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindsEventRepository(eventRepositoryImpl: EventRepositoryImpl): EventRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindsGameRepository(gameRepositoryImpl: GameRepositoryImpl): GameRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindsPlayerPropertyRepository(playerPropertyRepositoryImpl: PlayerPropertyRepositoryImpl): PlayerPropertyRepository
+
 }
-
-
-
