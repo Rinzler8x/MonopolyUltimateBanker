@@ -5,12 +5,19 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GameDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(game: Game)
+
+    @Query("SELECT * FROM game")
+    fun getGame(): Flow<List<Game>>
+
+    @Query("SELECT * FROM game WHERE player_id = :playerId")
+    fun getPlayer(playerId: String): Game
 
     @Query("UPDATE game SET player_balance = player_balance - :amount WHERE player_id = :payerId")
     suspend fun deductBalance(payerId: String, amount: Int)

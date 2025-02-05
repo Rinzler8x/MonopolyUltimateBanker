@@ -16,10 +16,10 @@ interface PlayerPropertyDao {
     fun getPlayerProperty(propertyNo: Int): PlayerProperty
 
     @Query("UPDATE player_property SET player_id = :playerId WHERE property_no = :propertyNo")
-    suspend fun swapProperty(playerId: Int, propertyNo: Int)
+    suspend fun swapProperty(playerId: String, propertyNo: Int)
 
     @Transaction
-    suspend fun propertySwap(player1Id: Int, player2Id: Int, property1No: Int, property2No: Int) {
+    suspend fun propertySwap(player1Id: String, player2Id: String, property1No: Int, property2No: Int) {
         swapProperty(player2Id, property1No)
         swapProperty(player1Id, property2No)
     }

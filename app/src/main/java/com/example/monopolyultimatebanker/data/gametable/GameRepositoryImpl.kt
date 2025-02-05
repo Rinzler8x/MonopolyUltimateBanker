@@ -1,0 +1,22 @@
+package com.example.monopolyultimatebanker.data.gametable
+
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+
+class GameRepositoryImpl @Inject constructor(
+    private val gameDao: GameDao
+) : GameRepository {
+    override fun getGameStream(): Flow<List<Game>> = gameDao.getGame()
+
+    override fun getGamePlayer(playerId: String): Game = gameDao.getPlayer(playerId)
+
+    override suspend fun gameDeductBalance(payerId: String, amount: Int) = gameDao.deductBalance(payerId, amount)
+
+    override suspend fun gameAddBalance(recipientId: String, amount: Int) = gameDao.addBalance(recipientId, amount)
+
+    override suspend fun gameTransferRent(payerId: String, recipientId: String, amount: Int) = gameDao.transferRent(payerId, recipientId, amount)
+
+    override suspend fun gameCollect200BothPlayers(player1Id: String, player2Id: String) = gameDao.collect200BothPlayers(player1Id, player2Id)
+
+    override suspend fun gameEventDeduct50PerProperty(playerId: String) = gameDao.eventDeduct50PerProperty(playerId)
+}
