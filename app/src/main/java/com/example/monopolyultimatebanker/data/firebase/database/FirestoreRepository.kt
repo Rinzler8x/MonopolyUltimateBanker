@@ -2,7 +2,6 @@ package com.example.monopolyultimatebanker.data.firebase.database
 
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerProperty
-import kotlinx.coroutines.flow.Flow
 
 
 interface FirestoreRepository {

@@ -5,13 +5,9 @@ import android.util.Log
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerProperty
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
-import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
