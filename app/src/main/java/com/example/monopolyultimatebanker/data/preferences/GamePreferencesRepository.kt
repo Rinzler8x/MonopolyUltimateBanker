@@ -16,6 +16,7 @@ import javax.inject.Inject
 
 data class GameState(
     val gameId: String,
+    val playerId: String,
     val isGameActive: Boolean
 )
 
@@ -25,6 +26,7 @@ class GamePreferencesRepository @Inject constructor(
 
     private companion object {
         val GAME_ID = stringPreferencesKey("game_id")
+        val PLAYER_ID = stringPreferencesKey("player_id")
         val IS_GAME_ACTIVE = booleanPreferencesKey("is_game_active")
     }
 
@@ -40,16 +42,19 @@ class GamePreferencesRepository @Inject constructor(
         .map { pref ->
             GameState(
                 gameId = pref[GAME_ID] ?: "",
+                playerId = pref[PLAYER_ID] ?: "",
                 isGameActive = pref[IS_GAME_ACTIVE] ?: false
             )
         }
 
     suspend fun saveGamePreference(
         gameId: String,
+        playerId: String,
         isGameActive: Boolean
     ) {
         dataStore.edit { pref ->
             pref[GAME_ID] = gameId
+            pref[PLAYER_ID] = playerId
             pref[IS_GAME_ACTIVE] = isGameActive
         }
     }
