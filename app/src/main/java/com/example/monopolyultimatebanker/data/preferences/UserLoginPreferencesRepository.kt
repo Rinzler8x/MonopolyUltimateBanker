@@ -9,7 +9,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.example.monopolyultimatebanker.ui.screens.signupandlogin.UiState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -41,7 +40,7 @@ class UserLoginPreferencesRepository @Inject constructor (
         }
         .map { preferences ->
             UserLogin(
-                isLoggedIn = preferences[IS_LOGGED_IN] ?: false,
+                isLoggedIn = preferences[IS_LOGGED_IN] ?: true, //Set true to avoid login screen, **CHANGE BACK AFTER DEVELOPMENT**
                 userName = preferences[USER_NAME] ?: "",
                 email = preferences[EMAIL] ?: ""
             )
