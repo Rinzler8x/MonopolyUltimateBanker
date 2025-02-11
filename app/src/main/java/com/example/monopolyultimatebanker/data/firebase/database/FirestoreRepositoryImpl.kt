@@ -6,12 +6,23 @@ import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerProperty
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.snapshots
+import com.google.firebase.firestore.toObjects
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+data class FirestoreGame(
+    val gameId: String = "",
+    val playerName: String = "",
+    val playerBalance: Int = 1500
+)
 
 class FirestoreRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,
@@ -45,11 +56,18 @@ class FirestoreRepositoryImpl @Inject constructor(
 //            }
 //        }
 
+    override fun getGame() = gameRef.whereEqualTo("gameId", "bruh").snapshots().map { it.toObjects<FirestoreGame>() }
+
     override suspend fun insertGamePlayer(gamePlayer: Game) {
-        val data = hashMapOf(
-            "game_id" to "bruhbruh",
-            "player_balance" to gamePlayer.playerBalance,
-            "player_name" to gamePlayer.playerName
+//        val data = hashMapOf(
+//            "game_id" to "bruhbruh",
+//            "player_balance" to gamePlayer.playerBalance,
+//            "player_name" to gamePlayer.playerName
+//        )
+        val data = FirestoreGame(
+            gameId = "bruh",
+            playerName = gamePlayer.playerName,
+            playerBalance = gamePlayer.playerBalance
         )
         withContext(Dispatchers.IO) {
             try {
