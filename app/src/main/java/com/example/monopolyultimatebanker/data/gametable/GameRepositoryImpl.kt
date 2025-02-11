@@ -10,6 +10,8 @@ class GameRepositoryImpl @Inject constructor(
 
     override fun getGamePlayer(playerId: String): Game = gameDao.getPlayer(playerId)
 
+    override suspend fun gameUpdateTempPlayerId(playerId: String, playerName: String) = gameDao.updateTempPlayerId(playerId, playerName)
+
     override suspend fun gameDeductBalance(payerId: String, amount: Int) = gameDao.deductBalance(payerId, amount)
 
     override suspend fun gameAddBalance(recipientId: String, amount: Int) = gameDao.addBalance(recipientId, amount)
