@@ -19,6 +19,9 @@ interface GameDao {
     @Query("SELECT * FROM game WHERE player_id = :playerId")
     fun getPlayer(playerId: String): Game
 
+    @Query("UPDATE game SET player_id = :playerId WHERE player_name = :playerName")
+    suspend fun updateTempPlayerId(playerId: String, playerName: String)
+
     @Query("UPDATE game SET player_balance = player_balance - :amount WHERE player_id = :payerId")
     suspend fun deductBalance(payerId: String, amount: Int)
 
