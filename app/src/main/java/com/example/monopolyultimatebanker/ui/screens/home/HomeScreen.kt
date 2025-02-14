@@ -58,6 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
 
@@ -72,12 +73,17 @@ fun HomeScreen(
 ) {
     val scope = rememberCoroutineScope()
     val dialogState = viewModel.dialogState
+    val gameState by viewModel.gamePreferenceState.collectAsStateWithLifecycle()
+    val userLoginState by viewModel.userLoginPreferenceState.collectAsStateWithLifecycle()
 
     ModalNavigationDrawer(
         drawerState = viewModel.navDrawerState,
         drawerContent = {
             ModalDrawerSheet {
-                DrawerContent()
+                DrawerContent(
+                    username = userLoginState.userName,
+                    gameId = gameState.gameId
+                )
             }
         },
         gesturesEnabled = viewModel.navDrawerState.isOpen
@@ -96,12 +102,12 @@ fun HomeScreen(
             Column (
                 modifier = modifier.padding(contentPadding)
             ) {
-                NoActiveGame()
-
+                NoActiveGame(vm = viewModel)
 
                 if(dialogState.createGameDialog){
                     CreateGameDialog(
                         onClickCreateGame = viewModel::onClickCreateGameDialog,
+                        createGame = viewModel::createNewGame,
                         gameId = dialogState.gameId,
                         updateGameId = viewModel::updateGameId
                     )
@@ -110,6 +116,7 @@ fun HomeScreen(
                 if(dialogState.joinGameDialog) {
                     JoinGameDialog(
                         onClickJoinGame = viewModel::onClickJoinGameDialog,
+                        joinGame = viewModel::joinNewGame,
                         gameId = dialogState.gameId,
                         updateGameId = viewModel::updateGameId
                     )
@@ -121,7 +128,11 @@ fun HomeScreen(
 }
 
 @Composable
-private fun DrawerContent(modifier: Modifier = Modifier) {
+private fun DrawerContent(
+    username: String,
+    gameId: String,
+    modifier: Modifier = Modifier
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -133,8 +144,8 @@ private fun DrawerContent(modifier: Modifier = Modifier) {
             contentDescription = "Account Icon",
             modifier = modifier.size(120.dp)
         )
-        Text("Username: Rinzler")
-        Text("Game ID: 123")
+        Text(text = "Username: $username")
+        Text("Game ID: $gameId")
         HorizontalDivider(modifier = modifier.padding(bottom = 12.dp, top = 8.dp))
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -156,14 +167,14 @@ private fun DrawerContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun NoActiveGame(modifier: Modifier = Modifier) {
+fun NoActiveGame(modifier: Modifier = Modifier, vm: HomeViewModel) {
 
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()
     ) {
-        Text("Create or Join Game")
+        Text(text = "Create or Join Game")
         HorizontalDivider(
             modifier = modifier
                 .width(220.dp)
@@ -176,6 +187,7 @@ fun NoActiveGame(modifier: Modifier = Modifier) {
 @Composable
 private fun JoinGameDialog(
     onClickJoinGame: () -> Unit,
+    joinGame: () -> Unit,
     gameId: String,
     updateGameId: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -215,6 +227,7 @@ private fun JoinGameDialog(
         confirmButton = {
             TextButton(
                 onClick = {
+                    joinGame()
                     onClickJoinGame()
                 }
             ) {
@@ -228,6 +241,7 @@ private fun JoinGameDialog(
 @Composable
 private fun CreateGameDialog(
     onClickCreateGame: () -> Unit,
+    createGame: () -> Unit,
     updateGameId: (String) -> Unit,
     gameId: String,
     modifier: Modifier = Modifier
@@ -265,7 +279,7 @@ private fun CreateGameDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-
+                    createGame()
                     onClickCreateGame()
                 }
             ) {
