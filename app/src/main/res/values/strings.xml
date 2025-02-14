@@ -6,4 +6,8 @@
     <string name="sign_in">Sign In</string>
     <string name="log_in">Log In</string>
     <string name="floating_action_button">Floating action button</string>
+    <string name="game_id">Game Id</string>
+    <string name="create">Create</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="join">Join</string>
 </resources>
