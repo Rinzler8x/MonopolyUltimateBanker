@@ -1,19 +1,32 @@
 package com.example.monopolyultimatebanker.ui.screens.home
 
+import android.widget.Space
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -22,14 +35,25 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,6 +71,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
+    val dialogState = viewModel.dialogState
 
     ModalNavigationDrawer(
         drawerState = viewModel.navDrawerState,
@@ -61,12 +86,34 @@ fun HomeScreen(
             topBar = {
                 GameTopAppBar(onClickNavIcon = { viewModel.onClickNavIcon(scope.coroutineContext) })
             },
-            floatingActionButton = { ExpandableFloatingActionButton() }
+            floatingActionButton = {
+                ExpandableFloatingActionButton(
+                    onClickCreateGame = viewModel::onClickCreateGameDialog,
+                    onClickJoinGame = viewModel::onClickJoinGameDialog
+                )
+            }
         ) { contentPadding ->
             Column (
                 modifier = modifier.padding(contentPadding)
             ) {
                 NoActiveGame()
+
+
+                if(dialogState.createGameDialog){
+                    CreateGameDialog(
+                        onClickCreateGame = viewModel::onClickCreateGameDialog,
+                        gameId = dialogState.gameId,
+                        updateGameId = viewModel::updateGameId
+                    )
+                }
+
+                if(dialogState.joinGameDialog) {
+                    JoinGameDialog(
+                        onClickJoinGame = viewModel::onClickJoinGameDialog,
+                        gameId = dialogState.gameId,
+                        updateGameId = viewModel::updateGameId
+                    )
+                }
             }
         }
     }
@@ -74,10 +121,12 @@ fun HomeScreen(
 }
 
 @Composable
-fun DrawerContent(modifier: Modifier = Modifier) {
+private fun DrawerContent(modifier: Modifier = Modifier) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxWidth().padding(16.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
     ) {
         Icon(
             imageVector = Icons.Filled.AccountCircle,
@@ -116,13 +165,120 @@ fun NoActiveGame(modifier: Modifier = Modifier) {
     ) {
         Text("Create or Join Game")
         HorizontalDivider(
-            modifier = modifier.width(220.dp).padding(vertical = 4.dp)
+            modifier = modifier
+                .width(220.dp)
+                .padding(vertical = 4.dp)
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpandableFloatingActionButton(
+private fun JoinGameDialog(
+    onClickJoinGame: () -> Unit,
+    gameId: String,
+    updateGameId: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    AlertDialog(
+        onDismissRequest = {
+            updateGameId("")
+            onClickJoinGame()
+        },
+        title = { Text("Join Game") },
+        text = {
+            Column {
+                Text(
+                    text = "Enter game id to join.",
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                )
+                Spacer(modifier = modifier.padding(vertical = 8.dp))
+                OutlinedTextField(
+                    value = gameId,
+                    onValueChange = updateGameId,
+                    label = { Text(text = stringResource(R.string.game_id)) }
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    updateGameId("")
+                    onClickJoinGame()
+                }
+            ) {
+                Text(text = stringResource(R.string.dismiss))
+            }
+
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onClickJoinGame()
+                }
+            ) {
+                Text(text = stringResource(R.string.join))
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CreateGameDialog(
+    onClickCreateGame: () -> Unit,
+    updateGameId: (String) -> Unit,
+    gameId: String,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog (
+        onDismissRequest = {
+            updateGameId("")
+            onClickCreateGame()
+        },
+        title = { Text("Create Game") },
+        text = {
+            Column {
+                Text(
+                    text = "To create a new game, give it a name.",
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                )
+                Spacer(modifier = modifier.padding(vertical = 8.dp))
+                OutlinedTextField(
+                    value = gameId,
+                    onValueChange = updateGameId,
+                    label = { Text(text = stringResource(R.string.game_id)) }
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    updateGameId("")
+                    onClickCreateGame()
+                }
+            ) {
+                Text(text = stringResource(R.string.dismiss))
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+
+                    onClickCreateGame()
+                }
+            ) {
+                Text(text = stringResource(R.string.create))
+            }
+        }
+    )
+}
+
+@Composable
+private fun ExpandableFloatingActionButton(
+    onClickJoinGame: () -> Unit,
+    onClickCreateGame: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -144,15 +300,15 @@ fun ExpandableFloatingActionButton(
 //            exit =  slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }) + shrinkVertically() + fadeOut()
 //        ) {}
         SmallFloatingActionButton (
-            onClick = { },
+            onClick = onClickJoinGame,
         ) {
             Icon(
-                Icons.Filled.Add,
+                painter = painterResource(R.drawable.baseline_groups_24),
                 contentDescription = stringResource(R.string.floating_action_button)
             )
         }
         SmallFloatingActionButton (
-            onClick = { },
+            onClick = onClickCreateGame,
         ) {
             Icon(
                 Icons.Filled.Add,
@@ -160,7 +316,7 @@ fun ExpandableFloatingActionButton(
             )
         }
         FloatingActionButton(
-            onClick = { },
+            onClick = {},
             modifier = modifier.padding(top = 4.dp),
         ) {
             Icon(
@@ -173,7 +329,7 @@ fun ExpandableFloatingActionButton(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameTopAppBar(
+private fun GameTopAppBar(
     onClickNavIcon: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
