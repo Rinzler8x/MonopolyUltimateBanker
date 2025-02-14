@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 data class UserLogin(
-    val isLoggedIn: Boolean,
-    val userName: String,
-    val email: String,
+    val isLoggedIn: Boolean = false,
+    val userName: String = "",
+    val email: String = "",
 )
 
 class UserLoginPreferencesRepository @Inject constructor (

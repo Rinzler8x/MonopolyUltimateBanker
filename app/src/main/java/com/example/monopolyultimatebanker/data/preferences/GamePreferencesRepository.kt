@@ -15,9 +15,9 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 data class GameState(
-    val gameId: String,
-    val playerId: String,
-    val isGameActive: Boolean
+    val gameId: String = "",
+    val playerId: String = "",
+    val isGameActive: Boolean = false
 )
 
 class GamePreferencesRepository @Inject constructor(
