@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.room.Room
 import com.example.monopolyultimatebanker.data.eventtable.EventDao
 import com.example.monopolyultimatebanker.data.eventtable.EventRepository
 import com.example.monopolyultimatebanker.data.eventtable.EventRepositoryImpl
@@ -100,26 +101,32 @@ object HiltModule {
 
     @Provides
     @Singleton
-    fun provideMonopolyDatabase(@ApplicationContext context: Context): MonopolyDatabase {
-        return MonopolyDatabase.getDatabase(context)
-    }
+    fun provideMonopolyDatabase(@ApplicationContext context: Context) =
+        Room.databaseBuilder(context, MonopolyDatabase::class.java, "monoploy_database")
+//            .fallbackToDestructiveMigration()
+            .createFromAsset("database/monopoly_prepopulate.db")
+            .build()
 
     @Provides
+    @Singleton
     fun providePropertyDao(database: MonopolyDatabase): PropertyDao {
         return database.propertyDao()
     }
 
     @Provides
+    @Singleton
     fun provideEventDao(database: MonopolyDatabase): EventDao {
         return database.eventDao()
     }
 
     @Provides
+    @Singleton
     fun provideGameDao(database: MonopolyDatabase): GameDao {
         return database.gameDao()
     }
 
     @Provides
+    @Singleton
     fun providePlayerPropertyDao(database: MonopolyDatabase): PlayerPropertyDao {
         return database.playerPropertyDao()
     }

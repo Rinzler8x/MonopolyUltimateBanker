@@ -25,18 +25,4 @@ abstract class MonopolyDatabase: RoomDatabase() {
     abstract fun gameDao(): GameDao
     abstract fun playerPropertyDao(): PlayerPropertyDao
 
-    companion object {
-        @Volatile
-        private var Instance: MonopolyDatabase? = null
-
-        fun getDatabase(context: Context): MonopolyDatabase {
-            return Instance ?: synchronized(this) {
-                Room.databaseBuilder(context, MonopolyDatabase::class.java, "monopoly_database")
-                    .fallbackToDestructiveMigration()
-                    .createFromAsset("database/monopoly_prepopulate.db")
-                    .build()
-                    .also { Instance = it }
-            }
-        }
-    }
 }
