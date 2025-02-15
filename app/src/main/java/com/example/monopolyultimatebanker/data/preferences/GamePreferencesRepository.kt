@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-data class GameState(
+data class GamePrefState(
     val gameId: String = "",
     val playerId: String = "",
     val isGameActive: Boolean = false
@@ -30,7 +30,7 @@ class GamePreferencesRepository @Inject constructor(
         val IS_GAME_ACTIVE = booleanPreferencesKey("is_game_active")
     }
 
-    val gameState: Flow<GameState> = dataStore.data
+    val gameState: Flow<GamePrefState> = dataStore.data
         .catch {
             if(it is IOException) {
                 Log.e(TAG, "Error reading UserLoginPreference.", it)
@@ -40,7 +40,7 @@ class GamePreferencesRepository @Inject constructor(
             }
         }
         .map { pref ->
-            GameState(
+            GamePrefState(
                 gameId = pref[GAME_ID] ?: "",
                 playerId = pref[PLAYER_ID] ?: "",
                 isGameActive = pref[IS_GAME_ACTIVE] ?: false
