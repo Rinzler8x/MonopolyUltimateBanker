@@ -43,6 +43,7 @@ fun SignUpAndLogInScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val uiState = viewModel.uiState
 
     ObserverAsEvents(
         flow = SnackbarController.events,
@@ -62,7 +63,6 @@ fun SignUpAndLogInScreen(
             }
         }
     }
-    val uiState = viewModel.uiState
     Scaffold(
         snackbarHost = {
             SnackbarHost(

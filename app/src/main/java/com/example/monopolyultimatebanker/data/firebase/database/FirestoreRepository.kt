@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.Flow
 interface FirestoreRepository {
 
     //games collection
-    suspend fun insertGamePlayer(gamePlayer: Game)
+    suspend fun insertGamePlayer(gameId: String, playerName: String): String
 
-    suspend fun updateGamePlayer(gamePlayer: Game)
+    suspend fun updateGamePlayer(playerId: String, playerBalance: Int)
 
     suspend fun deleteGame(playerId: String)
 
@@ -28,4 +28,9 @@ interface FirestoreRepository {
     suspend fun deleteAllGamePlayerProperty(playerId: String)
 
 //    val playerProperties: Flow<List<PlayerProperty>>
+
+    //users collection
+    suspend fun insertUsername(email: String, username: String)
+
+    suspend fun getUsername(email: String): String
 }

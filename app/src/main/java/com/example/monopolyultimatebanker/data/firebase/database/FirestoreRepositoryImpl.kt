@@ -3,6 +3,7 @@ package com.example.monopolyultimatebanker.data.firebase.database
 import android.content.ContentValues.TAG
 import android.util.Log
 import com.example.monopolyultimatebanker.data.gametable.Game
+import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerProperty
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,10 +11,9 @@ import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObjects
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -23,76 +23,66 @@ data class FirestoreGame(
     val playerName: String = "",
     val playerBalance: Int = 1500
 )
-
 class FirestoreRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,
-    private val gamePreferencesRepository: GamePreferencesRepository
+    private val gamePreferencesRepository: GamePreferencesRepository,
+    private val gameRepositoryImpl: GameRepositoryImpl
 ): FirestoreRepository {
 
     private val gameRef = db.collection("games")
     private val playerPropertyRef = db.collection("player_properties")
-    private val gameScope = CoroutineScope(Dispatchers.IO)
+    private val userRef = db.collection("users")
+    private val scope = CoroutineScope(Dispatchers.IO)
+//    private val gameId: String =  gameRepositoryImpl
 
-    //games collection functions
-
-//    override val game: Flow<List<Game>>
-//        get() = flow {
-//            gameScope.launch {
-//                gameRef.whereEqualTo("game_id", "bro")
-//                    .addSnapshotListener{ snapshot, e ->
-//                        if (e != null) {
-//                            Log.w(TAG, "listen:error", e)
-//                            return@addSnapshotListener
-//                        }
-//
-//                        for(dc in snapshot!!.documentChanges) {
-//                            when(dc.type) {
-//                                DocumentChange.Type.ADDED -> Log.d(TAG, "Game document: ${dc.document.data}")
-//                                DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified game document: ${dc.document.data}")
-//                                DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed game: ${dc.document.data}")
-//                            }
-//                        }
-//                    }
-//            }
-//        }
-
-    override fun getGame() = gameRef.whereEqualTo("gameId", "bruh").snapshots().map { it.toObjects<FirestoreGame>() }
-
-    override suspend fun insertGamePlayer(gamePlayer: Game) {
-//        val data = hashMapOf(
-//            "game_id" to "bruhbruh",
-//            "player_balance" to gamePlayer.playerBalance,
-//            "player_name" to gamePlayer.playerName
-//        )
-        val data = FirestoreGame(
-            gameId = "bruh",
-            playerName = gamePlayer.playerName,
-            playerBalance = gamePlayer.playerBalance
-        )
+    override fun getGame() = gameRef.whereEqualTo("gameId", "bruh").snapshots().map { it ->
+        val temp = it.toObjects<FirestoreGame>()
         withContext(Dispatchers.IO) {
-            try {
-                gameRef
-                    .add(data)
-                    .addOnSuccessListener { docRef ->
-                        Log.d(TAG, "Message: ${docRef.id}")
+            it.map {
+                for(i in temp) {
+                    if(gameRepositoryImpl.gamePlayerExists(i.playerName).count == 0){
+                        gameRepositoryImpl.gameInsert(Game(it.id, i.playerName, i.playerBalance))
+                    } else {
+                        gameRepositoryImpl.updatePlayerState(i.playerBalance, i.playerName)
                     }
-                    .await()
+                }
+            }
+        }
+        it.toObjects<FirestoreGame>()
+    }
 
+    override suspend fun insertGamePlayer(
+        gameId: String,
+        playerName: String,
+    ): String {
+        val data = FirestoreGame(
+            gameId = gameId,
+            playerName = playerName,
+            playerBalance = 1500
+        )
+        var playerId: String = ""
+        return withContext(Dispatchers.IO) {
+            try {
+                playerId = gameRef
+                    .add(data)
+                    .await()
+                    .id
+                playerId
             } catch(e: Exception) {
                 Log.d(TAG, "Message: ${e.message}")
+                playerId
             }
         }
     }
 
-    override suspend fun updateGamePlayer(gamePlayer: Game) {
+    override suspend fun updateGamePlayer(
+        playerId: String,
+        playerBalance: Int
+    ) {
         withContext(Dispatchers.IO) {
             try {
-                gameRef.document("r5Oo7sd2ysLkAS449F1M")
-                    .update(
-                        "game_id","bruhbruh",
-                        "player_name", gamePlayer.playerName,
-                        "player_balance", gamePlayer.playerBalance
-                    )
+                gameRef.document(playerId)
+                    .update("player_balance", playerBalance)
                     .await()
 
             } catch(e: Exception) {
@@ -113,30 +103,6 @@ class FirestoreRepositoryImpl @Inject constructor(
             }
         }
     }
-
-    //player_properties collection function
-
-//    override val playerProperties: Flow<List<PlayerProperty>>
-//        get() = flow {
-//            gameScope.launch {
-//                playerPropertyRef.whereEqualTo("game_id", "bro")
-//                    .addSnapshotListener{ snapshot, e ->
-//                        if (e != null) {
-//                            Log.w(TAG, "listen:error", e)
-//                            return@addSnapshotListener
-//                        }
-//
-//                        for(dc in snapshot!!.documentChanges) {
-//                            when(dc.type) {
-//                                DocumentChange.Type.ADDED -> Log.d(TAG, "PlayerProperty document: ${dc.document.data}")
-//                                DocumentChange.Type.MODIFIED -> Log.d(TAG, "Modified PlayerProperty document: ${dc.document.data}")
-//                                DocumentChange.Type.REMOVED -> Log.d(TAG, "Removed PlayerProperty: ${dc.document.data}")
-//                            }
-//                        }
-//                    }
-//            }
-//        }
-
 
     override suspend fun insertPlayerProperty(playerProperty: PlayerProperty) {
         withContext(Dispatchers.IO) {
@@ -186,4 +152,38 @@ class FirestoreRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    //Users
+    override suspend fun insertUsername(email: String, username: String) {
+        val data = hashMapOf(
+            "username" to username
+        )
+        withContext(Dispatchers.IO) {
+            try {
+                userRef.document(email)
+                    .set(data)
+                    .await()
+            } catch (e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun getUsername(email: String): String {
+        var username: String
+        return withContext(Dispatchers.IO) {
+            try {
+                username = userRef.document(email)
+                    .get()
+                    .await()
+                    .data?.get("username") as? String ?: "User not found"
+                username
+            } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+                username = "error"
+                username
+            }
+        }
+    }
 }
+
