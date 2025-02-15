@@ -8,7 +8,7 @@ interface GameRepository {
 
     fun getGamePlayer(playerId: String): Game
 
-    fun gamePlayerExists(playerName: String): Int
+    fun gamePlayerExists(playerName: String): PlayerState
 
     suspend fun updatePlayerState(amount: Int, playerName: String)
 

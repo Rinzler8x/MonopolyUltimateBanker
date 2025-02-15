@@ -5,8 +5,12 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+
+data class PlayerState(
+    val count: Int = 0,
+    val id: String? = "",
+)
 
 @Dao
 interface GameDao {
@@ -20,8 +24,8 @@ interface GameDao {
     @Query("SELECT * FROM game WHERE player_id = :playerId")
     fun getPlayer(playerId: String): Game
 
-    @Query("SELECT COUNT(*) FROM game where player_name = :playerName")
-    fun playerExists(playerName: String): Int
+    @Query("SELECT COUNT(*) AS count, player_id AS id FROM game where player_name = :playerName")
+    fun playerExists(playerName: String): PlayerState
 
     @Query("UPDATE game SET player_balance = :amount WHERE player_name = :playerName")
     suspend fun updatePlayerState(amount: Int, playerName: String)

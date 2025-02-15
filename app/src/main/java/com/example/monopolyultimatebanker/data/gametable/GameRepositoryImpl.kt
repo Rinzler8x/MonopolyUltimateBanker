@@ -12,7 +12,7 @@ class GameRepositoryImpl @Inject constructor(
 
     override fun getGamePlayer(playerId: String): Game = gameDao.getPlayer(playerId)
 
-    override fun gamePlayerExists(playerName: String):Int = gameDao.playerExists(playerName)
+    override fun gamePlayerExists(playerName: String): PlayerState = gameDao.playerExists(playerName)
 
     override suspend fun updatePlayerState(amount: Int, playerName: String) = gameDao.updatePlayerState(amount, playerName)
 
