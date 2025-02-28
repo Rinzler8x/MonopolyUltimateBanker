@@ -15,7 +15,7 @@ interface FirestoreRepository {
 
     suspend fun deleteGame(playerId: String)
 
-    fun getGame(): Flow<List<FirestoreGame>>
+    fun getGame(gameId: String): Flow<List<FirestoreGame>>
 
 //    val game: Flow<List<Game>>
 
