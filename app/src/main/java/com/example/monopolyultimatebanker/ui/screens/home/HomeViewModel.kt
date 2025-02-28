@@ -20,8 +20,11 @@ import com.example.monopolyultimatebanker.data.preferences.UserLogin
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -51,7 +54,6 @@ class HomeViewModel @Inject constructor(
     private val userLoginPreferencesRepository: UserLoginPreferencesRepository
 ): ViewModel() {
 
-
     val gamePreferenceState: StateFlow<GamePrefState> =
         gamePreferencesRepository.gameState.map {
             GamePrefState(
@@ -80,9 +82,18 @@ class HomeViewModel @Inject constructor(
                 initialValue = UserLogin()
             )
 
+    private val gameIdState = MutableStateFlow("")
+
+    private fun setGameId(gameId: String) {
+        gameIdState.value = gameId
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     val firestoreGameState: StateFlow<FirestoreGameState> =
-        firestoreRepositoryImpl.getGame().map {
-            FirestoreGameState(it)
+        gameIdState.flatMapLatest { gameId ->
+            firestoreRepositoryImpl.getGame(gameId).map {
+                FirestoreGameState(it)
+            }
         }
             .stateIn(
                 scope = viewModelScope,
@@ -116,58 +127,31 @@ class HomeViewModel @Inject constructor(
         dialogState = dialogState.copy(joinGameDialog = !dialogState.joinGameDialog)
     }
 
-    fun createNewGame() {
+    fun newGame() {
         viewModelScope.launch {
             withContext(Dispatchers.IO){
                 val (count, id) = gameRepositoryImpl.gamePlayerExists(userLoginPreferenceState.value.userName)
-                Log.d(TAG, "MSG: $id")
                 if(count == 0){
                     val playerId = firestoreRepositoryImpl.insertGamePlayer(dialogState.gameId, userLoginPreferenceState.value.userName)
-                    gameRepositoryImpl.gameInsert(Game(playerId, userLoginPreferenceState.value.userName, 1500))
                     gamePreferencesRepository.saveGamePreference(
                         gameId = dialogState.gameId,
                         playerId = playerId,
                         isGameActive = true
                     )
+                    setGameId(dialogState.gameId)
                 } else {
                     gamePreferencesRepository.saveGamePreference(
                         gameId = dialogState.gameId,
                         playerId = id!!,
                         isGameActive = true
                     )
+                    setGameId(dialogState.gameId)
                     //TODO: Maybe display snackbar message, "you are already in match"
                 }
             }
             updateGameId("")
         }
     }
-
-    fun joinNewGame() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO){
-                val (count, id) = gameRepositoryImpl.gamePlayerExists(userLoginPreferenceState.value.userName)
-                if(count == 0) {
-                    val playerId = firestoreRepositoryImpl.insertGamePlayer(dialogState.gameId, userLoginPreferenceState.value.userName)
-                    gameRepositoryImpl.gameInsert(Game(playerId, userLoginPreferenceState.value.userName, 1500))
-                    gamePreferencesRepository.saveGamePreference(
-                        gameId = dialogState.gameId,
-                        playerId = playerId,
-                        isGameActive = true
-                    )
-                } else {
-                    gamePreferencesRepository.saveGamePreference(
-                        gameId = dialogState.gameId,
-                        playerId = id!!,
-                        isGameActive = true
-                    )
-                    //TODO: Maybe display snackbar message, "you are already in match"
-                }
-            }
-            updateGameId("")
-        }
-    }
-
-
 
     /**Navigation Drawer Code*/
     var navDrawerState by mutableStateOf(DrawerState(initialValue = DrawerValue.Closed))
