@@ -1,5 +1,7 @@
 package com.example.monopolyultimatebanker.ui.screens.home
 
+import android.text.Layout
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -32,7 +37,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -42,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
+import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
 
 object HomeDestination: NavigationDestination {
@@ -66,7 +76,8 @@ fun HomeScreen(
             ModalDrawerSheet {
                 DrawerContent(
                     username = userLoginState.userName,
-                    gameId = gamePrefState.gameId
+                    gameId = gamePrefState.gameId,
+                    isGameActive = gamePrefState.isGameActive
                 )
             }
         },
@@ -77,32 +88,43 @@ fun HomeScreen(
                 GameTopAppBar(onClickNavIcon = { viewModel.onClickNavIcon(scope.coroutineContext) })
             },
             floatingActionButton = {
-                ExpandableFloatingActionButton(
-                    onClickCreateGame = viewModel::onClickCreateGameDialog,
-                    onClickJoinGame = viewModel::onClickJoinGameDialog
-                )
+                if(gamePrefState.isGameActive) {
+
+                } else {
+                    ExpandableFloatingActionButton(
+                        onClickCreateGame = viewModel::onClickCreateGameDialog,
+                        onClickJoinGame = viewModel::onClickJoinGameDialog
+                    )
+                }
             }
         ) { contentPadding ->
             Column (
                 modifier = modifier.padding(contentPadding)
             ) {
-                NoActiveGame(vm = viewModel)
+
+                if(gamePrefState.isGameActive){
+                    ActiveGame(game = gameState.gameState)
+                } else {
+                    NoActiveGame()
+                }
 
                 if(dialogState.createGameDialog){
-                    CreateGameDialog(
-                        onClickCreateGame = viewModel::onClickCreateGameDialog,
-                        createGame = viewModel::createNewGame,
+                    NewGameDialog(
+                        onClickNewGame = viewModel::onClickCreateGameDialog,
+                        newGame = viewModel::newGame,
                         gameId = dialogState.gameId,
-                        updateGameId = viewModel::updateGameId
+                        updateGameId = viewModel::updateGameId,
+                        confirmButtonText = R.string.create
                     )
                 }
 
                 if(dialogState.joinGameDialog) {
-                    JoinGameDialog(
-                        onClickJoinGame = viewModel::onClickJoinGameDialog,
-                        joinGame = viewModel::joinNewGame,
+                    NewGameDialog(
+                        onClickNewGame = viewModel::onClickJoinGameDialog,
+                        newGame = viewModel::newGame,
                         gameId = dialogState.gameId,
-                        updateGameId = viewModel::updateGameId
+                        updateGameId = viewModel::updateGameId,
+                        confirmButtonText = R.string.join
                     )
                 }
             }
@@ -115,6 +137,7 @@ fun HomeScreen(
 private fun DrawerContent(
     username: String,
     gameId: String,
+    isGameActive: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -137,7 +160,7 @@ private fun DrawerContent(
         ) {
             Button(
                 onClick = {},
-                enabled = false
+                enabled = isGameActive
             ) {
                 Text("Leave")
             }
@@ -151,8 +174,36 @@ private fun DrawerContent(
 }
 
 @Composable
-fun NoActiveGame(modifier: Modifier = Modifier, vm: HomeViewModel) {
+private fun ActiveGame(
+    modifier: Modifier = Modifier,
+    game: List<Game>,
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 50.dp),
+    ) {
+        item {
+            Row(
+                modifier = modifier.fillMaxWidth().padding(vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "Player")
+                Text(text = "Balance")
+            }
+        }
+        items(items = game, key = { it.playerId }) {
+            Row(
+                modifier = modifier.fillMaxWidth().padding(vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = it.playerName)
+                Text(text = it.playerBalance.toString())
+            }
+        }
+    }
+}
 
+@Composable
+fun NoActiveGame(modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -167,73 +218,19 @@ fun NoActiveGame(modifier: Modifier = Modifier, vm: HomeViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun JoinGameDialog(
-    onClickJoinGame: () -> Unit,
-    joinGame: () -> Unit,
-    gameId: String,
-    updateGameId: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-
-    AlertDialog(
-        onDismissRequest = {
-            updateGameId("")
-            onClickJoinGame()
-        },
-        title = { Text("Join Game") },
-        text = {
-            Column {
-                Text(
-                    text = "Enter game id to join.",
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                )
-                Spacer(modifier = modifier.padding(vertical = 8.dp))
-                OutlinedTextField(
-                    value = gameId,
-                    onValueChange = updateGameId,
-                    label = { Text(text = stringResource(R.string.game_id)) }
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    updateGameId("")
-                    onClickJoinGame()
-                }
-            ) {
-                Text(text = stringResource(R.string.dismiss))
-            }
-
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    joinGame()
-                    onClickJoinGame()
-                }
-            ) {
-                Text(text = stringResource(R.string.join))
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CreateGameDialog(
-    onClickCreateGame: () -> Unit,
-    createGame: () -> Unit,
+private fun NewGameDialog(
+    onClickNewGame: () -> Unit,
+    newGame: () -> Unit,
     updateGameId: (String) -> Unit,
     gameId: String,
+    @StringRes confirmButtonText: Int,
     modifier: Modifier = Modifier
 ) {
     AlertDialog (
         onDismissRequest = {
             updateGameId("")
-            onClickCreateGame()
+            onClickNewGame()
         },
         title = { Text("Create Game") },
         text = {
@@ -254,7 +251,7 @@ private fun CreateGameDialog(
             TextButton(
                 onClick = {
                     updateGameId("")
-                    onClickCreateGame()
+                    onClickNewGame()
                 }
             ) {
                 Text(text = stringResource(R.string.dismiss))
@@ -263,11 +260,12 @@ private fun CreateGameDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    createGame()
-                    onClickCreateGame()
-                }
+                    newGame()
+                    onClickNewGame()
+                },
+                enabled = gameId.isNotBlank()
             ) {
-                Text(text = stringResource(R.string.create))
+                Text(text = stringResource(confirmButtonText))
             }
         }
     )
