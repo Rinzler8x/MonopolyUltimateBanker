@@ -32,7 +32,7 @@ import com.example.monopolyultimatebanker.utils.SnackbarController
 import kotlinx.coroutines.launch
 
 object SignUpAndLogInDestination: NavigationDestination {
-    override val route = "signInAndLogIn"
+    override val route = "sign_in_and_log_in"
 }
 
 @Composable
