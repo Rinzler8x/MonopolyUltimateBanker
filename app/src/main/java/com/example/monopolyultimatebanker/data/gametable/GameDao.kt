@@ -1,6 +1,7 @@
 package com.example.monopolyultimatebanker.data.gametable
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -55,4 +56,7 @@ interface GameDao {
         "UPDATE game SET player_balance = player_balance - (50 * (SELECT COUNT(property_no) FROM player_property WHERE player_id = :playerId))"
     )
     suspend fun eventDeduct50PerProperty(playerId: String)
+
+    @Query("DELETE FROM game")
+    suspend fun deleteGame()
 }

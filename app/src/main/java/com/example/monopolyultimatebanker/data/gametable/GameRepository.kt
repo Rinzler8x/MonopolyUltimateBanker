@@ -25,4 +25,6 @@ interface GameRepository {
     suspend fun gameEventDeduct50PerProperty(playerId: String)
 
     suspend fun gameInsert(game: Game)
+
+    suspend fun deleteGame()
 }

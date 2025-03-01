@@ -29,4 +29,6 @@ class GameRepositoryImpl @Inject constructor(
     override suspend fun gameEventDeduct50PerProperty(playerId: String) = gameDao.eventDeduct50PerProperty(playerId)
 
     override suspend fun gameInsert(game: Game) = gameDao.insert(game)
+
+    override suspend fun deleteGame() = gameDao.deleteGame()
 }
