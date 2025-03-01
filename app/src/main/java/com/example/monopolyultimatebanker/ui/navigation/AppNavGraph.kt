@@ -14,6 +14,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.monopolyultimatebanker.ui.screens.home.HomeDestination
 import com.example.monopolyultimatebanker.ui.screens.home.HomeScreen
+import com.example.monopolyultimatebanker.ui.screens.qrcodescanner.QrCodeScanner
+import com.example.monopolyultimatebanker.ui.screens.qrcodescanner.QrCodeScannerDestination
 import com.example.monopolyultimatebanker.ui.screens.signupandlogin.SignUpAndLogInDestination
 import com.example.monopolyultimatebanker.ui.screens.signupandlogin.SignUpAndLogInScreen
 
@@ -49,7 +51,15 @@ fun AppNavHost(
             }
 
             composable(route = HomeDestination.route) {
-                HomeScreen()
+                HomeScreen(
+                    navigateToQrCodeScanner = {
+                        navController.navigate(QrCodeScannerDestination.route)
+                    }
+                )
+            }
+
+            composable(route = QrCodeScannerDestination.route) {
+                QrCodeScanner()
             }
         }
     }
