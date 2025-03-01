@@ -43,7 +43,7 @@ class GamePreferencesRepository @Inject constructor(
             GamePrefState(
                 gameId = pref[GAME_ID] ?: "",
                 playerId = pref[PLAYER_ID] ?: "",
-                isGameActive = pref[IS_GAME_ACTIVE] ?: false
+                isGameActive = pref[IS_GAME_ACTIVE] ?: true //Set true to avoid create game screen, **CHANGE BACK AFTER DEVELOPMENT**
             )
         }
 
@@ -56,6 +56,12 @@ class GamePreferencesRepository @Inject constructor(
             pref[GAME_ID] = gameId
             pref[PLAYER_ID] = playerId
             pref[IS_GAME_ACTIVE] = isGameActive
+        }
+    }
+
+    suspend fun resetGamePreference() {
+        dataStore.edit {
+            it.clear()
         }
     }
 
