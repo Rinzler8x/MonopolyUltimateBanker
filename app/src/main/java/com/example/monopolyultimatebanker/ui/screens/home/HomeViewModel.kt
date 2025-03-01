@@ -35,6 +35,7 @@ import kotlin.coroutines.CoroutineContext
 data class DialogState(
     val createGameDialog: Boolean = false,
     val joinGameDialog: Boolean = false,
+    val leaveGameDialog: Boolean = false,
     val gameId: String = ""
 )
 
@@ -127,6 +128,10 @@ class HomeViewModel @Inject constructor(
         dialogState = dialogState.copy(joinGameDialog = !dialogState.joinGameDialog)
     }
 
+    fun onClickLeaveGameDialog(){
+        dialogState = dialogState.copy(leaveGameDialog = !dialogState.leaveGameDialog)
+    }
+
     fun newGame() {
         viewModelScope.launch {
             withContext(Dispatchers.IO){
@@ -150,6 +155,16 @@ class HomeViewModel @Inject constructor(
                 }
             }
             updateGameId("")
+        }
+    }
+
+    /**Live Game Code*/
+
+    fun leaveGame() {
+        viewModelScope.launch {
+            gameRepositoryImpl.deleteGame()
+            gamePreferencesRepository.resetGamePreference()
+            setGameId("")
         }
     }
 

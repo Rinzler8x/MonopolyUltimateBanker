@@ -1,6 +1,5 @@
 package com.example.monopolyultimatebanker.ui.screens.home
 
-import android.text.Layout
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -37,11 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -61,6 +55,7 @@ object HomeDestination: NavigationDestination {
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    navigateToQrCodeScanner: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -77,7 +72,8 @@ fun HomeScreen(
                 DrawerContent(
                     username = userLoginState.userName,
                     gameId = gamePrefState.gameId,
-                    isGameActive = gamePrefState.isGameActive
+                    isGameActive = gamePrefState.isGameActive,
+                    onClickLeaveGameDialog = viewModel::onClickLeaveGameDialog
                 )
             }
         },
@@ -89,7 +85,9 @@ fun HomeScreen(
             },
             floatingActionButton = {
                 if(gamePrefState.isGameActive) {
-
+                    QrFloatingActionButton(
+                        onClickQrCodeScanner = navigateToQrCodeScanner
+                    )
                 } else {
                     ExpandableFloatingActionButton(
                         onClickCreateGame = viewModel::onClickCreateGameDialog,
@@ -127,6 +125,13 @@ fun HomeScreen(
                         confirmButtonText = R.string.join
                     )
                 }
+
+                if(dialogState.leaveGameDialog){
+                    LeaveGameDialog(
+                        onClickLeaveGameDialog = viewModel::onClickLeaveGameDialog,
+                        leaveGame = viewModel::leaveGame
+                    )
+                }
             }
         }
     }
@@ -138,6 +143,7 @@ private fun DrawerContent(
     username: String,
     gameId: String,
     isGameActive: Boolean,
+    onClickLeaveGameDialog: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -159,7 +165,7 @@ private fun DrawerContent(
             modifier = modifier.fillMaxWidth()
         ) {
             Button(
-                onClick = {},
+                onClick = onClickLeaveGameDialog,
                 enabled = isGameActive
             ) {
                 Text("Leave")
@@ -179,11 +185,15 @@ private fun ActiveGame(
     game: List<Game>,
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 50.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 50.dp),
     ) {
         item {
             Row(
-                modifier = modifier.fillMaxWidth().padding(vertical = 10.dp),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Player")
@@ -192,7 +202,9 @@ private fun ActiveGame(
         }
         items(items = game, key = { it.playerId }) {
             Row(
-                modifier = modifier.fillMaxWidth().padding(vertical = 10.dp),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = it.playerName)
@@ -203,7 +215,37 @@ private fun ActiveGame(
 }
 
 @Composable
-fun NoActiveGame(modifier: Modifier = Modifier) {
+private fun LeaveGameDialog(
+    onClickLeaveGameDialog: () -> Unit,
+    leaveGame: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = onClickLeaveGameDialog,
+        title = { Text(text = "Leave Game") },
+        text = { Text(text = "Are you sure you want leave the game?") },
+        dismissButton = {
+            TextButton(
+                onClick = onClickLeaveGameDialog
+            ) {
+                Text(text = stringResource(R.string.dismiss))
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    leaveGame()
+                    onClickLeaveGameDialog()
+                }
+            ) {
+                Text(text = stringResource(R.string.confirm))
+            }
+        }
+    )
+}
+
+@Composable
+private fun NoActiveGame(modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -269,6 +311,22 @@ private fun NewGameDialog(
             }
         }
     )
+}
+
+@Composable
+private fun QrFloatingActionButton(
+    onClickQrCodeScanner: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FloatingActionButton(
+        onClick = onClickQrCodeScanner
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.baseline_qr_code_scanner_24),
+            contentDescription = stringResource(R.string.qr_code),
+            modifier = modifier.size(42.dp)
+        )
+    }
 }
 
 @Composable
