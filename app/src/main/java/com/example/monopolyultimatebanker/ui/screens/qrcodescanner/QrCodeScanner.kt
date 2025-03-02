@@ -80,7 +80,6 @@ fun QrCodeScanner(
                                     val qrCodeResults = result?.getValue(qrScannerUtil.qrScanner)
                                     if(!qrCodeResults.isNullOrEmpty()) {
                                         qrCodeScannerViewModel.setQrCode(qrCodeResults.first().rawValue!!)
-                                        qrCodeScannerViewModel.setQrCodeDetected(true)
                                     }
                                 }
                             )

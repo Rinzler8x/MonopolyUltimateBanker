@@ -13,7 +13,6 @@ import javax.inject.Inject
 
 data class QrCodeState(
     val qrCode: String = "",
-    val qrCodeDetected: Boolean = false,
 )
 
 data class CameraControlState(
@@ -37,10 +36,6 @@ class QrCodeScannerViewModel @Inject constructor(
 
     fun setQrCode(input: String){
         qrState = qrState.copy(qrCode = input)
-    }
-
-    fun setQrCodeDetected(input: Boolean) {
-        qrState = qrState.copy(qrCodeDetected = input)
     }
 
     fun getCameraController(context: Context): CameraControlState{
