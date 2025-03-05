@@ -1,6 +1,7 @@
 package com.example.monopolyultimatebanker
 
 import android.content.Context
+import android.provider.ContactsContract.Data
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
@@ -19,6 +20,7 @@ import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropert
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepository
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
+import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
 import com.example.monopolyultimatebanker.data.propertytable.PropertyDao
 import com.example.monopolyultimatebanker.data.propertytable.PropertyRepository
@@ -51,6 +53,13 @@ private val Context.userLoginDataStore: DataStore<Preferences> by preferencesDat
 annotation class GameStateDataStore
 private val Context.gameStateDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "game_state"
+)
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class QrDataStore
+private val Context.qrDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "qr_preference"
 )
 
 @Module
@@ -97,6 +106,21 @@ object HiltModule {
         @GameStateDataStore dataStore: DataStore<Preferences>
     ): GamePreferencesRepository {
          return GamePreferencesRepository(dataStore)
+    }
+
+    @Provides
+    @Singleton
+    @QrDataStore
+    fun provideQrDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return context.qrDataStore
+    }
+
+    @Provides
+    @Singleton
+    fun provideQrPreferencesRepository (
+        @QrDataStore dataStore: DataStore<Preferences>
+    ): QrPreferencesRepository {
+        return QrPreferencesRepository(dataStore)
     }
 
     @Provides
