@@ -6,9 +6,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.utils.QrScanner
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class QrCodeState(
@@ -26,7 +29,8 @@ data class DialogState(
 
 @HiltViewModel
 class QrCodeScannerViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context
+    @ApplicationContext private val appContext: Context,
+    private val qrPreferencesRepository: QrPreferencesRepository,
 ): ViewModel() {
 
     var qrState by mutableStateOf(QrCodeState())
@@ -36,6 +40,9 @@ class QrCodeScannerViewModel @Inject constructor(
 
     fun setQrCode(input: String){
         qrState = qrState.copy(qrCode = input)
+        viewModelScope.launch {
+            qrPreferencesRepository.saveQrPreference(qrState.qrCode)
+        }
     }
 
     fun getCameraController(context: Context): CameraControlState{
@@ -50,4 +57,8 @@ class QrCodeScannerViewModel @Inject constructor(
         dialogState = dialogState.copy(codeDialog = !dialogState.codeDialog)
     }
 
+    fun navigateToPropertyScreen(navivateTo: () -> Unit) {
+        cameraCtrlState.cameraController.unbind()
+        navivateTo()
+    }
 }

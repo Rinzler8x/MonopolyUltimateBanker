@@ -46,6 +46,7 @@ object QrCodeScannerDestination: NavigationDestination {
 @Composable
 fun QrCodeScanner(
     modifier: Modifier = Modifier,
+    navigateTo: () -> Unit,
     qrCodeScannerViewModel: QrCodeScannerViewModel = hiltViewModel()
 ) {
 
@@ -60,12 +61,13 @@ fun QrCodeScanner(
         floatingActionButton = { CodeFloatingActionButton(onClickCodeDialog = qrCodeScannerViewModel::onClickCodeDialog) }
     ) { innerPadding ->
         Column(
-            verticalArrangement = Arrangement.SpaceEvenly
+            verticalArrangement = Arrangement.SpaceEvenly,
+            modifier = modifier.padding(innerPadding)
         ) {
             if(!dialogState.codeDialog){
                 AndroidView(
                     modifier = modifier
-                        .padding(innerPadding)
+//                        .padding(innerPadding)
                         .size(500.dp),
                     factory = { ctx ->
                         PreviewView(ctx).apply {
@@ -80,6 +82,7 @@ fun QrCodeScanner(
                                     val qrCodeResults = result?.getValue(qrScannerUtil.qrScanner)
                                     if(!qrCodeResults.isNullOrEmpty()) {
                                         qrCodeScannerViewModel.setQrCode(qrCodeResults.first().rawValue!!)
+                                        qrCodeScannerViewModel.navigateToPropertyScreen(navigateTo)
                                     }
                                 }
                             )
@@ -99,7 +102,8 @@ fun QrCodeScanner(
             CodeDialog(
                 onClickCodeDialog = qrCodeScannerViewModel::onClickCodeDialog,
                 setQrCode = qrCodeScannerViewModel::setQrCode,
-                qrCode = qrState.qrCode
+                qrCode = qrState.qrCode,
+                navigateTo = navigateTo
             )
         }
     }
@@ -110,6 +114,7 @@ private fun CodeDialog(
     onClickCodeDialog: () -> Unit,
     setQrCode: (String) -> Unit,
     qrCode: String,
+    navigateTo: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     AlertDialog (
@@ -146,6 +151,7 @@ private fun CodeDialog(
             TextButton(
                 onClick = {
                     onClickCodeDialog()
+                    navigateTo()
                 },
                 enabled = qrCode.isNotBlank()
             ) {
