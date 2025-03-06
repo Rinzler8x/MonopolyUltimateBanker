@@ -9,6 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.utils.QrScanner
+import com.example.monopolyultimatebanker.utils.SnackbarController
+import com.example.monopolyultimatebanker.utils.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
@@ -41,7 +43,7 @@ class QrCodeScannerViewModel @Inject constructor(
     fun setQrCode(input: String){
         qrState = qrState.copy(qrCode = input)
         viewModelScope.launch {
-            qrPreferencesRepository.saveQrPreference(qrState.qrCode)
+            qrPreferencesRepository.saveProQrPreference(qrState.qrCode)
         }
     }
 
@@ -57,8 +59,44 @@ class QrCodeScannerViewModel @Inject constructor(
         dialogState = dialogState.copy(codeDialog = !dialogState.codeDialog)
     }
 
-    fun navigateToPropertyScreen(navivateTo: () -> Unit) {
+    fun saveQrCodeAndNavigateToPropertyScreen(
+        qrCode: String,
+        navigateToPropertyScreen: () -> Unit
+    ) {
+        viewModelScope.launch {
+            setQrCode(qrCode)
+            qrPreferencesRepository.saveProQrPreference(qrState.qrCode)
+            navigateToPropertyScreen()
+        }
+    }
+
+    fun saveQrCodeAndNavigateToEventScreen(
+        qrCode: String,
+//        navigateToEventScreen: () -> Unit
+    ) {
+        viewModelScope.launch {
+            setQrCode(qrCode)
+            qrPreferencesRepository.saveEveQrPreference(qrState.qrCode)
+//            navigateToEventScreen()
+        }
+    }
+
+    fun unbindCameraController() {
         cameraCtrlState.cameraController.unbind()
-        navivateTo()
+    }
+
+    fun showWrongQrCodeSnackbar() {
+        showSnackBar("QR Code not supported. Please Try Again!")
+    }
+
+
+    private fun showSnackBar(message: String) {
+        viewModelScope.launch {
+            SnackbarController.sendEvent(
+                event = SnackbarEvent(
+                    message = message
+                )
+            )
+        }
     }
 }

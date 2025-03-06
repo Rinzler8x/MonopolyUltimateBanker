@@ -1,6 +1,5 @@
 package com.example.monopolyultimatebanker.ui.screens.qrcodescanner
 
-import android.Manifest
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.mlkit.vision.MlKitAnalyzer
 import androidx.camera.view.PreviewView
@@ -16,13 +15,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -34,9 +35,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
+import com.example.monopolyultimatebanker.utils.ObserverAsEvents
+import com.example.monopolyultimatebanker.utils.SnackbarController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
+import kotlinx.coroutines.launch
 
 object QrCodeScannerDestination: NavigationDestination {
     override val route = "qr_code_scanner"
@@ -46,18 +48,44 @@ object QrCodeScannerDestination: NavigationDestination {
 @Composable
 fun QrCodeScanner(
     modifier: Modifier = Modifier,
-    navigateTo: () -> Unit,
+    navigateToPropertyScreen: () -> Unit,
     qrCodeScannerViewModel: QrCodeScannerViewModel = hiltViewModel()
 ) {
 
     val qrState = qrCodeScannerViewModel.qrState
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraCtrl = qrCodeScannerViewModel.getCameraController(context)
     val qrScannerUtil = qrCodeScannerViewModel.cameraCtrlState.qrScannerUtil
     val dialogState = qrCodeScannerViewModel.dialogState
 
+    ObserverAsEvents(
+        flow = SnackbarController.events,
+        key1 = snackbarHostState
+    ) { event ->
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+
+            val result = snackbarHostState.showSnackbar(
+                message = event.message,
+                actionLabel = event.action?.name,
+                duration = SnackbarDuration.Long
+            )
+
+            if(result == SnackbarResult.ActionPerformed) {
+                event.action?.action?.invoke()
+            }
+        }
+    }
+
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState
+            )
+        },
         floatingActionButton = { CodeFloatingActionButton(onClickCodeDialog = qrCodeScannerViewModel::onClickCodeDialog) }
     ) { innerPadding ->
         Column(
@@ -81,8 +109,22 @@ fun QrCodeScanner(
 
                                     val qrCodeResults = result?.getValue(qrScannerUtil.qrScanner)
                                     if(!qrCodeResults.isNullOrEmpty()) {
-                                        qrCodeScannerViewModel.setQrCode(qrCodeResults.first().rawValue!!)
-                                        qrCodeScannerViewModel.navigateToPropertyScreen(navigateTo)
+                                        val tempVar = qrCodeResults.first().rawValue!!
+                                        if(tempVar.startsWith("monopro")) {
+                                            qrCodeScannerViewModel.saveQrCodeAndNavigateToPropertyScreen(
+                                                qrCode =  tempVar,
+                                                navigateToPropertyScreen = navigateToPropertyScreen
+                                            )
+                                            qrCodeScannerViewModel.unbindCameraController()
+                                        } else if (tempVar.startsWith("monoeve")) {
+                                            qrCodeScannerViewModel.saveQrCodeAndNavigateToEventScreen(
+                                                qrCode = tempVar,
+//                                                navigateToEventScreen = navigateToEventScreen
+                                            )
+                                            qrCodeScannerViewModel.unbindCameraController()
+                                        } else {
+                                            qrCodeScannerViewModel.showWrongQrCodeSnackbar()
+                                        }
                                     }
                                 }
                             )
@@ -103,7 +145,7 @@ fun QrCodeScanner(
                 onClickCodeDialog = qrCodeScannerViewModel::onClickCodeDialog,
                 setQrCode = qrCodeScannerViewModel::setQrCode,
                 qrCode = qrState.qrCode,
-                navigateTo = navigateTo
+                navigateTo = navigateToPropertyScreen
             )
         }
     }

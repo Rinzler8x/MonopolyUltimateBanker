@@ -1,12 +1,9 @@
 package com.example.monopolyultimatebanker.ui.screens.propertycard
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
+import com.example.monopolyultimatebanker.data.preferences.QrType
 import com.example.monopolyultimatebanker.data.propertytable.Property
 import com.example.monopolyultimatebanker.data.propertytable.PropertyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,23 +23,24 @@ class PropertyCardViewModel @Inject constructor(
 ): ViewModel() {
 
 
-    val qrPrefState: StateFlow<String> =
-        qrPreferencesRepository.qrState
+    val qrPrefState: StateFlow<QrType> =
+        qrPreferencesRepository.qrState.map {
+            QrType(property = it.property, event = it.event)
+        }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = "monopro_01"
+                initialValue = QrType(property = "monopro_01", event = "monoeve_01")
             )
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val propertyState: StateFlow<Property> = qrPrefState
         .flatMapLatest {
-            propertyRepository.getPropertyStream(it)
+            propertyRepository.getPropertyStream(it.property)
         }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = Property()
             )
-
 }

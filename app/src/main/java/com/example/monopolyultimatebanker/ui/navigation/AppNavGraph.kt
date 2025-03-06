@@ -62,7 +62,7 @@ fun AppNavHost(
 
             composable(route = QrCodeScannerDestination.route) {
                 QrCodeScanner(
-                    navigateTo = {
+                    navigateToPropertyScreen = {
                         navController.navigate(PropertyCardDestination.route) {
                             popUpTo(QrCodeScannerDestination.route) {
                                 inclusive = true
