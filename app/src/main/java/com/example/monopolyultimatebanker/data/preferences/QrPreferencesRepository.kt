@@ -13,15 +13,21 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+data class QrType(
+    val property: String = "",
+    val event: String = ""
+)
+
 class QrPreferencesRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) {
 
     private companion object{
-        val QR_CODE = stringPreferencesKey("qr_code")
+        val QR_CODE_PRO = stringPreferencesKey("qr_code_pro")
+        val QR_CODE_EVE = stringPreferencesKey("qr_code_eve")
     }
 
-    val qrState: Flow<String> = dataStore.data
+    val qrState: Flow<QrType> = dataStore.data
         .catch {
             if(it is IOException) {
                 Log.e(TAG, "Error reading UserLoginPreference.", it)
@@ -31,12 +37,21 @@ class QrPreferencesRepository @Inject constructor(
             }
         }
         .map { pref ->
-            pref[QR_CODE] ?: ""
+            QrType(
+                property = pref[QR_CODE_PRO] ?: "",
+                event = pref[QR_CODE_EVE] ?: ""
+            )
         }
 
-    suspend fun saveQrPreference( qrCode: String ) {
+    suspend fun saveProQrPreference(qrCode: String ) {
         dataStore.edit { pref ->
-            pref[QR_CODE] = qrCode
+            pref[QR_CODE_PRO] = qrCode
+        }
+    }
+
+    suspend fun saveEveQrPreference(qrCode: String) {
+        dataStore.edit { pref ->
+            pref[QR_CODE_EVE] = qrCode
         }
     }
 
