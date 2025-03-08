@@ -49,6 +49,7 @@ object QrCodeScannerDestination: NavigationDestination {
 fun QrCodeScanner(
     modifier: Modifier = Modifier,
     navigateToPropertyScreen: () -> Unit,
+    navigateToEventScreen: () -> Unit,
     qrCodeScannerViewModel: QrCodeScannerViewModel = hiltViewModel()
 ) {
 
@@ -119,7 +120,7 @@ fun QrCodeScanner(
                                         } else if (tempVar.startsWith("monoeve")) {
                                             qrCodeScannerViewModel.saveQrCodeAndNavigateToEventScreen(
                                                 qrCode = tempVar,
-//                                                navigateToEventScreen = navigateToEventScreen
+                                                navigateToEventScreen = navigateToEventScreen
                                             )
                                             qrCodeScannerViewModel.unbindCameraController()
                                         } else {
@@ -134,10 +135,9 @@ fun QrCodeScanner(
                     }
                 )
             } else {
-                // Dialog is open, stop camera
                 cameraCtrl.cameraController.unbind()
             }
-            Text(text = qrState.qrCode, modifier.fillMaxSize())
+//            Text(text = qrState.qrCode, modifier.fillMaxSize())
         }
 
         if(dialogState.codeDialog){
@@ -145,7 +145,12 @@ fun QrCodeScanner(
                 onClickCodeDialog = qrCodeScannerViewModel::onClickCodeDialog,
                 setQrCode = qrCodeScannerViewModel::setQrCode,
                 qrCode = qrState.qrCode,
-                navigateTo = navigateToPropertyScreen
+                saveQrCodeAndNavigateToPropertyScreen = qrCodeScannerViewModel::saveQrCodeAndNavigateToPropertyScreen,
+                saveQrCodeAndNavigateToEventScreen = qrCodeScannerViewModel::saveQrCodeAndNavigateToEventScreen,
+                navigateToPropertyScreen = navigateToPropertyScreen,
+                navigateToEventScreen = navigateToEventScreen,
+                unBindCamera = qrCodeScannerViewModel::unbindCameraController,
+                showWrongQrCodeSnackbar = qrCodeScannerViewModel::showWrongQrCodeSnackbar
             )
         }
     }
@@ -156,7 +161,12 @@ private fun CodeDialog(
     onClickCodeDialog: () -> Unit,
     setQrCode: (String) -> Unit,
     qrCode: String,
-    navigateTo: () -> Unit,
+    saveQrCodeAndNavigateToPropertyScreen: (String, () -> Unit) -> Unit,
+    saveQrCodeAndNavigateToEventScreen: (String, () -> Unit) -> Unit,
+    navigateToPropertyScreen: () -> Unit,
+    navigateToEventScreen: () -> Unit,
+    unBindCamera: () -> Unit,
+    showWrongQrCodeSnackbar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     AlertDialog (
@@ -193,7 +203,20 @@ private fun CodeDialog(
             TextButton(
                 onClick = {
                     onClickCodeDialog()
-                    navigateTo()
+                    unBindCamera()
+                    if(qrCode.startsWith("monopro")) {
+                        saveQrCodeAndNavigateToPropertyScreen(
+                            qrCode,
+                            navigateToPropertyScreen
+                        )
+                    } else if(qrCode.startsWith("monoeve")) {
+                        saveQrCodeAndNavigateToEventScreen(
+                            qrCode,
+                            navigateToEventScreen
+                        )
+                    } else {
+                        showWrongQrCodeSnackbar()
+                    }
                 },
                 enabled = qrCode.isNotBlank()
             ) {

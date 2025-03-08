@@ -72,12 +72,12 @@ class QrCodeScannerViewModel @Inject constructor(
 
     fun saveQrCodeAndNavigateToEventScreen(
         qrCode: String,
-//        navigateToEventScreen: () -> Unit
+        navigateToEventScreen: () -> Unit
     ) {
         viewModelScope.launch {
             setQrCode(qrCode)
             qrPreferencesRepository.saveEveQrPreference(qrState.qrCode)
-//            navigateToEventScreen()
+            navigateToEventScreen()
         }
     }
 
