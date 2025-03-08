@@ -12,4 +12,5 @@
     <string name="join">Join</string>
     <string name="qr_code">QR Code</string>
     <string name="confirm">Confirm</string>
+    <string name="pay">Pay</string>
 </resources>
