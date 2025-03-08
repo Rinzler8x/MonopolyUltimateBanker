@@ -38,7 +38,7 @@ object SignUpAndLogInDestination: NavigationDestination {
 @Composable
 fun SignUpAndLogInScreen(
     modifier: Modifier = Modifier,
-    navigateTo: () -> Unit,
+    navigateToHomeScreen: () -> Unit,
     viewModel: SignUpAndLogInViewModel = hiltViewModel()
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -84,7 +84,7 @@ fun SignUpAndLogInScreen(
                 if(uiState.checked){
                     LogInForm(
                         uiState = uiState,
-                        onClickLogIn = { viewModel.onClickLogIn(navigateTo = { navigateTo() }) },
+                        onClickLogIn = { viewModel.onClickLogIn(navigateTo = { navigateToHomeScreen() }) },
                         updateEmail = viewModel::updateEmail,
                         updatePassword = viewModel::updatePassword,
                         isNotEmpty = viewModel::isNotEmptyForLogIn,
@@ -94,7 +94,7 @@ fun SignUpAndLogInScreen(
                 } else {
                     SignInForm(
                         uiState = uiState,
-                        onClickSignIn = { viewModel.onClickSignIn(navigateTo = { navigateTo() }) },
+                        onClickSignIn = { viewModel.onClickSignIn(navigateTo = { navigateToHomeScreen() }) },
                         updateUsername = viewModel::updateUsername,
                         updateEmail = viewModel::updateEmail,
                         updatePassword = viewModel::updatePassword,

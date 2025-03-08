@@ -12,6 +12,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.monopolyultimatebanker.ui.screens.eventcard.EventCard
+import com.example.monopolyultimatebanker.ui.screens.eventcard.EventCardDestination
 import com.example.monopolyultimatebanker.ui.screens.home.HomeDestination
 import com.example.monopolyultimatebanker.ui.screens.home.HomeScreen
 import com.example.monopolyultimatebanker.ui.screens.propertycard.PropertyCard
@@ -44,7 +46,7 @@ fun AppNavHost(
         ) {
             composable(route = SignUpAndLogInDestination.route) {
                 SignUpAndLogInScreen(
-                    navigateTo = {
+                    navigateToHomeScreen = {
                         navController.navigate(HomeDestination.route) {
                             popUpTo(SignUpAndLogInDestination.route) { inclusive = true }
                         }
@@ -68,12 +70,23 @@ fun AppNavHost(
                                 inclusive = true
                             }
                         }
+                    },
+                    navigateToEventScreen = {
+                        navController.navigate(EventCardDestination.route) {
+                            popUpTo(QrCodeScannerDestination.route) {
+                                inclusive = true
+                            }
+                        }
                     }
                 )
             }
 
             composable(route = PropertyCardDestination.route) {
-                PropertyCard(navController = navController)
+                PropertyCard()
+            }
+
+            composable(route = EventCardDestination.route) {
+                EventCard()
             }
         }
     }
