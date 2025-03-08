@@ -6,6 +6,7 @@ import com.example.monopolyultimatebanker.data.preferences.QrPreferencesReposito
 import com.example.monopolyultimatebanker.data.preferences.QrType
 import com.example.monopolyultimatebanker.data.propertytable.Property
 import com.example.monopolyultimatebanker.data.propertytable.PropertyRepository
+import com.example.monopolyultimatebanker.data.propertytable.PropertyRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,9 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class PropertyCardViewModel @Inject constructor(
     private val qrPreferencesRepository: QrPreferencesRepository,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepositoryImpl: PropertyRepositoryImpl
 ): ViewModel() {
-
 
     val qrPrefState: StateFlow<QrType> =
         qrPreferencesRepository.qrState.map {
@@ -36,7 +36,7 @@ class PropertyCardViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val propertyState: StateFlow<Property> = qrPrefState
         .flatMapLatest {
-            propertyRepository.getPropertyStream(it.property)
+            propertyRepositoryImpl.getPropertyStream(it.property)
         }
             .stateIn(
                 scope = viewModelScope,
