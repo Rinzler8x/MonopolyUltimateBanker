@@ -1,10 +1,7 @@
 package com.example.monopolyultimatebanker.ui.screens.home
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,14 +11,13 @@ import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGame
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
-import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.GamePrefState
+import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.UserLogin
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -33,8 +29,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 data class DialogState(
-    val createGameDialog: Boolean = false,
-    val joinGameDialog: Boolean = false,
+    val createOrJoinGameDialog: Boolean = false,
     val leaveGameDialog: Boolean = false,
     val gameId: String = ""
 )
@@ -83,16 +78,10 @@ class HomeViewModel @Inject constructor(
                 initialValue = UserLogin()
             )
 
-    private val gameIdState = MutableStateFlow("")
-
-    private fun setGameId(gameId: String) {
-        gameIdState.value = gameId
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     val firestoreGameState: StateFlow<FirestoreGameState> =
-        gameIdState.flatMapLatest { gameId ->
-            firestoreRepositoryImpl.getGame(gameId).map {
+        gamePreferenceState.flatMapLatest { gameId ->
+            firestoreRepositoryImpl.getGame(gameId.gameId).map {
                 FirestoreGameState(it)
             }
         }
@@ -120,12 +109,8 @@ class HomeViewModel @Inject constructor(
         dialogState = dialogState.copy(gameId = input.trim())
     }
 
-    fun onClickCreateGameDialog() {
-        dialogState = dialogState.copy(createGameDialog = !dialogState.createGameDialog)
-    }
-
-    fun onClickJoinGameDialog() {
-        dialogState = dialogState.copy(joinGameDialog = !dialogState.joinGameDialog)
+    fun onClickCreateOrJoinGameDialog() {
+        dialogState = dialogState.copy(createOrJoinGameDialog = !dialogState.createOrJoinGameDialog)
     }
 
     fun onClickLeaveGameDialog(){
@@ -143,15 +128,12 @@ class HomeViewModel @Inject constructor(
                         playerId = playerId,
                         isGameActive = true
                     )
-                    setGameId(dialogState.gameId)
                 } else {
                     gamePreferencesRepository.saveGamePreference(
                         gameId = dialogState.gameId,
                         playerId = id!!,
                         isGameActive = true
                     )
-                    setGameId(dialogState.gameId)
-                    //TODO: Maybe display snackbar message, "you are already in match"
                 }
             }
             updateGameId("")
@@ -159,12 +141,10 @@ class HomeViewModel @Inject constructor(
     }
 
     /**Live Game Code*/
-
     fun leaveGame() {
         viewModelScope.launch {
             gameRepositoryImpl.deleteGame()
             gamePreferencesRepository.resetGamePreference()
-            setGameId("")
         }
     }
 
