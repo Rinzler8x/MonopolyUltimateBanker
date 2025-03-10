@@ -89,9 +89,8 @@ fun HomeScreen(
                         onClickQrCodeScanner = navigateToQrCodeScanner
                     )
                 } else {
-                    ExpandableFloatingActionButton(
-                        onClickCreateGame = viewModel::onClickCreateGameDialog,
-                        onClickJoinGame = viewModel::onClickJoinGameDialog
+                    CreateOrJoinGameFAB(
+                        onClickCreateOrJoinGame = viewModel::onClickCreateOrJoinGameDialog,
                     )
                 }
             }
@@ -106,23 +105,12 @@ fun HomeScreen(
                     NoActiveGame()
                 }
 
-                if(dialogState.createGameDialog){
-                    NewGameDialog(
-                        onClickNewGame = viewModel::onClickCreateGameDialog,
+                if(dialogState.createOrJoinGameDialog){
+                    CreateOrJoinGameDialog(
+                        onClickCreateOrJoinGame = viewModel::onClickCreateOrJoinGameDialog,
                         newGame = viewModel::newGame,
                         gameId = dialogState.gameId,
                         updateGameId = viewModel::updateGameId,
-                        confirmButtonText = R.string.create
-                    )
-                }
-
-                if(dialogState.joinGameDialog) {
-                    NewGameDialog(
-                        onClickNewGame = viewModel::onClickJoinGameDialog,
-                        newGame = viewModel::newGame,
-                        gameId = dialogState.gameId,
-                        updateGameId = viewModel::updateGameId,
-                        confirmButtonText = R.string.join
                     )
                 }
 
@@ -200,7 +188,7 @@ private fun ActiveGame(
                 Text(text = "Balance")
             }
         }
-        items(items = game, key = { it.playerId }) {
+        items(items = game.sortedByDescending { it.playerBalance }, key = { it.playerId }) {
             Row(
                 modifier = modifier
                     .fillMaxWidth()
@@ -211,6 +199,22 @@ private fun ActiveGame(
                 Text(text = it.playerBalance.toString())
             }
         }
+    }
+}
+
+@Composable
+private fun NoActiveGame(modifier: Modifier = Modifier) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.fillMaxSize()
+    ) {
+        Text(text = "Create or Join Game")
+        HorizontalDivider(
+            modifier = modifier
+                .width(220.dp)
+                .padding(vertical = 4.dp)
+        )
     }
 }
 
@@ -245,40 +249,23 @@ private fun LeaveGameDialog(
 }
 
 @Composable
-private fun NoActiveGame(modifier: Modifier = Modifier) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxSize()
-    ) {
-        Text(text = "Create or Join Game")
-        HorizontalDivider(
-            modifier = modifier
-                .width(220.dp)
-                .padding(vertical = 4.dp)
-        )
-    }
-}
-
-@Composable
-private fun NewGameDialog(
-    onClickNewGame: () -> Unit,
+private fun CreateOrJoinGameDialog(
+    onClickCreateOrJoinGame: () -> Unit,
     newGame: () -> Unit,
     updateGameId: (String) -> Unit,
     gameId: String,
-    @StringRes confirmButtonText: Int,
     modifier: Modifier = Modifier
 ) {
     AlertDialog (
         onDismissRequest = {
             updateGameId("")
-            onClickNewGame()
+            onClickCreateOrJoinGame()
         },
-        title = { Text("Create Game") },
+        title = { Text("Create or Join Game") },
         text = {
             Column {
                 Text(
-                    text = "To create a new game, give it a name.",
+                    text = "- Create a new game by giving it a name.\n- Enter game id to join a game.",
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize
                 )
                 Spacer(modifier = modifier.padding(vertical = 8.dp))
@@ -293,7 +280,7 @@ private fun NewGameDialog(
             TextButton(
                 onClick = {
                     updateGameId("")
-                    onClickNewGame()
+                    onClickCreateOrJoinGame()
                 }
             ) {
                 Text(text = stringResource(R.string.dismiss))
@@ -303,11 +290,11 @@ private fun NewGameDialog(
             TextButton(
                 onClick = {
                     newGame()
-                    onClickNewGame()
+                    onClickCreateOrJoinGame()
                 },
                 enabled = gameId.isNotBlank()
             ) {
-                Text(text = stringResource(confirmButtonText))
+                Text(text = stringResource(R.string.confirm))
             }
         }
     )
@@ -330,54 +317,17 @@ private fun QrFloatingActionButton(
 }
 
 @Composable
-private fun ExpandableFloatingActionButton(
-    onClickJoinGame: () -> Unit,
-    onClickCreateGame: () -> Unit,
+private fun CreateOrJoinGameFAB(
+    onClickCreateOrJoinGame: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    FloatingActionButton(
+        onClick = onClickCreateOrJoinGame,
     ) {
-//        AnimatedVisibility(
-//            modifier = modifier.padding(bottom = 12.dp),
-//            visible = state.value,
-//            enter = slideInVertically {
-//                // Slide in from 40 dp from the top.
-//                with(density) { -40.dp.roundToPx() }
-//            } + expandVertically(
-//                // Expand from the top.
-//                expandFrom = Alignment.Top
-//            ) + fadeIn(
-//                // Fade in with the initial alpha of 0.3f.
-//                initialAlpha = 0.3f
-//            ),
-//            exit =  slideOutVertically(targetOffsetY = { fullHeight -> fullHeight }) + shrinkVertically() + fadeOut()
-//        ) {}
-        SmallFloatingActionButton (
-            onClick = onClickJoinGame,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.baseline_groups_24),
-                contentDescription = stringResource(R.string.floating_action_button)
-            )
-        }
-        SmallFloatingActionButton (
-            onClick = onClickCreateGame,
-        ) {
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = stringResource(R.string.floating_action_button)
-            )
-        }
-        FloatingActionButton(
-            onClick = {},
-            modifier = modifier.padding(top = 4.dp),
-        ) {
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = stringResource(R.string.floating_action_button)
-            )
-        }
+        Icon(
+            Icons.Filled.Add,
+            contentDescription = stringResource(R.string.floating_action_button)
+        )
     }
 }
 
