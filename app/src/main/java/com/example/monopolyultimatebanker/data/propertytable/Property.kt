@@ -1,5 +1,6 @@
 package com.example.monopolyultimatebanker.data.propertytable
 
+import androidx.annotation.ColorInt
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -15,7 +16,7 @@ data class Property(
     @ColumnInfo(name = "rent_level_3") val rentLevel3: Int = 0,
     @ColumnInfo(name = "rent_level_4") val rentLevel4: Int = 0,
     @ColumnInfo(name = "rent_level_5") val rentLevel5: Int = 0,
-    @ColumnInfo(name = "color") val color: String = "",
+    @ColumnInfo(name = "color") @ColorInt val color: Int = 0,
     @ColumnInfo(name = "board_side") val boardSide: Int = 0,
 )
 
