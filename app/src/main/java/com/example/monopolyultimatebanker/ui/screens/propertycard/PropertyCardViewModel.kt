@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrType
 import com.example.monopolyultimatebanker.data.propertytable.Property
-import com.example.monopolyultimatebanker.data.propertytable.PropertyRepository
 import com.example.monopolyultimatebanker.data.propertytable.PropertyRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,7 +29,7 @@ class PropertyCardViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = QrType(property = "monopro_01", event = "monoeve_01")
+                initialValue = QrType()
             )
 
     @OptIn(ExperimentalCoroutinesApi::class)

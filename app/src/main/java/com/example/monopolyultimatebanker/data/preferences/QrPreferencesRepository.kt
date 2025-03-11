@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 data class QrType(
-    val property: String = "",
-    val event: String = ""
+    val property: String = "monopro_1",
+    val event: String = "monoeve_1"
 )
 
 class QrPreferencesRepository @Inject constructor(

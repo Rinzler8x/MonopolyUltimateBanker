@@ -28,7 +28,7 @@ class EventCardViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = QrType(property = "monopro_01", event = "monoeve_01")
+                initialValue = QrType()
             )
 
     @OptIn(ExperimentalCoroutinesApi::class)
