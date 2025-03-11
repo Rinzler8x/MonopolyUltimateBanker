@@ -5,15 +5,20 @@ import androidx.camera.mlkit.vision.MlKitAnalyzer
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -24,10 +29,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -37,14 +44,12 @@ import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
 import com.example.monopolyultimatebanker.utils.ObserverAsEvents
 import com.example.monopolyultimatebanker.utils.SnackbarController
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.launch
 
 object QrCodeScannerDestination: NavigationDestination {
     override val route = "qr_code_scanner"
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun QrCodeScanner(
     modifier: Modifier = Modifier,
@@ -96,7 +101,6 @@ fun QrCodeScanner(
             if(!dialogState.codeDialog){
                 AndroidView(
                     modifier = modifier
-//                        .padding(innerPadding)
                         .size(500.dp),
                     factory = { ctx ->
                         PreviewView(ctx).apply {
@@ -137,7 +141,6 @@ fun QrCodeScanner(
             } else {
                 cameraCtrl.cameraController.unbind()
             }
-//            Text(text = qrState.qrCode, modifier.fillMaxSize())
         }
 
         if(dialogState.codeDialog){
@@ -150,8 +153,46 @@ fun QrCodeScanner(
                 navigateToPropertyScreen = navigateToPropertyScreen,
                 navigateToEventScreen = navigateToEventScreen,
                 unBindCamera = qrCodeScannerViewModel::unbindCameraController,
-                showWrongQrCodeSnackbar = qrCodeScannerViewModel::showWrongQrCodeSnackbar
+                showWrongQrCodeSnackbar = qrCodeScannerViewModel::showWrongQrCodeSnackbar,
+                radioOptions = dialogState.radioOptions,
+                selectedOption = dialogState.selectedOption,
+                onOptionSelected = qrCodeScannerViewModel::onOptionSelected
             )
+        }
+    }
+}
+
+@Composable
+fun RadioButtonSingleSelection(
+    radioOptions: List<String>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier.selectableGroup()) {
+        radioOptions.forEach { text ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .selectable(
+                        selected = (text == selectedOption),
+                        onClick = { onOptionSelected(text) },
+                        role = Role.RadioButton
+                    )
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = (text == selectedOption),
+                    onClick = null
+                )
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
         }
     }
 }
@@ -167,6 +208,9 @@ private fun CodeDialog(
     navigateToEventScreen: () -> Unit,
     unBindCamera: () -> Unit,
     showWrongQrCodeSnackbar: () -> Unit,
+    radioOptions: List<String>,
+    selectedOption: String,
+    onOptionSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     AlertDialog (
@@ -180,6 +224,11 @@ private fun CodeDialog(
                 Text(
                     text = "Enter a card code.",
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                )
+                RadioButtonSingleSelection(
+                    radioOptions = radioOptions,
+                    selectedOption = selectedOption,
+                    onOptionSelected = onOptionSelected,
                 )
                 Spacer(modifier = modifier.padding(vertical = 8.dp))
                 OutlinedTextField(
@@ -204,16 +253,18 @@ private fun CodeDialog(
                 onClick = {
                     onClickCodeDialog()
                     unBindCamera()
-                    if(qrCode.startsWith("monopro")) {
-                        saveQrCodeAndNavigateToPropertyScreen(
-                            qrCode,
-                            navigateToPropertyScreen
-                        )
-                    } else if(qrCode.startsWith("monoeve")) {
-                        saveQrCodeAndNavigateToEventScreen(
-                            qrCode,
-                            navigateToEventScreen
-                        )
+                    if(qrCode.toInt() in 1..22) {
+                        if(selectedOption.startsWith("Property")) {
+                            saveQrCodeAndNavigateToPropertyScreen(
+                                qrCode,
+                                navigateToPropertyScreen
+                            )
+                        } else if(selectedOption.startsWith("Event")) {
+                            saveQrCodeAndNavigateToEventScreen(
+                                qrCode,
+                                navigateToEventScreen
+                            )
+                        }
                     } else {
                         showWrongQrCodeSnackbar()
                     }

@@ -1,12 +1,15 @@
 package com.example.monopolyultimatebanker.ui.screens.qrcodescanner
 
+import android.content.ContentValues.TAG
 import android.content.Context
+import android.util.Log
 import androidx.camera.view.LifecycleCameraController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.util.copy
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.utils.QrScanner
 import com.example.monopolyultimatebanker.utils.SnackbarController
@@ -26,7 +29,10 @@ data class CameraControlState(
 )
 
 data class DialogState(
-    val codeDialog: Boolean = false
+    val codeDialog: Boolean = false,
+    val radioOptions: List<String> = listOf("Property Card", "Event Card"),
+    val selectedOption: String = radioOptions[0],
+    val prefixValue: String = "monopro_"
 )
 
 @HiltViewModel
@@ -41,10 +47,7 @@ class QrCodeScannerViewModel @Inject constructor(
     var cameraCtrlState by mutableStateOf(CameraControlState(LifecycleCameraController(appContext)))
 
     fun setQrCode(input: String){
-        qrState = qrState.copy(qrCode = input)
-        viewModelScope.launch {
-            qrPreferencesRepository.saveProQrPreference(qrState.qrCode)
-        }
+        qrState = qrState.copy(qrCode = input.trim())
     }
 
     fun getCameraController(context: Context): CameraControlState{
@@ -59,12 +62,20 @@ class QrCodeScannerViewModel @Inject constructor(
         dialogState = dialogState.copy(codeDialog = !dialogState.codeDialog)
     }
 
+    fun onOptionSelected(input: String) {
+        dialogState = if(input.startsWith("Property")) {
+            dialogState.copy(prefixValue = "monopro_", selectedOption = input)
+        } else {
+            dialogState.copy(prefixValue = "monoeve_", selectedOption = input)
+        }
+    }
+
     fun saveQrCodeAndNavigateToPropertyScreen(
         qrCode: String,
         navigateToPropertyScreen: () -> Unit
     ) {
         viewModelScope.launch {
-            setQrCode(qrCode)
+            setQrCode(dialogState.prefixValue + qrCode)
             qrPreferencesRepository.saveProQrPreference(qrState.qrCode)
             navigateToPropertyScreen()
         }
@@ -75,7 +86,7 @@ class QrCodeScannerViewModel @Inject constructor(
         navigateToEventScreen: () -> Unit
     ) {
         viewModelScope.launch {
-            setQrCode(qrCode)
+            setQrCode(dialogState.prefixValue + qrCode)
             qrPreferencesRepository.saveEveQrPreference(qrState.qrCode)
             navigateToEventScreen()
         }
