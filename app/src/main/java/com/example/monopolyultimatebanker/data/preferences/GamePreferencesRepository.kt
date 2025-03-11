@@ -33,7 +33,7 @@ class GamePreferencesRepository @Inject constructor(
     val gameState: Flow<GamePrefState> = dataStore.data
         .catch {
             if(it is IOException) {
-                Log.e(TAG, "Error reading UserLoginPreference.", it)
+                Log.e(TAG, "Error reading GamePreference.", it)
                 emit(emptyPreferences())
             } else {
                 throw it
@@ -41,7 +41,7 @@ class GamePreferencesRepository @Inject constructor(
         }
         .map { pref ->
             GamePrefState(
-                gameId = pref[GAME_ID] ?: "",
+                gameId = pref[GAME_ID] ?: "sai", //Set "sai" to auto load gameId, **CHANGE BACK AFTER DEVELOPMENT**
                 playerId = pref[PLAYER_ID] ?: "",
                 isGameActive = pref[IS_GAME_ACTIVE] ?: true //Set true to avoid create game screen, **CHANGE BACK AFTER DEVELOPMENT**
             )
