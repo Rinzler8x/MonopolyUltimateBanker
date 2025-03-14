@@ -40,7 +40,7 @@ class UserLoginPreferencesRepository @Inject constructor (
         }
         .map { preferences ->
             UserLogin(
-                isLoggedIn = preferences[IS_LOGGED_IN] ?: true, //Set true to avoid login screen, **CHANGE BACK AFTER DEVELOPMENT**
+                isLoggedIn = preferences[IS_LOGGED_IN] ?: false, //Set true to avoid login screen, **CHANGE BACK AFTER DEVELOPMENT**
                 userName = preferences[USER_NAME] ?: "",
                 email = preferences[EMAIL] ?: ""
             )

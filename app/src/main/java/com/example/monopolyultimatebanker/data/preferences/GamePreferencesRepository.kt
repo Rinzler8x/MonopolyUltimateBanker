@@ -41,9 +41,9 @@ class GamePreferencesRepository @Inject constructor(
         }
         .map { pref ->
             GamePrefState(
-                gameId = pref[GAME_ID] ?: "sai", //Set "sai" to auto load gameId, **CHANGE BACK AFTER DEVELOPMENT**
+                gameId = pref[GAME_ID] ?: "", //Set "sai" to auto load gameId, **CHANGE BACK AFTER DEVELOPMENT**
                 playerId = pref[PLAYER_ID] ?: "",
-                isGameActive = pref[IS_GAME_ACTIVE] ?: true //Set true to avoid create game screen, **CHANGE BACK AFTER DEVELOPMENT**
+                isGameActive = pref[IS_GAME_ACTIVE] ?: false //Set true to avoid create game screen, **CHANGE BACK AFTER DEVELOPMENT**
             )
         }
 
