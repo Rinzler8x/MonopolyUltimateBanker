@@ -17,6 +17,8 @@ interface FirestoreRepository {
 
     fun getGame(gameId: String): Flow<List<FirestoreGame>>
 
+    suspend fun countGamePlayers(gameId: String): Int
+
 //    val game: Flow<List<Game>>
 
 

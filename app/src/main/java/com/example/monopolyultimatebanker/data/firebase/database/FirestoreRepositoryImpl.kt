@@ -43,11 +43,28 @@ class FirestoreRepositoryImpl @Inject constructor(
                         gameRepositoryImpl.gameInsert(Game(it.id, i.playerName, i.playerBalance))
                     } else {
                         gameRepositoryImpl.updatePlayerState(i.playerBalance, i.playerName)
+                        if(i.playerBalance == -99999) {
+                            gameRepositoryImpl.deletePlayer(i.playerBalance)
+                        }
                     }
                 }
             }
         }
         it.toObjects<FirestoreGame>()
+    }
+
+    override suspend fun countGamePlayers(gameId: String): Int {
+        return withContext(Dispatchers.IO) {
+            try {
+                val count = gameRef.whereEqualTo("gameId", gameId)
+                    .get()
+                    .await()
+                count.size()
+            } catch(e: Exception) {
+                Log.d(TAG, "MSG: ${e.message}")
+                -1
+            }
+        }
     }
 
     override suspend fun insertGamePlayer(
@@ -81,7 +98,7 @@ class FirestoreRepositoryImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 gameRef.document(playerId)
-                    .update("player_balance", playerBalance)
+                    .update("playerBalance", playerBalance)
                     .await()
 
             } catch(e: Exception) {
