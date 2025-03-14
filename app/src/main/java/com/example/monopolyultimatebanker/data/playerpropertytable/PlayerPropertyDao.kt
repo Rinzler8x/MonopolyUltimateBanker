@@ -75,7 +75,7 @@ interface PlayerPropertyDao {
     suspend fun eventRentLevelIncreaseColorSet(propertyNo: Int)
 
     @Query(
-        "UPDATE player_property SET rent_level = rent_level + 1 " +
+        "UPDATE player_property SET rent_level = rent_level - 1 " +
         "WHERE property_no IN " +
         "(SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
         "WHERE color IN (SELECT color FROM property WHERE property_no = :propertyNo)) AND rent_level != 5"
