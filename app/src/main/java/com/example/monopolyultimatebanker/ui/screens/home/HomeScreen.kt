@@ -1,6 +1,5 @@
 package com.example.monopolyultimatebanker.ui.screens.home
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,12 +28,16 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +50,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
+import com.example.monopolyultimatebanker.utils.ObserverAsEvents
+import com.example.monopolyultimatebanker.utils.SnackbarController
+import kotlinx.coroutines.launch
 
 object HomeDestination: NavigationDestination {
     override val route = "home"
@@ -64,6 +70,26 @@ fun HomeScreen(
     val userLoginState by viewModel.userLoginPreferenceState.collectAsStateWithLifecycle()
     val firestoreGameState by viewModel.firestoreGameState.collectAsStateWithLifecycle()
     val gameState by viewModel.gameState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    ObserverAsEvents(
+        flow = SnackbarController.events,
+        key1 = snackbarHostState
+    ) { event ->
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+
+            val result = snackbarHostState.showSnackbar(
+                message = event.message,
+                actionLabel = event.action?.name,
+                duration = SnackbarDuration.Long
+            )
+
+            if(result == SnackbarResult.ActionPerformed) {
+                event.action?.action?.invoke()
+            }
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = viewModel.navDrawerState,
@@ -82,6 +108,11 @@ fun HomeScreen(
         Scaffold(
             topBar = {
                 GameTopAppBar(onClickNavIcon = { viewModel.onClickNavIcon(scope.coroutineContext) })
+            },
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackbarHostState
+                )
             },
             floatingActionButton = {
                 if(gamePrefState.isGameActive) {

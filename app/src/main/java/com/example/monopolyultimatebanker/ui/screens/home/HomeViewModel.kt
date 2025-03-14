@@ -15,6 +15,8 @@ import com.example.monopolyultimatebanker.data.preferences.GamePrefState
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.UserLogin
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
+import com.example.monopolyultimatebanker.utils.SnackbarController
+import com.example.monopolyultimatebanker.utils.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -120,8 +122,8 @@ class HomeViewModel @Inject constructor(
     fun newGame() {
         viewModelScope.launch {
             withContext(Dispatchers.IO){
-                val (count, id) = gameRepositoryImpl.gamePlayerExists(userLoginPreferenceState.value.userName)
-                if(count == 0){
+                val count = firestoreRepositoryImpl.countGamePlayers(dialogState.gameId)
+                if(count < 4) {
                     val playerId = firestoreRepositoryImpl.insertGamePlayer(dialogState.gameId, userLoginPreferenceState.value.userName)
                     gamePreferencesRepository.saveGamePreference(
                         gameId = dialogState.gameId,
@@ -129,11 +131,7 @@ class HomeViewModel @Inject constructor(
                         isGameActive = true
                     )
                 } else {
-                    gamePreferencesRepository.saveGamePreference(
-                        gameId = dialogState.gameId,
-                        playerId = id!!,
-                        isGameActive = true
-                    )
+                    gameFullSnackbar()
                 }
             }
             updateGameId("")
@@ -143,6 +141,11 @@ class HomeViewModel @Inject constructor(
     /**Live Game Code*/
     fun leaveGame() {
         viewModelScope.launch {
+            firestoreRepositoryImpl.updateGamePlayer(
+                playerId = gamePreferenceState.value.playerId,
+                playerBalance = -99999
+            )
+            firestoreRepositoryImpl.deleteGame(gamePreferenceState.value.playerId)
             gameRepositoryImpl.deleteGame()
             gamePreferencesRepository.resetGamePreference()
         }
@@ -159,6 +162,22 @@ class HomeViewModel @Inject constructor(
                     if (isClosed) open() else close()
                 }
             }
+        }
+    }
+
+    /**Snackbar Code*/
+
+    fun gameFullSnackbar() {
+        showSnackBar("Game is full.")
+    }
+
+    private fun showSnackBar(message: String) {
+        viewModelScope.launch {
+            SnackbarController.sendEvent(
+                event = SnackbarEvent(
+                    message = message
+                )
+            )
         }
     }
 }
