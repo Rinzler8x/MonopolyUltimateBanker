@@ -118,12 +118,14 @@ fun QrCodeScanner(
                                         if(tempVar.startsWith("monopro")) {
                                             qrCodeScannerViewModel.saveQrCodeAndNavigateToPropertyScreen(
                                                 qrCode =  tempVar,
+                                                qrScannerInput = true,
                                                 navigateToPropertyScreen = navigateToPropertyScreen
                                             )
                                             qrCodeScannerViewModel.unbindCameraController()
                                         } else if (tempVar.startsWith("monoeve")) {
                                             qrCodeScannerViewModel.saveQrCodeAndNavigateToEventScreen(
                                                 qrCode = tempVar,
+                                                qrScannerInput = true,
                                                 navigateToEventScreen = navigateToEventScreen
                                             )
                                             qrCodeScannerViewModel.unbindCameraController()
@@ -202,8 +204,8 @@ private fun CodeDialog(
     onClickCodeDialog: () -> Unit,
     setQrCode: (String) -> Unit,
     qrCode: String,
-    saveQrCodeAndNavigateToPropertyScreen: (String, () -> Unit) -> Unit,
-    saveQrCodeAndNavigateToEventScreen: (String, () -> Unit) -> Unit,
+    saveQrCodeAndNavigateToPropertyScreen: (String, Boolean, () -> Unit) -> Unit,
+    saveQrCodeAndNavigateToEventScreen: (String, Boolean, () -> Unit) -> Unit,
     navigateToPropertyScreen: () -> Unit,
     navigateToEventScreen: () -> Unit,
     unBindCamera: () -> Unit,
@@ -257,11 +259,13 @@ private fun CodeDialog(
                         if(selectedOption.startsWith("Property")) {
                             saveQrCodeAndNavigateToPropertyScreen(
                                 qrCode,
+                                false,
                                 navigateToPropertyScreen
                             )
                         } else if(selectedOption.startsWith("Event")) {
                             saveQrCodeAndNavigateToEventScreen(
                                 qrCode,
+                                false,
                                 navigateToEventScreen
                             )
                         }

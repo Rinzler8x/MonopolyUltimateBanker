@@ -72,10 +72,15 @@ class QrCodeScannerViewModel @Inject constructor(
 
     fun saveQrCodeAndNavigateToPropertyScreen(
         qrCode: String,
+        qrScannerInput: Boolean,
         navigateToPropertyScreen: () -> Unit
     ) {
         viewModelScope.launch {
-            setQrCode(dialogState.prefixValue + qrCode)
+            if(qrScannerInput) {
+                setQrCode(qrCode)
+            } else {
+                setQrCode(dialogState.prefixValue + qrCode)
+            }
             qrPreferencesRepository.saveProQrPreference(qrState.qrCode)
             navigateToPropertyScreen()
         }
@@ -83,10 +88,15 @@ class QrCodeScannerViewModel @Inject constructor(
 
     fun saveQrCodeAndNavigateToEventScreen(
         qrCode: String,
+        qrScannerInput: Boolean,
         navigateToEventScreen: () -> Unit
     ) {
         viewModelScope.launch {
-            setQrCode(dialogState.prefixValue + qrCode)
+            if(qrScannerInput) {
+                setQrCode(qrCode)
+            } else {
+                setQrCode(dialogState.prefixValue + qrCode)
+            }
             qrPreferencesRepository.saveEveQrPreference(qrState.qrCode)
             navigateToEventScreen()
         }
