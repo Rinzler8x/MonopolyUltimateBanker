@@ -57,6 +57,9 @@ interface GameDao {
     )
     suspend fun eventDeduct50PerProperty(playerId: String)
 
+    @Query("DELETE FROM game WHERE player_balance = :playerBalance")
+    suspend fun deletePlayer(playerBalance: Int)
+
     @Query("DELETE FROM game")
     suspend fun deleteGame()
 }

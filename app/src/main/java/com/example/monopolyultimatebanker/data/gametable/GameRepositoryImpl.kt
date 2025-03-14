@@ -30,5 +30,7 @@ class GameRepositoryImpl @Inject constructor(
 
     override suspend fun gameInsert(game: Game) = gameDao.insert(game)
 
+    override suspend fun deletePlayer(playerBalance: Int) = gameDao.deletePlayer(playerBalance)
+
     override suspend fun deleteGame() = gameDao.deleteGame()
 }

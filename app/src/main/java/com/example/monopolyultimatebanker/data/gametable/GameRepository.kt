@@ -26,5 +26,7 @@ interface GameRepository {
 
     suspend fun gameInsert(game: Game)
 
+    suspend fun deletePlayer(playerBalance: Int)
+
     suspend fun deleteGame()
 }
