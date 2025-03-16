@@ -15,21 +15,27 @@ interface FirestoreRepository {
 
     suspend fun deleteGame(playerId: String)
 
-    fun getGame(gameId: String): Flow<List<FirestoreGame>>
-
     suspend fun countGamePlayers(gameId: String): Int
+
+    suspend fun transferRent(payerId: String, receipentId: String, addAmount: Int, deductAmount: Int)
+
+    fun getGame(gameId: String): Flow<List<FirestoreGame>>
 
 //    val game: Flow<List<Game>>
 
 
     //player_properties
-    suspend fun insertPlayerProperty(playerProperty: PlayerProperty)
+    suspend fun insertPlayerProperty(gameId: String, playerProperty: PlayerProperty): String
 
-    suspend fun updatePlayerProperty(playerProperty: PlayerProperty)
+    suspend fun updatePlayerPropertyRentLevel(ppId: String, rentLevel: Int)
+
+    suspend fun updatePlayerPropertyOwner(ppId: String, playerId: String)
+
+    suspend fun swapPlayerProperty(ppId1: String, ppId2: String, playerId1: Int, playerId2: Int)
 
     suspend fun deleteAllGamePlayerProperty(playerId: String)
 
-//    val playerProperties: Flow<List<PlayerProperty>>
+    fun getPlayerProperty(gameId: String): Flow<List<FirestorePlayerProperty>>
 
     //users collection
     suspend fun insertUsername(email: String, username: String)

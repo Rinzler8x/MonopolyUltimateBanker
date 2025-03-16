@@ -5,15 +5,15 @@ import android.util.Log
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerProperty
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.firestore.toObjects
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -23,10 +23,19 @@ data class FirestoreGame(
     val playerName: String = "",
     val playerBalance: Int = 1500
 )
+
+data class FirestorePlayerProperty(
+    val gameId: String = "",
+    val playerId: String = "",
+    val propertyNo: Int = 1,
+    val rentLevel: Int = 1
+)
+
 class FirestoreRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore,
     private val gamePreferencesRepository: GamePreferencesRepository,
-    private val gameRepositoryImpl: GameRepositoryImpl
+    private val gameRepositoryImpl: GameRepositoryImpl,
+    private val playerPropertyRepositoryImpl: PlayerPropertyRepositoryImpl
 ): FirestoreRepository {
 
     private val gameRef = db.collection("games")
@@ -34,6 +43,8 @@ class FirestoreRepositoryImpl @Inject constructor(
     private val userRef = db.collection("users")
     private val scope = CoroutineScope(Dispatchers.IO)
 
+
+    /**Game Logic*/
     override fun getGame(gameId: String) = gameRef.whereEqualTo("gameId", gameId).snapshots().map { it ->
         val temp = it.toObjects<FirestoreGame>()
         withContext(Dispatchers.IO) {
@@ -76,7 +87,7 @@ class FirestoreRepositoryImpl @Inject constructor(
             playerName = playerName,
             playerBalance = 1500
         )
-        var playerId: String = ""
+        var playerId = ""
         return withContext(Dispatchers.IO) {
             try {
                 playerId = gameRef
@@ -107,6 +118,19 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun transferRent(payerId: String, receipentId: String, addAmount: Int, deductAmount: Int) {
+        withContext(Dispatchers.IO) {
+            try {
+                db.runTransaction { transaction ->
+                    transaction.update(playerPropertyRef.document(payerId), "playerBalance", deductAmount)
+                    transaction.update(playerPropertyRef.document(receipentId), "playerBalance", addAmount)
+                }
+            } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+            }
+        }
+    }
+
     override suspend fun deleteGame(playerId: String) {
         withContext(Dispatchers.IO) {
             try {
@@ -120,11 +144,64 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertPlayerProperty(playerProperty: PlayerProperty) {
+    /**PlayerProperty Logic*/
+    override fun getPlayerProperty(gameId: String): Flow<List<FirestorePlayerProperty>> =
+        playerPropertyRef.whereEqualTo("gameId", gameId).snapshots().map { it ->
+            val temp = it.toObjects<FirestorePlayerProperty>()
+            withContext(Dispatchers.IO) {
+                it.map {
+                    for(i in temp) {
+                        if(playerPropertyRepositoryImpl.playerPropertyExists(i.propertyNo) == 0) {
+                            playerPropertyRepositoryImpl.playerPropertyInsert(
+                                PlayerProperty(
+                                    ppId = it.id,
+                                    playerId = i.playerId,
+                                    propertyNo = i.propertyNo,
+                                    rentLevel = i.rentLevel
+                                )
+                            )
+                        } else {
+                            playerPropertyRepositoryImpl.playerPropertyUpdatePropertyState(
+                                PlayerProperty(
+                                    ppId = it.id,
+                                    playerId = i.playerId,
+                                    propertyNo = i.propertyNo,
+                                    rentLevel = i.rentLevel
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            it.toObjects<FirestorePlayerProperty>()
+        }
+
+    override suspend fun insertPlayerProperty(gameId: String, playerProperty: PlayerProperty): String {
+        val data = FirestorePlayerProperty(
+            gameId = gameId,
+            playerId = playerProperty.playerId,
+            rentLevel = playerProperty.rentLevel
+        )
+        var ppid = ""
+        return withContext(Dispatchers.IO) {
+            try {
+                ppid = playerPropertyRef
+                    .add(data)
+                    .await()
+                    .id
+                ppid
+            } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+                ppid
+            }
+        }
+    }
+
+    override suspend fun updatePlayerPropertyRentLevel(ppId: String, rentLevel: Int) {
         withContext(Dispatchers.IO) {
             try {
-                playerPropertyRef
-                    .add(playerProperty)
+                playerPropertyRef.document(ppId)
+                    .update("rentLevel", rentLevel)
                     .await()
 
             } catch(e: Exception) {
@@ -133,20 +210,28 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updatePlayerProperty(playerProperty: PlayerProperty) {
+    override suspend fun updatePlayerPropertyOwner(ppId: String, playerId: String) {
         withContext(Dispatchers.IO) {
             try {
-                playerPropertyRef.document(playerProperty.playerId)
-                    .update(
-                        "game_id", "bro",
-                        "player_if", playerProperty.playerId,
-                        "ppid", playerProperty.ppId,
-                        "property_no", playerProperty.propertyNo,
-                        "rent_level", playerProperty.rentLevel
-                    )
+                playerPropertyRef.document(ppId)
+                    .update("playerId", playerId)
                     .await()
 
             } catch(e: Exception) {
+                Log.d(TAG, "Message: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun swapPlayerProperty(ppId1: String, ppId2: String, playerId1: Int, playerId2: Int) {
+        withContext(Dispatchers.IO) {
+            try {
+                db.runTransaction { transaction ->
+                    transaction.update(playerPropertyRef.document(ppId1), "playerId", playerId2)
+                    transaction.update(playerPropertyRef.document(ppId2), "playerId", playerId1)
+                }
+                    .await()
+            } catch (e: Exception) {
                 Log.d(TAG, "Message: ${e.message}")
             }
         }
@@ -156,7 +241,7 @@ class FirestoreRepositoryImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 playerPropertyRef
-                    .whereEqualTo("player_id", playerId)
+                    .whereEqualTo("playerId", playerId)
                     .get()
                     .addOnSuccessListener { documents ->
                         for (document in documents) {
