@@ -7,6 +7,10 @@ class PlayerPropertyRepositoryImpl @Inject constructor(
 ) : PlayerPropertyRepository {
     override fun getPlayerProperty(propertyNo: Int) = playerPropertyDao.getPlayerProperty(propertyNo)
 
+    override fun playerPropertyExists(propertyNo: Int): Int = playerPropertyDao.propertyExists(propertyNo)
+
+    override suspend fun playerPropertyUpdatePropertyState(playerProperty: PlayerProperty) = playerPropertyDao.updatePropertyState(playerProperty)
+
     override suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int) = playerPropertyDao.swapProperty(playerId, propertyNo)
 
     override suspend fun playerPropertyPropertySwap(

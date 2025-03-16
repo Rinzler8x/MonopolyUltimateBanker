@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 
 @Dao
 interface PlayerPropertyDao {
@@ -14,6 +15,12 @@ interface PlayerPropertyDao {
 
     @Query("SELECT * FROM player_property WHERE property_no = :propertyNo")
     fun getPlayerProperty(propertyNo: Int): PlayerProperty
+
+    @Query("SELECT COUNT(*) as count FROM player_property WHERE property_no = :propertyNo")
+    fun propertyExists(propertyNo: Int): Int
+
+    @Update
+    suspend fun updatePropertyState(playerProperty: PlayerProperty)
 
     @Query("UPDATE player_property SET player_id = :playerId WHERE property_no = :propertyNo")
     suspend fun swapProperty(playerId: String, propertyNo: Int)

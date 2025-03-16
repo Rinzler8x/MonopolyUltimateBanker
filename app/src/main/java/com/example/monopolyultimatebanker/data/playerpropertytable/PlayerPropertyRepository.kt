@@ -5,6 +5,10 @@ interface PlayerPropertyRepository {
 
     fun getPlayerProperty(propertyNo: Int): PlayerProperty
 
+    fun playerPropertyExists(propertyNo: Int): Int
+
+    suspend fun playerPropertyUpdatePropertyState(playerProperty: PlayerProperty)
+
     suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int)
 
     suspend fun playerPropertyPropertySwap(player1Id: String, player2Id: String, property1No: Int, property2No: Int)

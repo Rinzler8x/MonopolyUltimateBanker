@@ -27,7 +27,7 @@ import com.example.monopolyultimatebanker.data.propertytable.Property
     ])
 
 data class PlayerProperty(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "ppid") val ppId: Int,
+    @PrimaryKey(autoGenerate = false) @ColumnInfo(name = "ppid") val ppId: String,
     @ColumnInfo(name = "player_id") val playerId: String,
     @ColumnInfo(name = "property_no") val propertyNo: Int,
     @ColumnInfo(name = "rent_level") val rentLevel: Int,
