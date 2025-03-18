@@ -9,22 +9,23 @@ import com.example.monopolyultimatebanker.data.propertytable.Property
 
 @Entity(
     tableName = "player_property",
-    foreignKeys = [
-        ForeignKey(
-            entity = Game::class,
-            parentColumns = arrayOf("player_id"),
-            childColumns = arrayOf("player_id"),
-            onUpdate = ForeignKey.CASCADE,
-            onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = Property::class,
-            parentColumns = arrayOf("property_no"),
-            childColumns = arrayOf("property_no"),
-            onUpdate = ForeignKey.CASCADE,
-            onDelete = ForeignKey.CASCADE
-        ),
-    ])
+//    foreignKeys = [
+//        ForeignKey(
+//            entity = Game::class,
+//            parentColumns = arrayOf("player_id"),
+//            childColumns = arrayOf("player_id"),
+//            onUpdate = ForeignKey.CASCADE,
+//            onDelete = ForeignKey.CASCADE
+//        ),
+//        ForeignKey(
+//            entity = Property::class,
+//            parentColumns = arrayOf("property_no"),
+//            childColumns = arrayOf("property_no"),
+//            onUpdate = ForeignKey.CASCADE,
+//            onDelete = ForeignKey.CASCADE
+//        ),
+//    ]
+)
 
 data class PlayerProperty(
     @PrimaryKey(autoGenerate = false) @ColumnInfo(name = "ppid") val ppId: String,
