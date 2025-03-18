@@ -28,17 +28,17 @@ class PlayerPropertyRepositoryImpl @Inject constructor(
 
     override suspend fun playerPropertyRentLevelDecrease(propertyNo: Int) = playerPropertyDao.rentLevelDecrease(propertyNo)
 
-    override suspend fun playerPropertyRentLevelDecreaseForNeighbors(propertyNo: Int) = playerPropertyDao.rentLevelDecreaseForNeighbors(propertyNo)
+    override suspend fun playerPropertyRentLevelDecreaseForNeighbors(propertyNo: Int): List<Int>? = playerPropertyDao.rentLevelDecreaseForNeighbors(propertyNo)
 
     override suspend fun playerPropertyEventRentDecreaseForNeighbors(propertyNo: Int) = playerPropertyDao.eventRentDecreaseForNeighbors(propertyNo)
 
-    override suspend fun playerPropertyEventRentLevelIncreaseBoardSide(propertyNo: Int) = playerPropertyDao.eventRentLevelIncreaseBoardSide(propertyNo)
+    override suspend fun playerPropertyEventRentLevelIncreaseBoardSide(propertyNo: Int): List<Int>? = playerPropertyDao.eventRentLevelIncreaseBoardSide(propertyNo)
 
-    override suspend fun playerPropertyEventRentLevelDecreaseBoardSide(propertyNo: Int) = playerPropertyDao.eventRentLevelDecreaseBoardSide(propertyNo)
+    override suspend fun playerPropertyEventRentLevelDecreaseBoardSide(propertyNo: Int): List<Int>? = playerPropertyDao.eventRentLevelDecreaseBoardSide(propertyNo)
 
-    override suspend fun playerPropertyEventRentLevelIncreaseColorSet(propertyNo: Int) = playerPropertyDao.eventRentLevelIncreaseColorSet(propertyNo)
+    override suspend fun playerPropertyEventRentLevelIncreaseColorSet(propertyNo: Int): List<Int>? = playerPropertyDao.eventRentLevelIncreaseColorSet(propertyNo)
 
-    override suspend fun playerPropertyEventRentLevelDecreaseColorSet(propertyNo: Int) = playerPropertyDao.eventRentLevelDecreaseColorSet(propertyNo)
+    override suspend fun playerPropertyEventRentLevelDecreaseColorSet(propertyNo: Int): List<Int>? = playerPropertyDao.eventRentLevelDecreaseColorSet(propertyNo)
 
     override suspend fun playerPropertyInsert(playerProperty: PlayerProperty)  = playerPropertyDao.insert(playerProperty)
 }

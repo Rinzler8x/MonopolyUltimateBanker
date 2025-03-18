@@ -21,17 +21,17 @@ interface PlayerPropertyRepository {
 
     suspend fun playerPropertyRentLevelDecrease(propertyNo: Int)
 
-    suspend fun playerPropertyRentLevelDecreaseForNeighbors(propertyNo: Int)
+    suspend fun playerPropertyRentLevelDecreaseForNeighbors(propertyNo: Int): List<Int>?
 
     suspend fun playerPropertyEventRentDecreaseForNeighbors(propertyNo: Int)
 
-    suspend fun playerPropertyEventRentLevelIncreaseBoardSide(propertyNo: Int)
+    suspend fun playerPropertyEventRentLevelIncreaseBoardSide(propertyNo: Int): List<Int>?
 
-    suspend fun playerPropertyEventRentLevelDecreaseBoardSide(propertyNo: Int)
+    suspend fun playerPropertyEventRentLevelDecreaseBoardSide(propertyNo: Int): List<Int>?
 
-    suspend fun playerPropertyEventRentLevelIncreaseColorSet(propertyNo: Int)
+    suspend fun playerPropertyEventRentLevelIncreaseColorSet(propertyNo: Int): List<Int>?
 
-    suspend fun playerPropertyEventRentLevelDecreaseColorSet(propertyNo: Int)
+    suspend fun playerPropertyEventRentLevelDecreaseColorSet(propertyNo: Int): List<Int>?
 
     suspend fun playerPropertyInsert(playerProperty: PlayerProperty)
 }

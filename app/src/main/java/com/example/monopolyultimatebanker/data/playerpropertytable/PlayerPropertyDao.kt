@@ -43,13 +43,19 @@ interface PlayerPropertyDao {
     @Query("UPDATE player_property SET rent_level = rent_level - 1 WHERE property_no = :propertyNo AND rent_level != 1")
     suspend fun rentLevelDecrease(propertyNo: Int)
 
+//    @Query(
+//        "UPDATE player_property SET rent_level = rent_level - 1 " +
+//        "WHERE property_no " +
+//        "IN (SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+//        "WHERE property.property_no = :propertyNo - 1 OR property.property_no = :propertyNo + 1)"
+//    )
+//    suspend fun rentLevelDecreaseForNeighbors(propertyNo: Int)
+
     @Query(
-        "UPDATE player_property SET rent_level = rent_level - 1 " +
-        "WHERE property_no " +
-        "IN (SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
-        "WHERE property.property_no = :propertyNo - 1 OR property.property_no = :propertyNo + 1)"
+        "SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+        "WHERE property.property_no = :propertyNo - 1 OR property.property_no = :propertyNo + 1"
     )
-    suspend fun rentLevelDecreaseForNeighbors(propertyNo: Int)
+    suspend fun rentLevelDecreaseForNeighbors(propertyNo: Int): List<Int>?
 
     @Transaction
     suspend fun eventRentDecreaseForNeighbors(propertyNo: Int) {
@@ -57,36 +63,60 @@ interface PlayerPropertyDao {
         rentLevelDecreaseForNeighbors(propertyNo)
     }
 
-    @Query(
-        "UPDATE player_property SET rent_level = rent_level + 1 " +
-        "WHERE property_no IN " +
-        "(SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
-        "WHERE board_side IN (SELECT board_side FROM property WHERE property_no = :propertyNo)) AND rent_level != 5"
-    )
-    suspend fun eventRentLevelIncreaseBoardSide(propertyNo: Int)
+//    @Query(
+//        "UPDATE player_property SET rent_level = rent_level + 1 " +
+//        "WHERE property_no IN " +
+//        "(SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+//        "WHERE board_side IN (SELECT board_side FROM property WHERE property_no = :propertyNo)) AND rent_level != 5"
+//    )
+//    suspend fun eventRentLevelIncreaseBoardSide(propertyNo: Int)
 
     @Query(
-        "UPDATE player_property SET rent_level = rent_level - 1 " +
-        "WHERE property_no IN " +
-        "(SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
-        "WHERE board_side IN (SELECT board_side FROM property WHERE property_no = :propertyNo)) AND rent_level != 1"
+        "SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+        "WHERE board_side IN (SELECT board_side FROM property WHERE property_no = :propertyNo) AND rent_level != 5"
     )
-    suspend fun eventRentLevelDecreaseBoardSide(propertyNo: Int)
+    suspend fun eventRentLevelIncreaseBoardSide(propertyNo: Int): List<Int>?
+
+//    @Query(
+//        "UPDATE player_property SET rent_level = rent_level - 1 " +
+//        "WHERE property_no IN " +
+//        "(SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+//        "WHERE board_side IN (SELECT board_side FROM property WHERE property_no = :propertyNo)) AND rent_level != 1"
+//    )
+//    suspend fun eventRentLevelDecreaseBoardSide(propertyNo: Int)
 
     @Query(
-        "UPDATE player_property SET rent_level = rent_level + 1 " +
-        "WHERE property_no IN " +
-        "(SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
-        "WHERE color IN (SELECT color FROM property WHERE property_no = :propertyNo)) AND rent_level != 5"
+        "SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+        "WHERE board_side IN (SELECT board_side FROM property WHERE property_no = :propertyNo) AND rent_level != 1"
     )
-    suspend fun eventRentLevelIncreaseColorSet(propertyNo: Int)
+    suspend fun eventRentLevelDecreaseBoardSide(propertyNo: Int): List<Int>?
+
+//    @Query(
+//        "UPDATE player_property SET rent_level = rent_level + 1 " +
+//        "WHERE property_no IN " +
+//        "(SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+//        "WHERE color IN (SELECT color FROM property WHERE property_no = :propertyNo)) AND rent_level != 5"
+//    )
+//    suspend fun eventRentLevelIncreaseColorSet(propertyNo: Int)
 
     @Query(
-        "UPDATE player_property SET rent_level = rent_level - 1 " +
-        "WHERE property_no IN " +
-        "(SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
-        "WHERE color IN (SELECT color FROM property WHERE property_no = :propertyNo)) AND rent_level != 5"
+        "SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+        "WHERE color IN (SELECT color FROM property WHERE property_no = :propertyNo) AND rent_level != 5"
     )
-    suspend fun eventRentLevelDecreaseColorSet(propertyNo: Int)
+    suspend fun eventRentLevelIncreaseColorSet(propertyNo: Int): List<Int>?
+
+//    @Query(
+//        "UPDATE player_property SET rent_level = rent_level - 1 " +
+//        "WHERE property_no IN " +
+//        "(SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+//        "WHERE color IN (SELECT color FROM property WHERE property_no = :propertyNo)) AND rent_level != 5"
+//    )
+//    suspend fun eventRentLevelDecreaseColorSet(propertyNo: Int)
+
+    @Query(
+        "SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
+        "WHERE color IN (SELECT color FROM property WHERE property_no = :propertyNo) AND rent_level != 5"
+    )
+    suspend fun eventRentLevelDecreaseColorSet(propertyNo: Int): List<Int>?
 
 }
