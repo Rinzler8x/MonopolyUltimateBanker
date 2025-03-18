@@ -22,7 +22,7 @@ interface GameRepository {
 
     suspend fun gameCollect200BothPlayers(player1Id: String, player2Id: String)
 
-    suspend fun gameEventDeduct50PerProperty(playerId: String)
+    suspend fun gameEventDeduct50PerProperty(playerId: String): Int?
 
     suspend fun gameInsert(game: Game)
 
