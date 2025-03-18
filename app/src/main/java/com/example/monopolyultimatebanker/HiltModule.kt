@@ -11,6 +11,8 @@ import com.example.monopolyultimatebanker.data.eventtable.EventRepository
 import com.example.monopolyultimatebanker.data.eventtable.EventRepositoryImpl
 import com.example.monopolyultimatebanker.data.firebase.authentication.FirebaseAuthRepository
 import com.example.monopolyultimatebanker.data.firebase.authentication.FirebaseAuthRepositoryImpl
+import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogic
+import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepository
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
 import com.example.monopolyultimatebanker.data.gametable.GameDao
@@ -184,4 +186,7 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun bindsPlayerPropertyRepository(playerPropertyRepositoryImpl: PlayerPropertyRepositoryImpl): PlayerPropertyRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindsFirestoreGameLogic(firestoreGameLogicImpl: FirestoreGameLogicImpl): FirestoreGameLogic
 }
