@@ -8,13 +8,16 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGame
+import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.GamePrefState
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.UserLogin
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
+import com.example.monopolyultimatebanker.ui.screens.propertycard.PlayerPropertyState
 import com.example.monopolyultimatebanker.utils.SnackbarController
 import com.example.monopolyultimatebanker.utils.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,7 +50,9 @@ data class GameState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val firestoreRepositoryImpl: FirestoreRepositoryImpl,
+    private val firestoreGameLogicImpl: FirestoreGameLogicImpl,
     private val gameRepositoryImpl: GameRepositoryImpl,
+    private val playerPropertyRepositoryImpl: PlayerPropertyRepositoryImpl,
     private val gamePreferencesRepository: GamePreferencesRepository,
     private val userLoginPreferencesRepository: UserLoginPreferencesRepository
 ): ViewModel() {
@@ -103,6 +108,19 @@ class HomeViewModel @Inject constructor(
                 initialValue = GameState()
             )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val firestorePlayerPropertyState: StateFlow<PlayerPropertyState> =
+        gamePreferenceState.flatMapLatest { it ->
+            firestoreRepositoryImpl.getPlayerProperty(it.gameId).map {
+                PlayerPropertyState(it)
+            }
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = PlayerPropertyState()
+            )
+
     /**Dialog Boxes Code*/
     var dialogState by mutableStateOf(DialogState())
         private set
@@ -145,8 +163,11 @@ class HomeViewModel @Inject constructor(
                 playerId = gamePreferenceState.value.playerId,
                 playerBalance = -99999
             )
+            firestoreGameLogicImpl.setRentLevelToDeleteConstant(gamePreferenceState.value.playerId)
             firestoreRepositoryImpl.deleteGame(gamePreferenceState.value.playerId)
+            firestoreRepositoryImpl.deleteAllGamePlayerProperty(gamePreferenceState.value.playerId)
             gameRepositoryImpl.deleteGame()
+            playerPropertyRepositoryImpl.playerPropertyDeleteAllProperties()
             gamePreferencesRepository.resetGamePreference()
         }
     }

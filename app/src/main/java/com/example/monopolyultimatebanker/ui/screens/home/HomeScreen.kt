@@ -69,7 +69,9 @@ fun HomeScreen(
     val gamePrefState by viewModel.gamePreferenceState.collectAsStateWithLifecycle()
     val userLoginState by viewModel.userLoginPreferenceState.collectAsStateWithLifecycle()
     val firestoreGameState by viewModel.firestoreGameState.collectAsStateWithLifecycle()
+    val firestorePlayerPropertyState by viewModel.firestorePlayerPropertyState.collectAsStateWithLifecycle()
     val gameState by viewModel.gameState.collectAsStateWithLifecycle()
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     ObserverAsEvents(
