@@ -36,10 +36,12 @@ object PropertyCardDestination: NavigationDestination {
 @Composable
 fun PropertyCard(
     modifier: Modifier = Modifier,
+    navigateToHomeScreen: () -> Unit,
     propertyCardViewModel: PropertyCardViewModel = hiltViewModel()
 ) {
 
     val propertyState by propertyCardViewModel.propertyState.collectAsStateWithLifecycle()
+    val gamePrefState by propertyCardViewModel.gamePreferenceState.collectAsStateWithLifecycle()
     val qrPrefState by propertyCardViewModel.qrPrefState.collectAsStateWithLifecycle()
 
     Scaffold { innerPadding ->
@@ -87,7 +89,9 @@ fun PropertyCard(
             }
 
             repeat(5) { firstLoop ->
-                Row {
+                Row(
+
+                ) {
                     Column(
                         modifier = modifier.weight(.65f)
                     ) {
@@ -114,7 +118,7 @@ fun PropertyCard(
                                                 color = Color.Black,
                                                 shape = RoundedCornerShape(6.dp)
                                             )
-                                        .background(Color.White, RoundedCornerShape(6.dp))
+                                            .background(Color.White, RoundedCornerShape(6.dp))
                                             .padding(8.dp)
                                     },
                                 ) {
@@ -149,7 +153,7 @@ fun PropertyCard(
             }
 
             Button(
-                onClick = {}
+                onClick = { propertyCardViewModel.onClickPay(navigateToHomeScreen) }
             ) {
                 Text(
                     text = stringResource(R.string.pay)
