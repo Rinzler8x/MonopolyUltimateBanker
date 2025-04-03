@@ -3,6 +3,8 @@ package com.example.monopolyultimatebanker.data.firebase.database
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -10,7 +12,6 @@ class FirestoreGameLogicImpl @Inject constructor(
     private val gameRepositoryImpl: GameRepositoryImpl,
     private val firestoreRepositoryImpl: FirestoreRepositoryImpl,
     private val playerPropertyRepositoryImpl: PlayerPropertyRepositoryImpl,
-    private val gamePreferencesRepository: GamePreferencesRepository,
 ) : FirestoreGameLogic {
 
     /**Game*/
@@ -32,24 +33,20 @@ class FirestoreGameLogicImpl @Inject constructor(
         )
     }
 
-//    override suspend fun eventDeduct50PerProperty(playerId: String, playerBalance: Int) {
-//        val count = gameRepositoryImpl.gameEventDeduct50PerProperty(playerId) ?: 0
-//        if(count > 0.0) {
-//            val amount = playerBalance - (50 * count)
-//            firestoreRepositoryImpl.updateGamePlayer(
-//                playerId = playerId,
-//                playerBalance = amount
-//            )
-//        }
-//    }
+    override suspend fun eventDeduct50PerProperty(playerId: String, playerBalance: Int) {
+        withContext(Dispatchers.IO) {
+            val count = gameRepositoryImpl.gameEventDeduct50PerProperty(playerId) ?: 0
+            if(count > 0) {
+                val amount = playerBalance - (50 * count)
+                firestoreRepositoryImpl.updateGamePlayer(
+                    playerId = playerId,
+                    playerBalance = amount
+                )
+            }
+        }
+    }
 
     /**PlayerProperty*/
-//    override suspend fun buyProperty(playerProperty: PlayerProperty, playerId: Int, amount: Int) {
-//        val gameId = gamePreferencesRepository.gameState.first().gameId
-//        if(playerPropertyRepositoryImpl.playerPropertyExists(playerProperty.propertyNo) == 0) {
-//        }
-//        firestoreRepositoryImpl.insertPlayerProperty(gameId, playerProperty)
-//    }
 
     override suspend fun propertySwap(ppId1: String, ppId2: String, playerId1: Int, playerId2: Int) {
         firestoreRepositoryImpl.swapPlayerProperty(
@@ -75,97 +72,128 @@ class FirestoreGameLogicImpl @Inject constructor(
     }
 
     override suspend fun rentLevelIncrease(propertyNo: Int) {
-        val property = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo)
-        if(property.rentLevel != 5) {
-            firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
-                ppId = property.ppId,
-                rentLevel = property.rentLevel + 1
-            )
+        withContext(Dispatchers.IO) {
+            val property = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo)
+            if(property.rentLevel != 5) {
+                firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
+                    ppId = property.ppId,
+                    rentLevel = property.rentLevel + 1
+                )
+            }
         }
     }
 
     override suspend fun rentLevelDecrease(propertyNo: Int) {
-        val property = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo)
-        if(property.rentLevel != 1) {
-            firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
-                ppId = property.ppId,
-                rentLevel = property.rentLevel - 1
-            )
-        }
-    }
-
-    override suspend fun eventRentDecreaseForNeighbors(propertyNo: Int) {
-        val neighbours = playerPropertyRepositoryImpl
-            .playerPropertyRentLevelDecreaseForNeighbors(propertyNo) ?: emptyList()
-
-        if(neighbours.isNotEmpty()){
-            for(i in neighbours) {
-                val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
+        withContext(Dispatchers.IO) {
+            val property = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo)
+            if(property.rentLevel != 1) {
                 firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
                     ppId = property.ppId,
                     rentLevel = property.rentLevel - 1
                 )
+            }
+        }
+    }
+
+    override suspend fun eventRentDecreaseForNeighbors(propertyNo: Int) {
+        withContext(Dispatchers.IO) {
+            val neighbours = playerPropertyRepositoryImpl
+                .playerPropertyRentLevelDecreaseForNeighbors(propertyNo) ?: emptyList()
+
+            if(neighbours.isNotEmpty()){
+                for(i in neighbours) {
+                    val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
+                    firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
+                        ppId = property.ppId,
+                        rentLevel = property.rentLevel - 1
+                    )
+                }
             }
         }
     }
 
     override suspend fun eventRentLevelIncreaseBoardSide(propertyNo: Int) {
-        val properties = playerPropertyRepositoryImpl
-            .playerPropertyEventRentLevelIncreaseBoardSide(propertyNo) ?: emptyList()
+        withContext(Dispatchers.IO) {
+            val properties = playerPropertyRepositoryImpl
+                .playerPropertyEventRentLevelIncreaseBoardSide(propertyNo) ?: emptyList()
 
-        if(properties.isNotEmpty()) {
-            for(i in properties) {
-                val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
-                firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
-                    ppId = property.ppId,
-                    rentLevel = property.rentLevel + 1
-                )
+            if(properties.isNotEmpty()) {
+                for(i in properties) {
+                    val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
+                    firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
+                        ppId = property.ppId,
+                        rentLevel = property.rentLevel + 1
+                    )
+                }
             }
         }
     }
 
     override suspend fun eventRentLevelDecreaseBoardSide(propertyNo: Int) {
-        val properties = playerPropertyRepositoryImpl
-            .playerPropertyEventRentLevelDecreaseBoardSide(propertyNo) ?: emptyList()
+        withContext(Dispatchers.IO) {
+            val properties = playerPropertyRepositoryImpl
+                .playerPropertyEventRentLevelDecreaseBoardSide(propertyNo) ?: emptyList()
 
-        if(properties.isNotEmpty()) {
-            for(i in properties) {
-                val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
-                firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
-                    ppId = property.ppId,
-                    rentLevel = property.rentLevel - 1
-                )
+            if(properties.isNotEmpty()) {
+                for(i in properties) {
+                    val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
+                    firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
+                        ppId = property.ppId,
+                        rentLevel = property.rentLevel - 1
+                    )
+                }
             }
         }
     }
 
     override suspend fun eventRentLevelIncreaseColorSet(propertyNo: Int) {
-        val properties = playerPropertyRepositoryImpl
-            .playerPropertyEventRentLevelIncreaseColorSet(propertyNo) ?: emptyList()
+        withContext(Dispatchers.IO) {
+            val properties = playerPropertyRepositoryImpl
+                .playerPropertyEventRentLevelIncreaseColorSet(propertyNo) ?: emptyList()
 
-        if(properties.isNotEmpty()) {
-            for(i in properties) {
-                val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
-                firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
-                    ppId = property.ppId,
-                    rentLevel = property.rentLevel + 1
-                )
+            if(properties.isNotEmpty()) {
+                for(i in properties) {
+                    val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
+                    firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
+                        ppId = property.ppId,
+                        rentLevel = property.rentLevel + 1
+                    )
+                }
             }
         }
     }
 
     override suspend fun eventRentLevelDecreaseColorSet(propertyNo: Int) {
-        val properties = playerPropertyRepositoryImpl.playerPropertyEventRentLevelDecreaseColorSet(propertyNo) ?: emptyList()
+        withContext(Dispatchers.IO) {
+            val properties = playerPropertyRepositoryImpl
+                .playerPropertyEventRentLevelDecreaseColorSet(propertyNo) ?: emptyList()
 
-        if(properties.isNotEmpty()) {
-            for(i in properties) {
-                val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
-                firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
-                    ppId = property.ppId,
-                    rentLevel = property.rentLevel - 1
-                )
+            if(properties.isNotEmpty()) {
+                for(i in properties) {
+                    val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
+                    firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
+                        ppId = property.ppId,
+                        rentLevel = property.rentLevel - 1
+                    )
+                }
             }
         }
     }
 
+    override suspend fun setRentLevelToDeleteConstant(playerId: String) {
+        withContext(Dispatchers.IO) {
+            val properties = playerPropertyRepositoryImpl
+                .playerPropertyGetAllPlayerProperties(playerId) ?: emptyList()
+
+            if(properties.isNotEmpty()) {
+                for(i in properties) {
+                    val property = playerPropertyRepositoryImpl.getPlayerProperty(i)
+                    firestoreRepositoryImpl.updatePlayerPropertyRentLevel(
+                        ppId = property.ppId,
+                        rentLevel = -999
+                    )
+                }
+            }
+        }
+    }
 }

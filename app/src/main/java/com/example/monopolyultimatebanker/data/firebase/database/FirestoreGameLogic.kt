@@ -8,9 +8,7 @@ interface FirestoreGameLogic {
 
     suspend fun collect200BothPlayers(player1Id: String, player2Id: String, amount: Int)
 
-//    suspend fun eventDeduct50PerProperty(playerId: String, playerBalance: Int)
-
-//    suspend fun buyProperty(playerProperty: PlayerProperty, playerId: Int, amount: Int)
+    suspend fun eventDeduct50PerProperty(playerId: String, playerBalance: Int)
 
     suspend fun propertySwap(ppId1: String, ppId2: String, playerId1: Int, playerId2: Int)
 
@@ -32,5 +30,6 @@ interface FirestoreGameLogic {
 
     suspend fun eventRentLevelDecreaseColorSet(propertyNo: Int)
 
+    suspend fun setRentLevelToDeleteConstant(playerId: String)
 }
 
