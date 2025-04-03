@@ -62,15 +62,15 @@ object HomeDestination: NavigationDestination {
 fun HomeScreen(
     modifier: Modifier = Modifier,
     navigateToQrCodeScanner: () -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
-    val dialogState = viewModel.dialogState
-    val gamePrefState by viewModel.gamePreferenceState.collectAsStateWithLifecycle()
-    val userLoginState by viewModel.userLoginPreferenceState.collectAsStateWithLifecycle()
-    val firestoreGameState by viewModel.firestoreGameState.collectAsStateWithLifecycle()
-    val firestorePlayerPropertyState by viewModel.firestorePlayerPropertyState.collectAsStateWithLifecycle()
-    val gameState by viewModel.gameState.collectAsStateWithLifecycle()
+    val dialogState = homeViewModel.dialogState
+    val gamePrefState by homeViewModel.gamePreferenceState.collectAsStateWithLifecycle()
+    val userLoginState by homeViewModel.userLoginPreferenceState.collectAsStateWithLifecycle()
+    val firestoreGameState by homeViewModel.firestoreGameState.collectAsStateWithLifecycle()
+    val firestorePlayerPropertyState by homeViewModel.firestorePlayerPropertyState.collectAsStateWithLifecycle()
+    val gameState by homeViewModel.gameState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -94,22 +94,22 @@ fun HomeScreen(
     }
 
     ModalNavigationDrawer(
-        drawerState = viewModel.navDrawerState,
+        drawerState = homeViewModel.navDrawerState,
         drawerContent = {
             ModalDrawerSheet {
                 DrawerContent(
                     username = userLoginState.userName,
                     gameId = gamePrefState.gameId,
                     isGameActive = gamePrefState.isGameActive,
-                    onClickLeaveGameDialog = viewModel::onClickLeaveGameDialog
+                    onClickLeaveGameDialog = homeViewModel::onClickLeaveGameDialog
                 )
             }
         },
-        gesturesEnabled = viewModel.navDrawerState.isOpen
+        gesturesEnabled = homeViewModel.navDrawerState.isOpen
     ) {
         Scaffold(
             topBar = {
-                GameTopAppBar(onClickNavIcon = { viewModel.onClickNavIcon(scope.coroutineContext) })
+                GameTopAppBar(onClickNavIcon = { homeViewModel.onClickNavIcon(scope.coroutineContext) })
             },
             snackbarHost = {
                 SnackbarHost(
@@ -123,7 +123,7 @@ fun HomeScreen(
                     )
                 } else {
                     CreateOrJoinGameFAB(
-                        onClickCreateOrJoinGame = viewModel::onClickCreateOrJoinGameDialog,
+                        onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog,
                     )
                 }
             }
@@ -140,17 +140,17 @@ fun HomeScreen(
 
                 if(dialogState.createOrJoinGameDialog){
                     CreateOrJoinGameDialog(
-                        onClickCreateOrJoinGame = viewModel::onClickCreateOrJoinGameDialog,
-                        newGame = viewModel::newGame,
+                        onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog,
+                        newGame = homeViewModel::newGame,
                         gameId = dialogState.gameId,
-                        updateGameId = viewModel::updateGameId,
+                        updateGameId = homeViewModel::updateGameId,
                     )
                 }
 
                 if(dialogState.leaveGameDialog){
                     LeaveGameDialog(
-                        onClickLeaveGameDialog = viewModel::onClickLeaveGameDialog,
-                        leaveGame = viewModel::leaveGame
+                        onClickLeaveGameDialog = homeViewModel::onClickLeaveGameDialog,
+                        leaveGame = homeViewModel::leaveGame
                     )
                 }
             }
