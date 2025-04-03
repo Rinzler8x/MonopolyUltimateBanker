@@ -7,7 +7,9 @@ interface PlayerPropertyRepository {
 
     fun playerPropertyExists(propertyNo: Int): Int
 
-    suspend fun playerPropertyUpdatePropertyState(playerProperty: PlayerProperty)
+    suspend fun playerPropertyGetAllPlayerProperties(playerId: String): List<Int>?
+
+    suspend fun playerPropertyUpdatePropertyState(playerId: String, propertyNo: Int, rentLevel: Int)
 
     suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int)
 
@@ -34,4 +36,8 @@ interface PlayerPropertyRepository {
     suspend fun playerPropertyEventRentLevelDecreaseColorSet(propertyNo: Int): List<Int>?
 
     suspend fun playerPropertyInsert(playerProperty: PlayerProperty)
+
+    suspend fun playerPropertyDeleteProperty(rentLevel: Int)
+
+    suspend fun playerPropertyDeleteAllProperties()
 }

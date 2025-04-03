@@ -5,11 +5,13 @@ import javax.inject.Inject
 class PlayerPropertyRepositoryImpl @Inject constructor(
     private val playerPropertyDao: PlayerPropertyDao
 ) : PlayerPropertyRepository {
-    override fun getPlayerProperty(propertyNo: Int) = playerPropertyDao.getPlayerProperty(propertyNo)
+    override fun getPlayerProperty(propertyNo: Int): PlayerProperty = playerPropertyDao.getPlayerProperty(propertyNo)
 
     override fun playerPropertyExists(propertyNo: Int): Int = playerPropertyDao.propertyExists(propertyNo)
 
-    override suspend fun playerPropertyUpdatePropertyState(playerProperty: PlayerProperty) = playerPropertyDao.updatePropertyState(playerProperty)
+    override suspend fun playerPropertyGetAllPlayerProperties(playerId: String): List<Int>? = playerPropertyDao.getAllPlayerProperties(playerId)
+
+    override suspend fun playerPropertyUpdatePropertyState(playerId: String, propertyNo: Int, rentLevel: Int) = playerPropertyDao.updatePropertyState(playerId, propertyNo, rentLevel)
 
     override suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int) = playerPropertyDao.swapProperty(playerId, propertyNo)
 
@@ -41,4 +43,8 @@ class PlayerPropertyRepositoryImpl @Inject constructor(
     override suspend fun playerPropertyEventRentLevelDecreaseColorSet(propertyNo: Int): List<Int>? = playerPropertyDao.eventRentLevelDecreaseColorSet(propertyNo)
 
     override suspend fun playerPropertyInsert(playerProperty: PlayerProperty)  = playerPropertyDao.insert(playerProperty)
+
+    override suspend fun playerPropertyDeleteProperty(rentLevel: Int) = playerPropertyDao.deleteProperty(rentLevel)
+
+    override suspend fun playerPropertyDeleteAllProperties() = playerPropertyDao.deleteAllProperteries()
 }

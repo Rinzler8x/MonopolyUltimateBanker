@@ -19,8 +19,8 @@ interface PlayerPropertyDao {
     @Query("SELECT COUNT(*) as count FROM player_property WHERE property_no = :propertyNo")
     fun propertyExists(propertyNo: Int): Int
 
-    @Update
-    suspend fun updatePropertyState(playerProperty: PlayerProperty)
+    @Query("UPDATE player_property SET player_id = :playerId, property_no = :propertyNo, rent_level = :rentLevel WHERE property_no = :propertyNo")
+    suspend fun updatePropertyState(playerId: String, propertyNo: Int, rentLevel: Int)
 
     @Query("UPDATE player_property SET player_id = :playerId WHERE property_no = :propertyNo")
     suspend fun swapProperty(playerId: String, propertyNo: Int)
@@ -119,4 +119,12 @@ interface PlayerPropertyDao {
     )
     suspend fun eventRentLevelDecreaseColorSet(propertyNo: Int): List<Int>?
 
+    @Query("DELETE FROM player_property WHERE rent_level = :rentLevel")
+    suspend fun deleteProperty(rentLevel: Int)
+
+    @Query("DELETE FROM player_property")
+    suspend fun deleteAllProperteries()
+
+    @Query("SELECT property_no FROM player_property WHERE player_id = :playerId")
+    suspend fun getAllPlayerProperties(playerId: String): List<Int>?
 }
