@@ -25,7 +25,7 @@ interface FirestoreRepository {
 
 
     //player_properties
-    suspend fun insertPlayerProperty(gameId: String, playerProperty: PlayerProperty): String
+    suspend fun insertPlayerProperty(gameId: String, playerId: String, propertyNo: Int)
 
     suspend fun updatePlayerPropertyRentLevel(ppId: String, rentLevel: Int)
 

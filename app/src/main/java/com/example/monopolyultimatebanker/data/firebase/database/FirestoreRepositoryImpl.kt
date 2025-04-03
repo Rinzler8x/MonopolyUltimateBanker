@@ -48,10 +48,10 @@ class FirestoreRepositoryImpl @Inject constructor(
     override fun getGame(gameId: String) = gameRef.whereEqualTo("gameId", gameId).snapshots().map { it ->
         val temp = it.toObjects<FirestoreGame>()
         withContext(Dispatchers.IO) {
-            it.map {
+            it.map { it2 ->
                 for(i in temp) {
                     if(gameRepositoryImpl.gamePlayerExists(i.playerName).count == 0){
-                        gameRepositoryImpl.gameInsert(Game(it.id, i.playerName, i.playerBalance))
+                        gameRepositoryImpl.gameInsert(Game(it2.id, i.playerName, i.playerBalance))
                     } else {
                         gameRepositoryImpl.updatePlayerState(i.playerBalance, i.playerName)
                         if(i.playerBalance == -99999) {
@@ -122,9 +122,10 @@ class FirestoreRepositoryImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 db.runTransaction { transaction ->
-                    transaction.update(playerPropertyRef.document(payerId), "playerBalance", deductAmount)
-                    transaction.update(playerPropertyRef.document(receipentId), "playerBalance", addAmount)
+                    transaction.update(gameRef.document(payerId), "playerBalance", deductAmount)
+                    transaction.update(gameRef.document(receipentId), "playerBalance", addAmount)
                 }
+                    .await()
             } catch(e: Exception) {
                 Log.d(TAG, "Message: ${e.message}")
             }
@@ -162,13 +163,13 @@ class FirestoreRepositoryImpl @Inject constructor(
                             )
                         } else {
                             playerPropertyRepositoryImpl.playerPropertyUpdatePropertyState(
-                                PlayerProperty(
-                                    ppId = it.id,
-                                    playerId = i.playerId,
-                                    propertyNo = i.propertyNo,
-                                    rentLevel = i.rentLevel
-                                )
+                                playerId = i.playerId,
+                                propertyNo = i.propertyNo,
+                                rentLevel = i.rentLevel
                             )
+                            if(i.rentLevel == -999) {
+                                playerPropertyRepositoryImpl.playerPropertyDeleteProperty(i.rentLevel)
+                            }
                         }
                     }
                 }
@@ -176,23 +177,20 @@ class FirestoreRepositoryImpl @Inject constructor(
             it.toObjects<FirestorePlayerProperty>()
         }
 
-    override suspend fun insertPlayerProperty(gameId: String, playerProperty: PlayerProperty): String {
+    override suspend fun insertPlayerProperty(gameId: String, playerId: String, propertyNo: Int){
         val data = FirestorePlayerProperty(
             gameId = gameId,
-            playerId = playerProperty.playerId,
-            rentLevel = playerProperty.rentLevel
+            playerId = playerId,
+            propertyNo = propertyNo,
+            rentLevel = 1
         )
-        var ppid = ""
         return withContext(Dispatchers.IO) {
             try {
-                ppid = playerPropertyRef
+                playerPropertyRef
                     .add(data)
                     .await()
-                    .id
-                ppid
             } catch(e: Exception) {
                 Log.d(TAG, "Message: ${e.message}")
-                ppid
             }
         }
     }
