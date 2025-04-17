@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,11 +13,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -24,19 +27,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
-import com.example.monopolyultimatebanker.ui.screens.home.GameState
-import kotlinx.coroutines.CoroutineScope
 
 object EventCardDestination: NavigationDestination {
     override val route = "event_card"
@@ -54,6 +55,8 @@ fun EventCard(
     val gameState by eventCardViewModel.gameState.collectAsStateWithLifecycle()
     val playerBottomSheetState = eventCardViewModel.playerBottomSheetState
     val sheetState = rememberModalBottomSheetState()
+    val propertyDialogState = eventCardViewModel.propertyDialogState
+    val actionUserInput = eventCardViewModel.actionUserInput
 
     Scaffold { innerPadding ->
         Column(
@@ -67,15 +70,26 @@ fun EventCard(
                 title = eventState.title,
                 phrase = eventState.phrase,
                 action = eventState.action,
-                onClickAction = eventCardViewModel::onCLickPlayerBottomSheet
+                onClickAction = eventCardViewModel::onClickActionCheckUserInputRequired
             )
 
             if (playerBottomSheetState.showBottomSheet) {
                 PlayerBottomSheet(
                     onClickPlayerBottomSheet = eventCardViewModel::onCLickPlayerBottomSheet,
+                    onClickPropertyDialog = eventCardViewModel::onClickPropertyDialog,
+                    updatePlayerName = eventCardViewModel::updatePlayerName,
                     sheetState = sheetState,
                     innerPadding = innerPadding,
                     game = gameState.gameState
+                )
+            }
+
+            if (propertyDialogState.propertyDialogState) {
+                PropertyDialog(
+                    onClickPropertyDialog = eventCardViewModel::onClickPropertyDialog,
+                    onClickAction = eventCardViewModel::onClickAction,
+                    propertyNo = actionUserInput.propertyNo.toString(),
+                    updatePropertyNo = eventCardViewModel::updatePropertyNo,
                 )
             }
         }
@@ -87,6 +101,8 @@ fun EventCard(
 @Composable
 private fun PlayerBottomSheet(
     onClickPlayerBottomSheet: () -> Unit,
+    onClickPropertyDialog: () -> Unit,
+    updatePlayerName: (String) -> Unit,
     sheetState: SheetState,
     innerPadding: PaddingValues,
     game: List<Game>,
@@ -97,7 +113,9 @@ private fun PlayerBottomSheet(
             onClickPlayerBottomSheet()
         },
         sheetState = sheetState,
-        modifier = modifier.fillMaxHeight().padding(innerPadding)
+        modifier = modifier
+            .fillMaxHeight()
+            .padding(innerPadding)
     ) {
         LazyColumn(
             modifier = modifier
@@ -128,7 +146,9 @@ private fun PlayerBottomSheet(
 //
                 TextButton(
                     onClick = {
-                        println(it.playerName)
+                        updatePlayerName(it.playerName)
+                        onClickPlayerBottomSheet()
+                        onClickPropertyDialog()
                     },
                 ) {
                     Row(
@@ -147,6 +167,58 @@ private fun PlayerBottomSheet(
             }
         }
     }
+}
+
+@Composable
+private fun PropertyDialog(
+    onClickPropertyDialog: () -> Unit,
+    onClickAction: () -> Unit,
+    propertyNo: String,
+    updatePropertyNo: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = {
+            updatePropertyNo("")
+            onClickPropertyDialog()
+        },
+        title = { Text(text = "Property No.") },
+        text = {
+            Column {
+                Text(
+                    text = "Enter a property no.",
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                )
+                Spacer(modifier = modifier.padding(vertical = 8.dp))
+                OutlinedTextField(
+                    value = propertyNo,
+                    onValueChange = updatePropertyNo,
+                    label = { Text(text = "Property No") }
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    updatePropertyNo("")
+                    onClickPropertyDialog()
+                }
+            ) {
+                Text(text = stringResource(R.string.dismiss))
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onClickPropertyDialog()
+                    onClickAction()
+                },
+                enabled = propertyNo.isNotBlank()
+            ) {
+                Text(text = stringResource(R.string.confirm))
+            }
+        }
+    )
 }
 
 @Composable

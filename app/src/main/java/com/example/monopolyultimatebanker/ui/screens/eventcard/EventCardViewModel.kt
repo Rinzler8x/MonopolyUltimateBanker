@@ -1,17 +1,12 @@
 package com.example.monopolyultimatebanker.ui.screens.eventcard
 
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SheetState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.eventtable.Event
 import com.example.monopolyultimatebanker.data.eventtable.EventRepositoryImpl
-import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrType
@@ -28,6 +23,15 @@ import javax.inject.Inject
 
 data class PlayerBottomSheetState(
     val showBottomSheet: Boolean = false
+)
+
+data class ActionUserInput(
+    val playerName: String = "",
+    val propertyNo: String = "",
+)
+
+data class DialogState(
+    val propertyDialogState: Boolean = false,
 )
 
 @HiltViewModel
@@ -76,9 +80,26 @@ class EventCardViewModel @Inject constructor(
         playerBottomSheetState = playerBottomSheetState.copy(showBottomSheet = !playerBottomSheetState.showBottomSheet)
     }
 
+    var propertyDialogState by mutableStateOf(DialogState())
+
+    fun onClickPropertyDialog() {
+        propertyDialogState = propertyDialogState.copy(propertyDialogState = !propertyDialogState.propertyDialogState)
+    }
+
+    var actionUserInput by mutableStateOf(ActionUserInput())
+
+    fun updatePlayerName(input: String) {
+        actionUserInput = actionUserInput.copy(playerName = input.trim())
+    }
+
+    fun updatePropertyNo(input: String) {
+        actionUserInput = actionUserInput.copy(propertyNo = input.trim())
+    }
+
     private fun swapProperty() {
         viewModelScope.launch {
-
+            println(actionUserInput.propertyNo::class)
+            println(actionUserInput.playerName)
         }
     }
 
@@ -139,6 +160,25 @@ class EventCardViewModel @Inject constructor(
     private fun collect200() {
         viewModelScope.launch {
 
+        }
+    }
+
+    fun onClickActionCheckUserInputRequired() {
+        when(qrPrefState.value.event) {
+            "monoeve_1", "monoeve_9",  -> {
+                onCLickPlayerBottomSheet()
+            }
+            "monoeve_2", "monoeve_13", "monoeve_18", "monoeve_4",
+            "monoeve_22", "monoeve_5", "monoeve_17", "monoeve_11",
+            "monoeve_14", "monoeve_16", "monoeve_8" -> {
+                onClickPropertyDialog()
+            }
+            "monoeve_15", "monoeve_21" -> {
+
+            }
+            else -> {
+                onClickAction()
+            }
         }
     }
 
