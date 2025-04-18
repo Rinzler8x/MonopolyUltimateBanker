@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.eventtable.Event
 import com.example.monopolyultimatebanker.data.eventtable.EventRepositoryImpl
+import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
+import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrType
 import com.example.monopolyultimatebanker.ui.screens.home.GameState
@@ -15,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -26,19 +29,24 @@ data class PlayerBottomSheetState(
 )
 
 data class ActionUserInput(
-    val playerName: String = "",
-    val propertyNo: String = "",
+    val playerId: String = "",
+    val propertyNo1: String = "",
+    val propertyNo2: String = "",
 )
 
 data class DialogState(
-    val propertyDialogState: Boolean = false,
+    val propertyDialogState1: Boolean = false,
+    val propertyDialogState2: Boolean = false,
+    val doubleInput: Boolean = false,
 )
 
 @HiltViewModel
 class EventCardViewModel @Inject constructor(
     private val qrPreferencesRepository: QrPreferencesRepository,
+    private val gamePreferencesRepository: GamePreferencesRepository,
     private val gameRepositoryImpl: GameRepositoryImpl,
-    private val eventRepositoryImpl: EventRepositoryImpl
+    private val eventRepositoryImpl: EventRepositoryImpl,
+    private val firestoreGameLogicImpl: FirestoreGameLogicImpl
 ): ViewModel() {
 
     val qrPrefState: StateFlow<QrType> =
@@ -82,24 +90,35 @@ class EventCardViewModel @Inject constructor(
 
     var propertyDialogState by mutableStateOf(DialogState())
 
-    fun onClickPropertyDialog() {
-        propertyDialogState = propertyDialogState.copy(propertyDialogState = !propertyDialogState.propertyDialogState)
+    fun onClickPropertyDialog1() {
+        propertyDialogState = propertyDialogState.copy(propertyDialogState1 = !propertyDialogState.propertyDialogState1)
+    }
+
+    fun onClickPropertyDialog2() {
+        propertyDialogState = propertyDialogState.copy(propertyDialogState2 = !propertyDialogState.propertyDialogState2)
+    }
+
+    fun onClickDoubleInput() {
+        propertyDialogState = propertyDialogState.copy(doubleInput = !propertyDialogState.doubleInput)
     }
 
     var actionUserInput by mutableStateOf(ActionUserInput())
 
     fun updatePlayerName(input: String) {
-        actionUserInput = actionUserInput.copy(playerName = input.trim())
+        actionUserInput = actionUserInput.copy(playerId = input.trim())
     }
 
-    fun updatePropertyNo(input: String) {
-        actionUserInput = actionUserInput.copy(propertyNo = input.trim())
+    fun updatePropertyNo1(input: String) {
+        actionUserInput = actionUserInput.copy(propertyNo1 = input.trim())
+    }
+
+    fun updatePropertyNo2(input: String) {
+        actionUserInput = actionUserInput.copy(propertyNo2 = input.trim())
     }
 
     private fun swapProperty() {
         viewModelScope.launch {
-            println(actionUserInput.propertyNo::class)
-            println(actionUserInput.playerName)
+
         }
     }
 
@@ -157,21 +176,16 @@ class EventCardViewModel @Inject constructor(
         }
     }
 
-    private fun collect200() {
-        viewModelScope.launch {
-
-        }
-    }
-
     fun onClickActionCheckUserInputRequired() {
         when(qrPrefState.value.event) {
             "monoeve_1", "monoeve_9",  -> {
+                onClickDoubleInput()
                 onCLickPlayerBottomSheet()
             }
             "monoeve_2", "monoeve_13", "monoeve_18", "monoeve_4",
             "monoeve_22", "monoeve_5", "monoeve_17", "monoeve_11",
             "monoeve_14", "monoeve_16", "monoeve_8" -> {
-                onClickPropertyDialog()
+                onClickPropertyDialog1()
             }
             "monoeve_15", "monoeve_21" -> {
 
@@ -218,7 +232,7 @@ class EventCardViewModel @Inject constructor(
                 rentLevel1For2RentPayments()
             }
             "monoeve_15", "monoeve_21" -> {
-                collect200()
+                //TODO: Plans to just makes the players collect the 200 manually
             }
         }
     }

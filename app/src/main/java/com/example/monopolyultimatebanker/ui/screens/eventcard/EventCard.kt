@@ -22,11 +22,17 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -38,6 +44,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
+import com.example.monopolyultimatebanker.utils.ObserverAsEvents
+import com.example.monopolyultimatebanker.utils.SnackbarController
+import kotlinx.coroutines.launch
 
 object EventCardDestination: NavigationDestination {
     override val route = "event_card"
@@ -58,6 +67,7 @@ fun EventCard(
     val propertyDialogState = eventCardViewModel.propertyDialogState
     val actionUserInput = eventCardViewModel.actionUserInput
 
+
     Scaffold { innerPadding ->
         Column(
             modifier = modifier
@@ -76,7 +86,7 @@ fun EventCard(
             if (playerBottomSheetState.showBottomSheet) {
                 PlayerBottomSheet(
                     onClickPlayerBottomSheet = eventCardViewModel::onCLickPlayerBottomSheet,
-                    onClickPropertyDialog = eventCardViewModel::onClickPropertyDialog,
+                    onClickPropertyDialog = eventCardViewModel::onClickPropertyDialog1,
                     updatePlayerName = eventCardViewModel::updatePlayerName,
                     sheetState = sheetState,
                     innerPadding = innerPadding,
@@ -84,12 +94,31 @@ fun EventCard(
                 )
             }
 
-            if (propertyDialogState.propertyDialogState) {
+            if (propertyDialogState.propertyDialogState1) {
                 PropertyDialog(
-                    onClickPropertyDialog = eventCardViewModel::onClickPropertyDialog,
+                    propertyDialog1 = propertyDialogState.propertyDialogState1,
+                    onClickPropertyDialog1 = eventCardViewModel::onClickPropertyDialog1,
+                    onClickPropertyDialog2 = eventCardViewModel::onClickPropertyDialog2,
                     onClickAction = eventCardViewModel::onClickAction,
-                    propertyNo = actionUserInput.propertyNo.toString(),
-                    updatePropertyNo = eventCardViewModel::updatePropertyNo,
+                    propertyNo = actionUserInput.propertyNo1,
+                    updatePropertyNo = eventCardViewModel::updatePropertyNo1,
+                    doubleInput = propertyDialogState.doubleInput,
+                    onClickDoubleInput = eventCardViewModel::onClickDoubleInput,
+                    description = "Enter first property no.",
+                )
+            }
+
+            if (propertyDialogState.propertyDialogState2) {
+                PropertyDialog(
+                    propertyDialog1 = propertyDialogState.propertyDialogState1,
+                    onClickPropertyDialog1 = eventCardViewModel::onClickPropertyDialog1,
+                    onClickPropertyDialog2 = eventCardViewModel::onClickPropertyDialog2,
+                    onClickAction = eventCardViewModel::onClickAction,
+                    propertyNo = actionUserInput.propertyNo2,
+                    updatePropertyNo = eventCardViewModel::updatePropertyNo2,
+                    doubleInput = propertyDialogState.doubleInput,
+                    onClickDoubleInput = eventCardViewModel::onClickDoubleInput,
+                    description = "Enter second property no.",
                 )
             }
         }
@@ -171,29 +200,45 @@ private fun PlayerBottomSheet(
 
 @Composable
 private fun PropertyDialog(
-    onClickPropertyDialog: () -> Unit,
+    propertyDialog1: Boolean,
+    onClickPropertyDialog1: () -> Unit,
+    onClickPropertyDialog2: () -> Unit,
     onClickAction: () -> Unit,
     propertyNo: String,
     updatePropertyNo: (String) -> Unit,
+    doubleInput: Boolean,
+    onClickDoubleInput: () -> Unit,
+    description: String,
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
         onDismissRequest = {
             updatePropertyNo("")
-            onClickPropertyDialog()
+            onClickPropertyDialog1()
         },
         title = { Text(text = "Property No.") },
         text = {
             Column {
                 Text(
-                    text = "Enter a property no.",
+                    text = description,
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize
                 )
                 Spacer(modifier = modifier.padding(vertical = 8.dp))
                 OutlinedTextField(
                     value = propertyNo,
                     onValueChange = updatePropertyNo,
-                    label = { Text(text = "Property No") }
+                    label = { Text(text = "Property No") },
+                    supportingText = {
+                        if(propertyNo.isNotBlank()){
+                            if(propertyNo.toInt() !in 1..22) {
+                                Text(
+                                    text = "Must be between 1 to 22.",
+                                    modifier = modifier.padding(bottom =  4.dp)
+                                )
+                            }
+                        }
+                    },
+                    isError = (propertyNo.isNotBlank() && (propertyNo.toInt() !in 1..22))
                 )
             }
         },
@@ -201,7 +246,7 @@ private fun PropertyDialog(
             TextButton(
                 onClick = {
                     updatePropertyNo("")
-                    onClickPropertyDialog()
+                    onClickPropertyDialog1()
                 }
             ) {
                 Text(text = stringResource(R.string.dismiss))
@@ -210,10 +255,20 @@ private fun PropertyDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onClickPropertyDialog()
-                    onClickAction()
+                    if(doubleInput) {
+                        onClickPropertyDialog1()
+                        onClickPropertyDialog2()
+                        onClickDoubleInput()
+                    } else {
+                        if(propertyDialog1) {
+                            onClickPropertyDialog1()
+                        } else {
+                            onClickPropertyDialog2()
+                        }
+                        onClickAction()
+                    }
                 },
-                enabled = propertyNo.isNotBlank()
+                enabled = (propertyNo.isNotBlank() && (propertyNo.toInt() in 1..22))
             ) {
                 Text(text = stringResource(R.string.confirm))
             }
