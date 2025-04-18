@@ -155,7 +155,6 @@ fun QrCodeScanner(
                 navigateToPropertyScreen = navigateToPropertyScreen,
                 navigateToEventScreen = navigateToEventScreen,
                 unBindCamera = qrCodeScannerViewModel::unbindCameraController,
-                showWrongQrCodeSnackbar = qrCodeScannerViewModel::showWrongQrCodeSnackbar,
                 radioOptions = dialogState.radioOptions,
                 selectedOption = dialogState.selectedOption,
                 onOptionSelected = qrCodeScannerViewModel::onOptionSelected
@@ -209,7 +208,6 @@ private fun CodeDialog(
     navigateToPropertyScreen: () -> Unit,
     navigateToEventScreen: () -> Unit,
     unBindCamera: () -> Unit,
-    showWrongQrCodeSnackbar: () -> Unit,
     radioOptions: List<String>,
     selectedOption: String,
     onOptionSelected: (String) -> Unit,
@@ -236,7 +234,18 @@ private fun CodeDialog(
                 OutlinedTextField(
                     value = qrCode,
                     onValueChange = setQrCode,
-                    label = { Text(text = stringResource(R.string.qr_code)) }
+                    label = { Text(text = stringResource(R.string.qr_code)) },
+                    supportingText = {
+                        if(qrCode.isNotBlank()){
+                            if(qrCode.toInt() !in 1..22) {
+                                Text(
+                                    text = "Must be between 1 to 22.",
+                                    modifier = modifier.padding(bottom =  4.dp)
+                                )
+                            }
+                        }
+                    },
+                    isError = (qrCode.isNotBlank() && (qrCode.toInt() !in 1..22))
                 )
             }
         },
@@ -255,25 +264,21 @@ private fun CodeDialog(
                 onClick = {
                     onClickCodeDialog()
                     unBindCamera()
-                    if(qrCode.toInt() in 1..22) {
-                        if(selectedOption.startsWith("Property")) {
-                            saveQrCodeAndNavigateToPropertyScreen(
-                                qrCode,
-                                false,
-                                navigateToPropertyScreen
-                            )
-                        } else if(selectedOption.startsWith("Event")) {
-                            saveQrCodeAndNavigateToEventScreen(
-                                qrCode,
-                                false,
-                                navigateToEventScreen
-                            )
-                        }
-                    } else {
-                        showWrongQrCodeSnackbar()
+                    if(selectedOption.startsWith("Property")) {
+                        saveQrCodeAndNavigateToPropertyScreen(
+                            qrCode,
+                            false,
+                            navigateToPropertyScreen
+                        )
+                    } else if(selectedOption.startsWith("Event")) {
+                        saveQrCodeAndNavigateToEventScreen(
+                            qrCode,
+                            false,
+                            navigateToEventScreen
+                        )
                     }
                 },
-                enabled = qrCode.isNotBlank()
+                enabled = (qrCode.isNotBlank() && (qrCode.toInt() in 1..22))
             ) {
                 Text(text = stringResource(R.string.confirm))
             }

@@ -1,15 +1,12 @@
 package com.example.monopolyultimatebanker.ui.screens.qrcodescanner
 
-import android.content.ContentValues.TAG
 import android.content.Context
-import android.util.Log
 import androidx.camera.view.LifecycleCameraController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.util.copy
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.utils.QrScanner
 import com.example.monopolyultimatebanker.utils.SnackbarController
