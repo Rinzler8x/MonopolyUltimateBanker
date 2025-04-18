@@ -221,7 +221,7 @@ class FirestoreRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun swapPlayerProperty(ppId1: String, ppId2: String, playerId1: Int, playerId2: Int) {
+    override suspend fun swapPlayerProperty(ppId1: String, ppId2: String, playerId1: String, playerId2: String) {
         withContext(Dispatchers.IO) {
             try {
                 db.runTransaction { transaction ->

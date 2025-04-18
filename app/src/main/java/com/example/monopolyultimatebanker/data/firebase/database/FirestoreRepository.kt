@@ -21,9 +21,6 @@ interface FirestoreRepository {
 
     fun getGame(gameId: String): Flow<List<FirestoreGame>>
 
-//    val game: Flow<List<Game>>
-
-
     //player_properties
     suspend fun insertPlayerProperty(gameId: String, playerId: String, propertyNo: Int)
 
@@ -31,7 +28,7 @@ interface FirestoreRepository {
 
     suspend fun updatePlayerPropertyOwner(ppId: String, playerId: String)
 
-    suspend fun swapPlayerProperty(ppId1: String, ppId2: String, playerId1: Int, playerId2: Int)
+    suspend fun swapPlayerProperty(ppId1: String, ppId2: String, playerId1: String, playerId2: String)
 
     suspend fun deleteAllGamePlayerProperty(playerId: String)
 
