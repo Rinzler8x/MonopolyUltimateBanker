@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -23,6 +25,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.monopolyultimatebanker.R
@@ -124,12 +129,18 @@ fun LogInForm(
         value = uiState.email,
         onValueChange = updateEmail,
         label = { Text(stringResource(R.string.email)) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
         modifier = Modifier.padding(vertical = 10.dp)
     )
     OutlinedTextField(
         value = uiState.password,
         onValueChange = updatePassword,
         label = { Text(stringResource(R.string.password)) },
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = {
+            onClickLogIn()
+        })
     )
     Row (
         modifier = modifier.fillMaxWidth(),
@@ -170,17 +181,24 @@ fun SignInForm(
         value = uiState.userName,
         onValueChange = updateUsername,
         label = { Text(stringResource(R.string.username)) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next)
     )
     OutlinedTextField(
         value = uiState.email,
         onValueChange = updateEmail,
         label = { Text(stringResource(R.string.email)) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
         modifier = Modifier.padding(vertical = 10.dp)
     )
     OutlinedTextField(
         value = uiState.password,
         onValueChange = updatePassword,
         label = { Text(stringResource(R.string.password)) },
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = {
+            onClickSignIn()
+        })
     )
     Row (
         modifier = modifier.fillMaxWidth(),

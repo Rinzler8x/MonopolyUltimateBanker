@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.AlertDialog
@@ -22,20 +23,17 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,9 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
-import com.example.monopolyultimatebanker.utils.ObserverAsEvents
-import com.example.monopolyultimatebanker.utils.SnackbarController
-import kotlinx.coroutines.launch
 
 object EventCardDestination: NavigationDestination {
     override val route = "event_card"
@@ -87,7 +82,7 @@ fun EventCard(
                 PlayerBottomSheet(
                     onClickPlayerBottomSheet = eventCardViewModel::onCLickPlayerBottomSheet,
                     onClickPropertyDialog = eventCardViewModel::onClickPropertyDialog1,
-                    updatePlayerName = eventCardViewModel::updatePlayerName,
+                    updatePlayerName = eventCardViewModel::updatePlayerId,
                     sheetState = sheetState,
                     innerPadding = innerPadding,
                     game = gameState.gameState
@@ -149,7 +144,6 @@ private fun PlayerBottomSheet(
         LazyColumn(
             modifier = modifier
                 .fillMaxWidth()
-//                .padding(horizontal = 50.dp),
         ) {
             item {
                 Row(
@@ -163,19 +157,9 @@ private fun PlayerBottomSheet(
                 }
             }
             items(items = game.sortedByDescending { it.playerBalance }, key = { it.playerId }) {
-//                Row(
-//                    modifier = modifier
-//                        .fillMaxWidth()
-//                        .padding(vertical = 10.dp),
-//                    horizontalArrangement = Arrangement.SpaceBetween
-//                ) {
-//                    Text(text = it.playerName)
-//                    Text(text = it.playerBalance.toString())
-//                }
-//
                 TextButton(
                     onClick = {
-                        updatePlayerName(it.playerName)
+                        updatePlayerName(it.playerId)
                         onClickPlayerBottomSheet()
                         onClickPropertyDialog()
                     },
@@ -228,7 +212,8 @@ private fun PropertyDialog(
                     value = propertyNo,
                     onValueChange = updatePropertyNo,
                     label = { Text(text = "Property No") },
-                    supportingText = {
+                    visualTransformation = VisualTransformation.None,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),                    supportingText = {
                         if(propertyNo.isNotBlank()){
                             if(propertyNo.toInt() !in 1..22) {
                                 Text(
