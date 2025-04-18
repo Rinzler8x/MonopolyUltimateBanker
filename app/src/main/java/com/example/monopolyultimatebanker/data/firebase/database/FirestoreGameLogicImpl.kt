@@ -2,7 +2,6 @@ package com.example.monopolyultimatebanker.data.firebase.database
 
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
-import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -48,13 +47,17 @@ class FirestoreGameLogicImpl @Inject constructor(
 
     /**PlayerProperty*/
 
-    override suspend fun propertySwap(ppId1: String, ppId2: String, playerId1: Int, playerId2: Int) {
-        firestoreRepositoryImpl.swapPlayerProperty(
-            ppId1 = ppId1,
-            ppId2 = ppId2,
-            playerId1 = playerId1,
-            playerId2 = playerId2
-        )
+    override suspend fun propertySwap(propertyNo1: Int, propertyNo2: Int, playerId1: String, playerId2: String) {
+        withContext(Dispatchers.IO) {
+            val ppId1 = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyNo1).ppId
+            val ppId2 = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyNo2).ppId
+            firestoreRepositoryImpl.swapPlayerProperty(
+                ppId1 = ppId1,
+                ppId2 = ppId2,
+                playerId1 = playerId1,
+                playerId2 = playerId2
+            )
+        }
     }
 
     override suspend fun rentLevelReset1(ppId: String) {

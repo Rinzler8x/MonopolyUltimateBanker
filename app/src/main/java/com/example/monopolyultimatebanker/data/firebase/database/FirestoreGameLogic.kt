@@ -10,7 +10,7 @@ interface FirestoreGameLogic {
 
     suspend fun eventDeduct50PerProperty(playerId: String, playerBalance: Int)
 
-    suspend fun propertySwap(ppId1: String, ppId2: String, playerId1: Int, playerId2: Int)
+    suspend fun propertySwap(propertyNo1: Int, propertyNo2: Int, playerId1: String, playerId2: String)
 
     suspend fun rentLevelReset1(ppId: String)
 
