@@ -46,5 +46,5 @@ class PlayerPropertyRepositoryImpl @Inject constructor(
 
     override suspend fun playerPropertyDeleteProperty(rentLevel: Int) = playerPropertyDao.deleteProperty(rentLevel)
 
-    override suspend fun playerPropertyDeleteAllProperties() = playerPropertyDao.deleteAllProperteries()
+    override suspend fun playerPropertyDeleteAllProperties() = playerPropertyDao.deleteAllProperties()
 }
