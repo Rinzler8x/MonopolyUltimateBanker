@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.eventtable.Event
 import com.example.monopolyultimatebanker.data.eventtable.EventRepositoryImpl
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
+import com.example.monopolyultimatebanker.data.firebase.database.UpdatedProperty
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
@@ -15,12 +16,15 @@ import com.example.monopolyultimatebanker.data.preferences.QrType
 import com.example.monopolyultimatebanker.ui.screens.home.GameState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,6 +42,12 @@ data class DialogState(
     val propertyDialogState1: Boolean = false,
     val propertyDialogState2: Boolean = false,
     val doubleInput: Boolean = false,
+    val resultDialogState: Boolean = false
+)
+
+data class ResultsUiState(
+    val updatedProperties: List<UpdatedProperty> = emptyList(),
+    val noPropertiesUpdated: String = "No properties were updated."
 )
 
 @HiltViewModel
@@ -81,6 +91,21 @@ class EventCardViewModel @Inject constructor(
                 initialValue = Event()
             )
 
+    private val _uiResults = MutableStateFlow(ResultsUiState())
+    val uiResults: StateFlow<ResultsUiState> = _uiResults.asStateFlow()
+
+    private fun updateResults(results: List<UpdatedProperty>) {
+        _uiResults.update { currentState ->
+            currentState.copy(
+                updatedProperties = results.ifEmpty { emptyList() }
+            )
+        }
+    }
+
+    fun clearResults() {
+        updateResults(results = emptyList())
+    }
+
     /**Player Bottom Sheet*/
     var playerBottomSheetState by mutableStateOf(PlayerBottomSheetState())
 
@@ -101,6 +126,10 @@ class EventCardViewModel @Inject constructor(
 
     fun onClickDoubleInput() {
         propertyDialogState = propertyDialogState.copy(doubleInput = !propertyDialogState.doubleInput)
+    }
+
+    fun onClickResultDialog() {
+        propertyDialogState = propertyDialogState.copy(resultDialogState = !propertyDialogState.resultDialogState)
     }
 
     /**User Input State*/
@@ -131,56 +160,70 @@ class EventCardViewModel @Inject constructor(
 
     private fun rentLevelResetTo1() {
         viewModelScope.launch {
-            firestoreGameLogicImpl.rentLevelReset1(
-                propertyNo = actionUserInput.propertyNo1.toInt()
+            updateResults(
+                results = firestoreGameLogicImpl.rentLevelReset1(
+                    propertyNo = actionUserInput.propertyNo1.toInt()
+                )
             )
         }
     }
 
     private fun rentLevelJumpsTo5() {
         viewModelScope.launch {
-            firestoreGameLogicImpl.rentLevelJumpTo5(
-                propertyNo = actionUserInput.propertyNo1.toInt()
+            updateResults(
+                results = firestoreGameLogicImpl.rentLevelJumpTo5(
+                    propertyNo = actionUserInput.propertyNo1.toInt()
+                )
             )
         }
     }
 
     private fun rentLevelIncreaseForYouAndDecreaseForNeighbours() {
         viewModelScope.launch {
-            firestoreGameLogicImpl.eventRentDecreaseForNeighbors(
-                propertyNo = actionUserInput.propertyNo1.toInt()
+            updateResults(
+                results = firestoreGameLogicImpl.eventRentDecreaseForNeighbors(
+                    propertyNo = actionUserInput.propertyNo1.toInt()
+                )
             )
         }
     }
 
     private fun rentLevelIncreaseForBoardSide() {
         viewModelScope.launch {
-            firestoreGameLogicImpl.eventRentLevelIncreaseBoardSide(
-                propertyNo = actionUserInput.propertyNo1.toInt()
+            updateResults(
+                results = firestoreGameLogicImpl.eventRentLevelIncreaseBoardSide(
+                    propertyNo = actionUserInput.propertyNo1.toInt()
+                )
             )
         }
     }
 
     private fun rentLevelDecreaseForBoardSide() {
         viewModelScope.launch {
-            firestoreGameLogicImpl.eventRentLevelDecreaseBoardSide(
-                propertyNo = actionUserInput.propertyNo1.toInt()
+            updateResults(
+                results = firestoreGameLogicImpl.eventRentLevelDecreaseBoardSide(
+                    propertyNo = actionUserInput.propertyNo1.toInt()
+                )
             )
         }
     }
 
     private fun rentLevelIncreaseForColorSet() {
         viewModelScope.launch {
-            firestoreGameLogicImpl.eventRentLevelIncreaseColorSet(
-                propertyNo = actionUserInput.propertyNo1.toInt()
+            updateResults(
+                results = firestoreGameLogicImpl.eventRentLevelIncreaseColorSet(
+                    propertyNo = actionUserInput.propertyNo1.toInt()
+                )
             )
         }
     }
 
     private fun rentLevelDecreaseForColorSet() {
         viewModelScope.launch {
-            firestoreGameLogicImpl.eventRentLevelDecreaseColorSet(
-                propertyNo = actionUserInput.propertyNo1.toInt()
+            updateResults(
+                results = firestoreGameLogicImpl.eventRentLevelDecreaseColorSet(
+                    propertyNo = actionUserInput.propertyNo1.toInt()
+                )
             )
         }
     }
@@ -207,7 +250,7 @@ class EventCardViewModel @Inject constructor(
             }
             "monoeve_2", "monoeve_13", "monoeve_18", "monoeve_4",
             "monoeve_22", "monoeve_5", "monoeve_17", "monoeve_11",
-            "monoeve_14", "monoeve_16", "monoeve_8", "monoeve_20" -> {
+            "monoeve_14", "monoeve_16", "monoeve_20" -> {
                 onClickPropertyDialog1()
             }
             else -> {
@@ -256,5 +299,6 @@ class EventCardViewModel @Inject constructor(
         updatePropertyNo1("")
         updatePropertyNo2("")
         updatePlayerId("")
+        onClickResultDialog()
     }
 }

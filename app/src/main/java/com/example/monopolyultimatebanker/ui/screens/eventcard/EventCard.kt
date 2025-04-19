@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
+import com.example.monopolyultimatebanker.data.firebase.database.UpdatedProperty
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
 
@@ -50,6 +51,7 @@ object EventCardDestination: NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventCard(
+    navigateToHomeScreen: () -> Unit,
     modifier: Modifier = Modifier,
     eventCardViewModel: EventCardViewModel = hiltViewModel()
 ) {
@@ -61,7 +63,7 @@ fun EventCard(
     val sheetState = rememberModalBottomSheetState()
     val propertyDialogState = eventCardViewModel.propertyDialogState
     val actionUserInput = eventCardViewModel.actionUserInput
-
+    val resultsUiState by eventCardViewModel.uiResults.collectAsStateWithLifecycle()
 
     Scaffold { innerPadding ->
         Column(
@@ -114,6 +116,16 @@ fun EventCard(
                     doubleInput = propertyDialogState.doubleInput,
                     onClickDoubleInput = eventCardViewModel::onClickDoubleInput,
                     description = "Enter second property no.",
+                )
+            }
+
+            if(propertyDialogState.resultDialogState) {
+                ResultDialog(
+                    onClickResultDialog = eventCardViewModel::onClickResultDialog,
+                    properties = resultsUiState.updatedProperties,
+                    noPropertiesUpdated = resultsUiState.noPropertiesUpdated,
+                    navigateToHomeScreen = navigateToHomeScreen,
+                    clearResults = eventCardViewModel::clearResults
                 )
             }
         }
@@ -213,7 +225,8 @@ private fun PropertyDialog(
                     onValueChange = updatePropertyNo,
                     label = { Text(text = "Property No") },
                     visualTransformation = VisualTransformation.None,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),                    supportingText = {
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
+                    supportingText = {
                         if(propertyNo.isNotBlank()){
                             if(propertyNo.toInt() !in 1..22) {
                                 Text(
@@ -254,6 +267,63 @@ private fun PropertyDialog(
                     }
                 },
                 enabled = (propertyNo.isNotBlank() && (propertyNo.toInt() in 1..22))
+            ) {
+                Text(text = stringResource(R.string.confirm))
+            }
+        }
+    )
+}
+
+@Composable
+private fun ResultDialog(
+    onClickResultDialog: () -> Unit,
+    properties: List<UpdatedProperty>,
+    noPropertiesUpdated: String,
+    clearResults: () -> Unit,
+    navigateToHomeScreen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = {
+            onClickResultDialog()
+        },
+        title = { Text(text = "Updated Properties") },
+        text = {
+            LazyColumn {
+                if(properties.isNotEmpty()) {
+                    item {
+                        Row(
+                            modifier = modifier.fillMaxWidth()
+                        ) {
+                            Text("Property No.")
+                            Text("Rent Level")
+                        }
+                    }
+                    items(properties, key = { it.propertyNo }) { property ->
+                        Row {
+                            Text(text = "${property.propertyNo}")
+                            Text(text = "${property.rentLevel}")
+                        }
+                    }
+                } else {
+                    item {
+                        Row(
+                            horizontalArrangement = Arrangement.Start,
+                            modifier = modifier.fillMaxWidth()
+                        ) {
+                            Text(text = noPropertiesUpdated)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onClickResultDialog()
+                    navigateToHomeScreen()
+                    clearResults()
+                },
             ) {
                 Text(text = stringResource(R.string.confirm))
             }
