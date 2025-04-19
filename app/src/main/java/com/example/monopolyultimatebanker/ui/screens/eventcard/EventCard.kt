@@ -77,7 +77,8 @@ fun EventCard(
                 title = eventState.title,
                 phrase = eventState.phrase,
                 action = eventState.action,
-                onClickAction = eventCardViewModel::onClickActionCheckUserInputRequired
+                onClickAction = eventCardViewModel::onClickActionCheckUserInputRequired,
+                navigateToHomeScreen = navigateToHomeScreen,
             )
 
             if (playerBottomSheetState.showBottomSheet) {
@@ -126,6 +127,12 @@ fun EventCard(
                     noPropertiesUpdated = resultsUiState.noPropertiesUpdated,
                     navigateToHomeScreen = navigateToHomeScreen,
                     clearResults = eventCardViewModel::clearResults
+                )
+            }
+
+            if(propertyDialogState.wrongPropertyInputDialogState) {
+                WrongPropertyInputDialog(
+                    onClickWrongPropertyInputDialog = eventCardViewModel::onClickWrongPropertyInputDialog,
                 )
             }
         }
@@ -332,11 +339,36 @@ private fun ResultDialog(
 }
 
 @Composable
+private fun WrongPropertyInputDialog(
+    onClickWrongPropertyInputDialog: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = {
+            onClickWrongPropertyInputDialog()
+        },
+        title = { Text(text = "Invalid Input") },
+        text = { Text(text = "One of property no. provided doesn't belong to the right player." +
+                "\nPlease retry again.") },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onClickWrongPropertyInputDialog()
+                },
+            ) {
+                Text(text = stringResource(R.string.confirm))
+            }
+        }
+    )
+}
+
+@Composable
 private fun EventCardContent(
     title: String,
     phrase: String,
     action: String,
-    onClickAction: () -> Unit,
+    navigateToHomeScreen: () -> Unit,
+    onClickAction: (() -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -378,7 +410,7 @@ private fun EventCardContent(
     }
 
     Button(
-        onClick = onClickAction
+        onClick = { onClickAction(navigateToHomeScreen) }
     ) {
         Text(
             text = "Action"

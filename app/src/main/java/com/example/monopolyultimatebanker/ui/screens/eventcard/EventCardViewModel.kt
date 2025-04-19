@@ -10,11 +10,13 @@ import com.example.monopolyultimatebanker.data.eventtable.EventRepositoryImpl
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
 import com.example.monopolyultimatebanker.data.firebase.database.UpdatedProperty
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrType
 import com.example.monopolyultimatebanker.ui.screens.home.GameState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 data class PlayerBottomSheetState(
@@ -42,7 +45,8 @@ data class DialogState(
     val propertyDialogState1: Boolean = false,
     val propertyDialogState2: Boolean = false,
     val doubleInput: Boolean = false,
-    val resultDialogState: Boolean = false
+    val resultDialogState: Boolean = false,
+    val wrongPropertyInputDialogState: Boolean = false
 )
 
 data class ResultsUiState(
@@ -56,6 +60,7 @@ class EventCardViewModel @Inject constructor(
     private val gamePreferencesRepository: GamePreferencesRepository,
     private val gameRepositoryImpl: GameRepositoryImpl,
     private val eventRepositoryImpl: EventRepositoryImpl,
+    private val playerPropertyRepositoryImpl: PlayerPropertyRepositoryImpl,
     private val firestoreGameLogicImpl: FirestoreGameLogicImpl
 ): ViewModel() {
 
@@ -130,6 +135,10 @@ class EventCardViewModel @Inject constructor(
 
     fun onClickResultDialog() {
         propertyDialogState = propertyDialogState.copy(resultDialogState = !propertyDialogState.resultDialogState)
+    }
+
+    fun onClickWrongPropertyInputDialog() {
+        propertyDialogState = propertyDialogState.copy(wrongPropertyInputDialogState = !propertyDialogState.wrongPropertyInputDialogState)
     }
 
     /**User Input State*/
@@ -242,9 +251,9 @@ class EventCardViewModel @Inject constructor(
 //        }
 //    }
 
-    fun onClickActionCheckUserInputRequired() {
+    fun onClickActionCheckUserInputRequired(navigateToHome: () -> Unit) {
         when(qrPrefState.value.event) {
-            "monoeve_1", "monoeve_9",  -> {
+            "monoeve_1", "monoeve_9" -> {
                 onClickDoubleInput()
                 onCLickPlayerBottomSheet()
             }
@@ -253,52 +262,85 @@ class EventCardViewModel @Inject constructor(
             "monoeve_14", "monoeve_16", "monoeve_20" -> {
                 onClickPropertyDialog1()
             }
-            else -> {
+            "monoeve_8" -> {
                 onClickAction()
+            }
+            "monoeve_3", "monoeve_6", "monoeve_7", "monoeve_12", "monoeve_19", "monoeve_15", "monoeve_21" -> {
+                navigateToHome()
             }
         }
     }
 
     fun onClickAction() {
-        when(qrPrefState.value.event) {
-            "monoeve_1", "monoeve_9" -> {
-                swapProperty()
+        var propertyOwnerCheck = false
+        viewModelScope.launch {
+            val playerId = gamePreferencesRepository.gameState.first().playerId
+            withContext(Dispatchers.IO) {
+                when(qrPrefState.value.event) {
+                    "monoeve_1", "monoeve_9" -> {
+                        propertyOwnerCheck = playerPropertyRepositoryImpl
+                            .playerPropertyCheckIfPropertyBelongsToPlayer(
+                                propertyNo = actionUserInput.propertyNo1.toInt(),
+                                playerId = playerId
+                            )
+                        propertyOwnerCheck = playerPropertyRepositoryImpl
+                            .playerPropertyCheckIfPropertyBelongsToPlayer(
+                                propertyNo = actionUserInput.propertyNo2.toInt(),
+                                playerId = actionUserInput.playerId
+                            )
+                    }
+                    "monoeve_2", "monoeve_13", "monoeve_18", "monoeve_4",
+                    "monoeve_22", "monoeve_5", "monoeve_17", "monoeve_11",
+                    "monoeve_14", "monoeve_16", "monoeve_20" -> {
+                        propertyOwnerCheck = playerPropertyRepositoryImpl
+                            .playerPropertyCheckIfPropertyBelongsToPlayer(
+                                propertyNo = actionUserInput.propertyNo1.toInt(),
+                                playerId = playerId
+                            )
+                    }
+                }
             }
-            "monoeve_2", "monoeve_13", "monoeve_18" -> {
-                rentLevelResetTo1()
+            if(propertyOwnerCheck) {
+                when(qrPrefState.value.event) {
+                    "monoeve_1", "monoeve_9" -> {
+                        swapProperty()
+                    }
+                    "monoeve_2", "monoeve_13", "monoeve_18" -> {
+                        rentLevelResetTo1()
+                    }
+                    "monoeve_20" -> {
+                        rentLevelJumpsTo5()
+                    }
+                    "monoeve_4", "monoeve_22" -> {
+                        rentLevelIncreaseForYouAndDecreaseForNeighbours()
+                    }
+                    "monoeve_5" -> {
+                        rentLevelIncreaseForBoardSide()
+                    }
+                    "monoeve_17" -> {
+                        rentLevelDecreaseForBoardSide()
+                    }
+                    "monoeve_11", "monoeve_14" -> {
+                        rentLevelIncreaseForColorSet()
+                    }
+                    "monoeve_16" -> {
+                        rentLevelDecreaseForColorSet()
+                    }
+                    "monoeve_8" -> {
+                        pay50PerPropertyOwned()
+                    }
+//                    "monoeve_10" -> {
+//                        rentLevel1For2RentPayments()
+//                    }
+                }
+                onClickResultDialog()
+            } else {
+                onClickWrongPropertyInputDialog()
             }
-            "monoeve_20" -> {
-                rentLevelJumpsTo5()
-            }
-            "monoeve_3", "monoeve_6", "monoeve_7", "monoeve_12", "monoeve_19", "monoeve_15", "monoeve_21" -> {
-                //TODO: navigate back to home screen
-            }
-            "monoeve_4", "monoeve_22" -> {
-                rentLevelIncreaseForYouAndDecreaseForNeighbours()
-            }
-            "monoeve_5" -> {
-                rentLevelIncreaseForBoardSide()
-            }
-            "monoeve_17" -> {
-                rentLevelDecreaseForBoardSide()
-            }
-            "monoeve_11", "monoeve_14" -> {
-                rentLevelIncreaseForColorSet()
-            }
-            "monoeve_16" -> {
-                rentLevelDecreaseForColorSet()
-            }
-            "monoeve_8" -> {
-                pay50PerPropertyOwned()
-            }
-//            "monoeve_10" -> {
-//                rentLevel1For2RentPayments()
-//            }
+            updatePropertyNo1("")
+            updatePropertyNo2("")
+            updatePlayerId("")
         }
 
-        updatePropertyNo1("")
-        updatePropertyNo2("")
-        updatePlayerId("")
-        onClickResultDialog()
     }
 }
