@@ -21,26 +21,31 @@ interface PlayerPropertyDao {
     @Query("UPDATE player_property SET player_id = :playerId, property_no = :propertyNo, rent_level = :rentLevel WHERE property_no = :propertyNo")
     suspend fun updatePropertyState(playerId: String, propertyNo: Int, rentLevel: Int)
 
-    @Query("UPDATE player_property SET player_id = :playerId WHERE property_no = :propertyNo")
-    suspend fun swapProperty(playerId: String, propertyNo: Int)
+    @Query("SELECT CASE WHEN EXISTS (" +
+            "SELECT 1 FROM player_property WHERE property_no = :propertyNo AND player_id = :playerId) THEN 1 ELSE 0 " +
+            "END AS belongs_to_player")
+    fun checkIfPropertyBelongsToPlayer(propertyNo: Int, playerId: String): Int
 
-    @Transaction
-    suspend fun propertySwap(player1Id: String, player2Id: String, property1No: Int, property2No: Int) {
-        swapProperty(player2Id, property1No)
-        swapProperty(player1Id, property2No)
-    }
-
-    @Query("UPDATE player_property SET rent_level = 1 WHERE property_no = :propertyNo")
-    suspend fun rentLevelReset1(propertyNo: Int)
-
-    @Query("UPDATE player_property SET rent_level = 5 WHERE property_no = :propertyNo")
-    suspend fun rentLevelJumpTo5(propertyNo: Int)
-
-    @Query("UPDATE player_property SET rent_level = rent_level + 1 WHERE property_no = :propertyNo AND rent_level != 5")
-    suspend fun rentLevelIncrease(propertyNo: Int)
-
-    @Query("UPDATE player_property SET rent_level = rent_level - 1 WHERE property_no = :propertyNo AND rent_level != 1")
-    suspend fun rentLevelDecrease(propertyNo: Int)
+//    @Query("UPDATE player_property SET player_id = :playerId WHERE property_no = :propertyNo")
+//    suspend fun swapProperty(playerId: String, propertyNo: Int)
+//
+//    @Transaction
+//    suspend fun propertySwap(player1Id: String, player2Id: String, property1No: Int, property2No: Int) {
+//        swapProperty(player2Id, property1No)
+//        swapProperty(player1Id, property2No)
+//    }
+//
+//    @Query("UPDATE player_property SET rent_level = 1 WHERE property_no = :propertyNo")
+//    suspend fun rentLevelReset1(propertyNo: Int)
+//
+//    @Query("UPDATE player_property SET rent_level = 5 WHERE property_no = :propertyNo")
+//    suspend fun rentLevelJumpTo5(propertyNo: Int)
+//
+//    @Query("UPDATE player_property SET rent_level = rent_level + 1 WHERE property_no = :propertyNo AND rent_level != 5")
+//    suspend fun rentLevelIncrease(propertyNo: Int)
+//
+//    @Query("UPDATE player_property SET rent_level = rent_level - 1 WHERE property_no = :propertyNo AND rent_level != 1")
+//    suspend fun rentLevelDecrease(propertyNo: Int)
 
     @Query(
         "SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +
@@ -48,11 +53,11 @@ interface PlayerPropertyDao {
     )
     suspend fun rentLevelDecreaseForNeighbors(propertyNo: Int): List<Int>?
 
-    @Transaction
-    suspend fun eventRentDecreaseForNeighbors(propertyNo: Int) {
-        rentLevelIncrease(propertyNo)
-        rentLevelDecreaseForNeighbors(propertyNo)
-    }
+//    @Transaction
+//    suspend fun eventRentDecreaseForNeighbors(propertyNo: Int) {
+//        rentLevelIncrease(propertyNo)
+//        rentLevelDecreaseForNeighbors(propertyNo)
+//    }
 
     @Query(
         "SELECT property.property_no FROM property INNER JOIN player_property ON player_property.property_no = property.property_no " +

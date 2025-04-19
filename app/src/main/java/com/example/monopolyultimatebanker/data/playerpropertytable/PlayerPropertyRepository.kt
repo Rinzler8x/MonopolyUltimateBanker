@@ -11,21 +11,23 @@ interface PlayerPropertyRepository {
 
     suspend fun playerPropertyUpdatePropertyState(playerId: String, propertyNo: Int, rentLevel: Int)
 
-    suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int)
+    suspend fun playerPropertyCheckIfPropertyBelongsToPlayer(propertyNo: Int, playerId: String): Boolean
 
-    suspend fun playerPropertyPropertySwap(player1Id: String, player2Id: String, property1No: Int, property2No: Int)
-
-    suspend fun playerPropertyRentLevelRest1(propertyNo: Int)
-
-    suspend fun playerPropertyRentLevelJumpTo5(propertyNo: Int)
-
-    suspend fun playerPropertyRentLevelIncrease(propertyNo: Int)
-
-    suspend fun playerPropertyRentLevelDecrease(propertyNo: Int)
+//    suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int)
+//
+//    suspend fun playerPropertyPropertySwap(player1Id: String, player2Id: String, property1No: Int, property2No: Int)
+//
+//    suspend fun playerPropertyRentLevelRest1(propertyNo: Int)
+//
+//    suspend fun playerPropertyRentLevelJumpTo5(propertyNo: Int)
+//
+//    suspend fun playerPropertyRentLevelIncrease(propertyNo: Int)
+//
+//    suspend fun playerPropertyRentLevelDecrease(propertyNo: Int)
 
     suspend fun playerPropertyRentLevelDecreaseForNeighbors(propertyNo: Int): List<Int>?
 
-    suspend fun playerPropertyEventRentDecreaseForNeighbors(propertyNo: Int)
+//    suspend fun playerPropertyEventRentDecreaseForNeighbors(propertyNo: Int)
 
     suspend fun playerPropertyEventRentLevelIncreaseBoardSide(propertyNo: Int): List<Int>?
 
