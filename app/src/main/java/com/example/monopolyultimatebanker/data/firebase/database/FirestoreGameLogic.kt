@@ -4,7 +4,7 @@ interface FirestoreGameLogic {
 
     suspend fun transferRent(payerId: String, recipientId: String, addAmount: Int, deductAmount: Int)
 
-    suspend fun collect200BothPlayers(player1Id: String, player2Id: String, amount: Int)
+    suspend fun collect200(playerId: String)
 
     suspend fun eventDeduct50PerProperty(playerId: String)
 
