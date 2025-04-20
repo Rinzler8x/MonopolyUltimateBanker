@@ -28,17 +28,6 @@ class FirestoreGameLogicImpl @Inject constructor(
         )
     }
 
-    override suspend fun collect200(playerId: String) {
-        withContext(Dispatchers.IO) {
-            val playerBalance = gameRepositoryImpl.getGamePlayer(playerId).playerBalance
-
-            firestoreRepositoryImpl.updateGamePlayer(
-                playerId = playerId,
-                playerBalance = (playerBalance + 200)
-            )
-        }
-    }
-
     override suspend fun eventDeduct50PerProperty(playerId: String) {
         withContext(Dispatchers.IO) {
             val playerBalance = gameRepositoryImpl.getGamePlayer(playerId).playerBalance
@@ -50,6 +39,28 @@ class FirestoreGameLogicImpl @Inject constructor(
                     playerBalance = amount
                 )
             }
+        }
+    }
+
+    override suspend fun collect200(playerId: String) {
+        withContext(Dispatchers.IO) {
+            val playerBalance = gameRepositoryImpl.getGamePlayer(playerId).playerBalance
+
+            firestoreRepositoryImpl.updateGamePlayer(
+                playerId = playerId,
+                playerBalance = (playerBalance + 200)
+            )
+        }
+    }
+
+    override suspend fun navigateToNewLocation(playerId: String) {
+        withContext(Dispatchers.IO) {
+            val playerBalance = gameRepositoryImpl.getGamePlayer(playerId).playerBalance
+
+            firestoreRepositoryImpl.updateGamePlayer(
+                playerId = playerId,
+                playerBalance = (playerBalance - 100)
+            )
         }
     }
 
