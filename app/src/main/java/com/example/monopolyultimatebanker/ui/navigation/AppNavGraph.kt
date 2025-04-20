@@ -12,6 +12,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.monopolyultimatebanker.ui.screens.collect200.Collect200
+import com.example.monopolyultimatebanker.ui.screens.collect200.Collect200Destination
 import com.example.monopolyultimatebanker.ui.screens.eventcard.EventCard
 import com.example.monopolyultimatebanker.ui.screens.eventcard.EventCardDestination
 import com.example.monopolyultimatebanker.ui.screens.home.HomeDestination
@@ -78,6 +80,13 @@ fun AppNavHost(
                                 inclusive = true
                             }
                         }
+                    },
+                    navigateToCollect200 = {
+                        navController.navigate(Collect200Destination.route) {
+                            popUpTo(QrCodeScannerDestination.route) {
+                                inclusive = true
+                            }
+                        }
                     }
                 )
             }
@@ -93,6 +102,14 @@ fun AppNavHost(
             composable(route = EventCardDestination.route) {
                 EventCard(
                     navigateToHomeScreen = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(route = Collect200Destination.route) {
+                Collect200(
+                    navigateToHome = {
                         navController.popBackStack()
                     }
                 )
