@@ -63,12 +63,12 @@ object HomeDestination: NavigationDestination {
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
     navigateToQrCodeScanner: () -> Unit,
+    modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
-    val dialogState = homeViewModel.dialogState
+    val newGameDialogState = homeViewModel.newGameDialogState
     val gamePrefState by homeViewModel.gamePreferenceState.collectAsStateWithLifecycle()
     val userLoginState by homeViewModel.userLoginPreferenceState.collectAsStateWithLifecycle()
     val firestoreGameState by homeViewModel.firestoreGameState.collectAsStateWithLifecycle()
@@ -141,16 +141,16 @@ fun HomeScreen(
                     NoActiveGame()
                 }
 
-                if(dialogState.createOrJoinGameDialog){
+                if(newGameDialogState.createOrJoinGameDialog){
                     CreateOrJoinGameDialog(
                         onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog,
                         newGame = homeViewModel::newGame,
-                        gameId = dialogState.gameId,
+                        gameId = newGameDialogState.gameId,
                         updateGameId = homeViewModel::updateGameId,
                     )
                 }
 
-                if(dialogState.leaveGameDialog){
+                if(newGameDialogState.leaveGameDialog){
                     LeaveGameDialog(
                         onClickLeaveGameDialog = homeViewModel::onClickLeaveGameDialog,
                         leaveGame = homeViewModel::leaveGame

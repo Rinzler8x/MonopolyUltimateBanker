@@ -29,8 +29,8 @@ data class CameraControlState(
     val qrScannerUtil: QrScanner = QrScanner
 )
 
-data class DialogState(
-    val codeDialog: Boolean = false,
+data class QrCodeDialogState(
+    val codeDialogState: Boolean = false,
     val radioOptions: List<String> = listOf("Property Card", "Event Card", "Collect 200"),
     val selectedOption: String = radioOptions[0],
     val prefixValue: String = "monopro_"
@@ -61,13 +61,13 @@ class QrCodeScannerViewModel @Inject constructor(
         return uiCameraCtrl.value
     }
 
-    private val _uiDialog = MutableStateFlow(DialogState())
-    val uiDialog: StateFlow<DialogState> = _uiDialog.asStateFlow()
+    private val _uiDialog = MutableStateFlow(QrCodeDialogState())
+    val uiDialog: StateFlow<QrCodeDialogState> = _uiDialog.asStateFlow()
 
     fun onClickCodeDialog(){
         _uiDialog.update { currentState ->
             currentState.copy(
-                codeDialog = !_uiDialog.value.codeDialog
+                codeDialogState = !_uiDialog.value.codeDialogState
             )
         }
     }

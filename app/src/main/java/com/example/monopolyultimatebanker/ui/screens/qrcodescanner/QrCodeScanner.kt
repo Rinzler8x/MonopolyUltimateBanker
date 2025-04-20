@@ -106,7 +106,7 @@ fun QrCodeScanner(
             verticalArrangement = Arrangement.SpaceEvenly,
             modifier = modifier.padding(innerPadding)
         ) {
-            if(!dialogState.codeDialog){
+            if(!dialogState.codeDialogState){
                 AndroidView(
                     modifier = modifier
                         .size(500.dp),
@@ -156,7 +156,7 @@ fun QrCodeScanner(
             }
         }
 
-        if(dialogState.codeDialog){
+        if(dialogState.codeDialogState){
             CodeDialog(
                 onClickCodeDialog = qrCodeScannerViewModel::onClickCodeDialog,
                 setQrCode = qrCodeScannerViewModel::setQrCode,

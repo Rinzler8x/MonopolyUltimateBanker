@@ -1,6 +1,5 @@
 package com.example.monopolyultimatebanker.ui.screens.eventcard
 
-import androidx.compose.runtime.currentCompositionErrors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -42,7 +41,7 @@ data class ActionUserInput(
     val propertyNo2: String = "",
 )
 
-data class DialogState(
+data class PropertyDialogState(
     val propertyDialogState1: Boolean = false,
     val propertyDialogState2: Boolean = false,
     val doubleInput: Boolean = false,
@@ -125,8 +124,8 @@ class EventCardViewModel @Inject constructor(
     }
 
     /**Dialog State */
-    private val _uiPropertyDialog = MutableStateFlow(DialogState())
-    val uiPropertyDialog: StateFlow<DialogState> = _uiPropertyDialog.asStateFlow()
+    private val _uiPropertyDialog = MutableStateFlow(PropertyDialogState())
+    val uiPropertyDialog: StateFlow<PropertyDialogState> = _uiPropertyDialog.asStateFlow()
 
     fun onClickPropertyDialog1() {
         _uiPropertyDialog.update { currentState ->

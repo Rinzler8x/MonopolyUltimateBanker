@@ -49,7 +49,7 @@ fun Collect200(
                 Text(text = "Collect")
             }
 
-            if(resultsDialogState.resultDialog) {
+            if(resultsDialogState.resultDialogState) {
                 ResultDialog(
                     onClickResultDialog = collect200ViewModel::onClickResultDialog,
                     navigateToHome = navigateToHome,

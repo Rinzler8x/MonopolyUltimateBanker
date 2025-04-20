@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ResultDialogState(
-    val resultDialog: Boolean = false
+    val resultDialogState: Boolean = false
 )
 
 @HiltViewModel
@@ -29,7 +29,7 @@ class Collect200ViewModel @Inject constructor(
     fun onClickResultDialog() {
         _uiResultDialog.update { currentState ->
             currentState.copy(
-                resultDialog = !_uiResultDialog.value.resultDialog
+                resultDialogState = !_uiResultDialog.value.resultDialogState
             )
         }
     }

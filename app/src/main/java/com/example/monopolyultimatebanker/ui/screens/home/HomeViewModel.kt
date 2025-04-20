@@ -33,7 +33,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-data class DialogState(
+data class NewGameDialogState(
     val createOrJoinGameDialog: Boolean = false,
     val leaveGameDialog: Boolean = false,
     val gameId: String = ""
@@ -122,29 +122,29 @@ class HomeViewModel @Inject constructor(
             )
 
     /**Dialog Boxes Code*/
-    var dialogState by mutableStateOf(DialogState())
+    var newGameDialogState by mutableStateOf(NewGameDialogState())
         private set
 
     fun updateGameId(input: String) {
-        dialogState = dialogState.copy(gameId = input.trim())
+        newGameDialogState = newGameDialogState.copy(gameId = input.trim())
     }
 
     fun onClickCreateOrJoinGameDialog() {
-        dialogState = dialogState.copy(createOrJoinGameDialog = !dialogState.createOrJoinGameDialog)
+        newGameDialogState = newGameDialogState.copy(createOrJoinGameDialog = !newGameDialogState.createOrJoinGameDialog)
     }
 
     fun onClickLeaveGameDialog(){
-        dialogState = dialogState.copy(leaveGameDialog = !dialogState.leaveGameDialog)
+        newGameDialogState = newGameDialogState.copy(leaveGameDialog = !newGameDialogState.leaveGameDialog)
     }
 
     fun newGame() {
         viewModelScope.launch {
             withContext(Dispatchers.IO){
-                val count = firestoreRepositoryImpl.countGamePlayers(dialogState.gameId)
+                val count = firestoreRepositoryImpl.countGamePlayers(newGameDialogState.gameId)
                 if(count < 4) {
-                    val playerId = firestoreRepositoryImpl.insertGamePlayer(dialogState.gameId, userLoginPreferenceState.value.userName)
+                    val playerId = firestoreRepositoryImpl.insertGamePlayer(newGameDialogState.gameId, userLoginPreferenceState.value.userName)
                     gamePreferencesRepository.saveGamePreference(
-                        gameId = dialogState.gameId,
+                        gameId = newGameDialogState.gameId,
                         playerId = playerId,
                         isGameActive = true
                     )
