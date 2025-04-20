@@ -348,6 +348,7 @@ private fun ResultDialog(
     AlertDialog(
         onDismissRequest = {
             onClickResultDialog()
+            navigateToHomeScreen()
         },
         title = { Text(text = "Updated Properties") },
         text = {
