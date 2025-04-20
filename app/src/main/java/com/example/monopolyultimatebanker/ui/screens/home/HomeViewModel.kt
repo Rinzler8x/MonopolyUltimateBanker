@@ -23,11 +23,14 @@ import com.example.monopolyultimatebanker.utils.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -35,8 +38,13 @@ import kotlin.coroutines.CoroutineContext
 
 data class NewGameDialogState(
     val createOrJoinGameDialog: Boolean = false,
-    val leaveGameDialog: Boolean = false,
     val gameId: String = ""
+)
+
+data class MultiPurposeDialogState(
+    val leaveGameDialog: Boolean = false,
+    val logoutDialog: Boolean = false,
+    val navigateToNewLocationDialog: Boolean = false,
 )
 
 data class FirestoreGameState(
@@ -133,10 +141,6 @@ class HomeViewModel @Inject constructor(
         newGameDialogState = newGameDialogState.copy(createOrJoinGameDialog = !newGameDialogState.createOrJoinGameDialog)
     }
 
-    fun onClickLeaveGameDialog(){
-        newGameDialogState = newGameDialogState.copy(leaveGameDialog = !newGameDialogState.leaveGameDialog)
-    }
-
     fun newGame() {
         viewModelScope.launch {
             withContext(Dispatchers.IO){
@@ -156,6 +160,34 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**Multipurpose Dialog Box*/
+    private val _uiMultiPurposeDialog = MutableStateFlow(MultiPurposeDialogState())
+    val uiMultiPurposeDialog: StateFlow<MultiPurposeDialogState> = _uiMultiPurposeDialog.asStateFlow()
+
+    fun onClickLeaveGameDialog() {
+        _uiMultiPurposeDialog.update { currentState ->
+            currentState.copy(
+                leaveGameDialog = !_uiMultiPurposeDialog.value.leaveGameDialog
+            )
+        }
+    }
+
+    fun onClickLogOutDialog() {
+        _uiMultiPurposeDialog.update { currentState ->
+            currentState.copy(
+                logoutDialog = !_uiMultiPurposeDialog.value.logoutDialog
+            )
+        }
+    }
+
+    fun onClickNavigateToNewLocationDialog() {
+        _uiMultiPurposeDialog.update { currentState ->
+            currentState.copy(
+                navigateToNewLocationDialog = !_uiMultiPurposeDialog.value.navigateToNewLocationDialog
+            )
+        }
+    }
+
     /**Live Game Code*/
     fun leaveGame() {
         viewModelScope.launch {
@@ -169,6 +201,14 @@ class HomeViewModel @Inject constructor(
             gameRepositoryImpl.deleteGame()
             playerPropertyRepositoryImpl.playerPropertyDeleteAllProperties()
             gamePreferencesRepository.resetGamePreference()
+        }
+    }
+
+    fun navigateToNewLocation() {
+        viewModelScope.launch {
+            firestoreGameLogicImpl.navigateToNewLocation(
+                playerId = gamePreferenceState.value.playerId
+            )
         }
     }
 

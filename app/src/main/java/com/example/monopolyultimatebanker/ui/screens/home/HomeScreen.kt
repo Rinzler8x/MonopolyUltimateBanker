@@ -74,6 +74,7 @@ fun HomeScreen(
     val firestoreGameState by homeViewModel.firestoreGameState.collectAsStateWithLifecycle()
     val firestorePlayerPropertyState by homeViewModel.firestorePlayerPropertyState.collectAsStateWithLifecycle()
     val gameState by homeViewModel.gameState.collectAsStateWithLifecycle()
+    val multiPurposeDialogState by homeViewModel.uiMultiPurposeDialog.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -104,7 +105,9 @@ fun HomeScreen(
                     username = userLoginState.userName,
                     gameId = gamePrefState.gameId,
                     isGameActive = gamePrefState.isGameActive,
-                    onClickLeaveGameDialog = homeViewModel::onClickLeaveGameDialog
+                    onClickLeaveGameDialog = homeViewModel::onClickLeaveGameDialog,
+                    onCLickLogOutDialog = homeViewModel::onClickLogOutDialog,
+                    onClickNavigateToNewLocationDialog = homeViewModel::onClickNavigateToNewLocationDialog
                 )
             }
         },
@@ -150,10 +153,33 @@ fun HomeScreen(
                     )
                 }
 
-                if(newGameDialogState.leaveGameDialog){
-                    LeaveGameDialog(
-                        onClickLeaveGameDialog = homeViewModel::onClickLeaveGameDialog,
-                        leaveGame = homeViewModel::leaveGame
+                if(multiPurposeDialogState.leaveGameDialog){
+                    MultiPurposeDialog(
+                        onClickDialogState = homeViewModel::onClickLeaveGameDialog,
+                        title = "Leave Game",
+                        description = "Are you sure you want leave the game?",
+                        isLeaveGame = true,
+                        leaveGame = homeViewModel::leaveGame,
+                    )
+                }
+
+                if(multiPurposeDialogState.logoutDialog){
+                    MultiPurposeDialog(
+                        onClickDialogState = homeViewModel::onClickLogOutDialog,
+                        title = "Log Out",
+                        description = "Are you sure you want to log out?",
+                        isLogOut = true,
+                        logOut = {},
+                    )
+                }
+
+                if(multiPurposeDialogState.navigateToNewLocationDialog){
+                    MultiPurposeDialog(
+                        onClickDialogState = homeViewModel::onClickNavigateToNewLocationDialog,
+                        title = "Navigation",
+                        description = "Pay 100$ and navigate to any property space.",
+                        isNavigate = true,
+                        nagivateToNewLocation = homeViewModel::navigateToNewLocation,
                     )
                 }
             }
@@ -168,6 +194,8 @@ private fun DrawerContent(
     gameId: String,
     isGameActive: Boolean,
     onClickLeaveGameDialog: () -> Unit,
+    onCLickLogOutDialog: () -> Unit,
+    onClickNavigateToNewLocationDialog: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -195,9 +223,20 @@ private fun DrawerContent(
                 Text("Leave")
             }
             Button(
-                onClick = {},
+                onClick = onCLickLogOutDialog,
             ) {
                 Text("Log Out")
+            }
+        }
+        HorizontalDivider(modifier = modifier.padding(bottom = 12.dp, top = 8.dp))
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = modifier.fillMaxWidth()
+        ) {
+            Button(
+                onClick = onClickNavigateToNewLocationDialog
+            ) {
+                Text(text = "Navigation")
             }
         }
     }
@@ -255,18 +294,25 @@ private fun NoActiveGame(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun LeaveGameDialog(
-    onClickLeaveGameDialog: () -> Unit,
-    leaveGame: () -> Unit,
+private fun MultiPurposeDialog(
+    onClickDialogState: () -> Unit,
+    title: String,
+    description: String,
+    isLeaveGame: Boolean = false,
+    leaveGame: () -> Unit = {},
+    isLogOut: Boolean = false,
+    logOut: () -> Unit = {},
+    isNavigate: Boolean = false,
+    nagivateToNewLocation: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
-        onDismissRequest = onClickLeaveGameDialog,
-        title = { Text(text = "Leave Game") },
-        text = { Text(text = "Are you sure you want leave the game?") },
+        onDismissRequest = onClickDialogState,
+        title = { Text(text = title) },
+        text = { Text(text = description) },
         dismissButton = {
             TextButton(
-                onClick = onClickLeaveGameDialog
+                onClick = onClickDialogState
             ) {
                 Text(text = stringResource(R.string.dismiss))
             }
@@ -274,8 +320,14 @@ private fun LeaveGameDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    leaveGame()
-                    onClickLeaveGameDialog()
+                    if(isLeaveGame) {
+                        leaveGame()
+                    } else if(isLogOut) {
+                        logOut()
+                    } else if(isNavigate) {
+                        nagivateToNewLocation()
+                    }
+                    onClickDialogState()
                 }
             ) {
                 Text(text = stringResource(R.string.confirm))
