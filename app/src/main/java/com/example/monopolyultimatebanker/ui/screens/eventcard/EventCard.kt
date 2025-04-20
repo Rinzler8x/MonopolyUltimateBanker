@@ -59,9 +59,9 @@ fun EventCard(
     val eventState by eventCardViewModel.eventState.collectAsStateWithLifecycle()
     val qrPrefState by eventCardViewModel.qrPrefState.collectAsStateWithLifecycle()
     val gameState by eventCardViewModel.gameState.collectAsStateWithLifecycle()
-    val playerBottomSheetState = eventCardViewModel.playerBottomSheetState
+    val playerBottomSheetState by eventCardViewModel.uiPlayerBottomSheet.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState()
-    val propertyDialogState = eventCardViewModel.propertyDialogState
+    val propertyDialogState by eventCardViewModel.uiPropertyDialog.collectAsStateWithLifecycle()
     val actionUserInput = eventCardViewModel.actionUserInput
     val resultsUiState by eventCardViewModel.uiResults.collectAsStateWithLifecycle()
 
@@ -139,6 +139,61 @@ fun EventCard(
     }
 }
 
+@Composable
+private fun EventCardContent(
+    title: String,
+    phrase: String,
+    action: String,
+    navigateToHomeScreen: () -> Unit,
+    onClickAction: (() -> Unit) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(text = title)
+    }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = phrase,
+            textAlign = TextAlign.Center
+        )
+    }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            Icons.Filled.Home,
+            contentDescription = "Icon",
+            modifier = modifier.size(100.dp)
+        )
+    }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = action,
+            textAlign = TextAlign.Center
+        )
+    }
+
+    Button(
+        onClick = { onClickAction(navigateToHomeScreen) }
+    ) {
+        Text(
+            text = "Action"
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -360,60 +415,4 @@ private fun WrongPropertyInputDialog(
             }
         }
     )
-}
-
-@Composable
-private fun EventCardContent(
-    title: String,
-    phrase: String,
-    action: String,
-    navigateToHomeScreen: () -> Unit,
-    onClickAction: (() -> Unit) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(text = title)
-    }
-
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = phrase,
-            textAlign = TextAlign.Center
-        )
-    }
-
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            Icons.Filled.Home,
-            contentDescription = "Icon",
-            modifier = modifier.size(100.dp)
-        )
-    }
-
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = action,
-            textAlign = TextAlign.Center
-        )
-    }
-
-    Button(
-        onClick = { onClickAction(navigateToHomeScreen) }
-    ) {
-        Text(
-            text = "Action"
-        )
-    }
 }

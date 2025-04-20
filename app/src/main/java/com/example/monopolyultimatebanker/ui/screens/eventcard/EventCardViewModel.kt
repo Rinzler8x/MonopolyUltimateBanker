@@ -1,5 +1,6 @@
 package com.example.monopolyultimatebanker.ui.screens.eventcard
 
+import androidx.compose.runtime.currentCompositionErrors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -112,33 +113,59 @@ class EventCardViewModel @Inject constructor(
     }
 
     /**Player Bottom Sheet*/
-    var playerBottomSheetState by mutableStateOf(PlayerBottomSheetState())
+    private val _uiPlayerBottomSheet = MutableStateFlow(PlayerBottomSheetState())
+    val uiPlayerBottomSheet: StateFlow<PlayerBottomSheetState> = _uiPlayerBottomSheet.asStateFlow()
 
     fun onCLickPlayerBottomSheet() {
-        playerBottomSheetState = playerBottomSheetState.copy(showBottomSheet = !playerBottomSheetState.showBottomSheet)
+        _uiPlayerBottomSheet.update { currentState ->
+            currentState.copy(
+                showBottomSheet = !_uiPlayerBottomSheet.value.showBottomSheet
+            )
+        }
     }
 
     /**Dialog State */
-    var propertyDialogState by mutableStateOf(DialogState())
+    private val _uiPropertyDialog = MutableStateFlow(DialogState())
+    val uiPropertyDialog: StateFlow<DialogState> = _uiPropertyDialog.asStateFlow()
 
     fun onClickPropertyDialog1() {
-        propertyDialogState = propertyDialogState.copy(propertyDialogState1 = !propertyDialogState.propertyDialogState1)
+        _uiPropertyDialog.update { currentState ->
+            currentState.copy(
+                propertyDialogState1 = !_uiPropertyDialog.value.propertyDialogState1
+            )
+        }
     }
 
     fun onClickPropertyDialog2() {
-        propertyDialogState = propertyDialogState.copy(propertyDialogState2 = !propertyDialogState.propertyDialogState2)
+        _uiPropertyDialog.update { currentState ->
+            currentState.copy(
+                propertyDialogState2 = !_uiPropertyDialog.value.propertyDialogState2
+            )
+        }
     }
 
     fun onClickDoubleInput() {
-        propertyDialogState = propertyDialogState.copy(doubleInput = !propertyDialogState.doubleInput)
+        _uiPropertyDialog.update { currentState ->
+            currentState.copy(
+                doubleInput = !_uiPropertyDialog.value.doubleInput
+            )
+        }
     }
 
     fun onClickResultDialog() {
-        propertyDialogState = propertyDialogState.copy(resultDialogState = !propertyDialogState.resultDialogState)
+        _uiPropertyDialog.update { currentState ->
+            currentState.copy(
+                resultDialogState = !_uiPropertyDialog.value.resultDialogState
+            )
+        }
     }
 
     fun onClickWrongPropertyInputDialog() {
-        propertyDialogState = propertyDialogState.copy(wrongPropertyInputDialogState = !propertyDialogState.wrongPropertyInputDialogState)
+        _uiPropertyDialog.update { currentState ->
+            currentState.copy(
+                wrongPropertyInputDialogState = !_uiPropertyDialog.value.wrongPropertyInputDialogState
+            )
+        }
     }
 
     /**User Input State*/
