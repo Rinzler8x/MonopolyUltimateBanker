@@ -13,6 +13,10 @@ import com.example.monopolyultimatebanker.utils.SnackbarController
 import com.example.monopolyultimatebanker.utils.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,7 +31,7 @@ data class CameraControlState(
 
 data class DialogState(
     val codeDialog: Boolean = false,
-    val radioOptions: List<String> = listOf("Property Card", "Event Card"),
+    val radioOptions: List<String> = listOf("Property Card", "Event Card", "Collect 200"),
     val selectedOption: String = radioOptions[0],
     val prefixValue: String = "monopro_"
 )
@@ -41,29 +45,40 @@ class QrCodeScannerViewModel @Inject constructor(
     var qrState by mutableStateOf(QrCodeState())
         private set
 
-    var cameraCtrlState by mutableStateOf(CameraControlState(LifecycleCameraController(appContext)))
-
     fun setQrCode(input: String){
         qrState = qrState.copy(qrCode = input.trim())
     }
 
+    private val _uiCameraCtrl = MutableStateFlow(CameraControlState(LifecycleCameraController(appContext)))
+    val uiCameraCtrl: StateFlow<CameraControlState> = _uiCameraCtrl.asStateFlow()
+
     fun getCameraController(context: Context): CameraControlState{
-        cameraCtrlState = cameraCtrlState.copy(cameraController = LifecycleCameraController(context))
-        return cameraCtrlState
+        _uiCameraCtrl.update { currentState ->
+            currentState.copy(
+                cameraController = LifecycleCameraController(context)
+            )
+        }
+        return uiCameraCtrl.value
     }
 
-    var dialogState by mutableStateOf(DialogState())
-        private set
+    private val _uiDialog = MutableStateFlow(DialogState())
+    val uiDialog: StateFlow<DialogState> = _uiDialog.asStateFlow()
 
     fun onClickCodeDialog(){
-        dialogState = dialogState.copy(codeDialog = !dialogState.codeDialog)
+        _uiDialog.update { currentState ->
+            currentState.copy(
+                codeDialog = !_uiDialog.value.codeDialog
+            )
+        }
     }
 
     fun onOptionSelected(input: String) {
-        dialogState = if(input.startsWith("Property")) {
-            dialogState.copy(prefixValue = "monopro_", selectedOption = input)
-        } else {
-            dialogState.copy(prefixValue = "monoeve_", selectedOption = input)
+        _uiDialog.update { currentState ->
+            if(input.startsWith("Property")) {
+                currentState.copy(prefixValue = "monopro_", selectedOption = input)
+            } else {
+                currentState.copy(prefixValue = "monoeve_", selectedOption = input)
+            }
         }
     }
 
@@ -76,7 +91,7 @@ class QrCodeScannerViewModel @Inject constructor(
             if(qrScannerInput) {
                 setQrCode(qrCode)
             } else {
-                setQrCode(dialogState.prefixValue + qrCode)
+                setQrCode(uiDialog.value.prefixValue + qrCode)
             }
             qrPreferencesRepository.saveProQrPreference(qrState.qrCode)
             navigateToPropertyScreen()
@@ -92,7 +107,7 @@ class QrCodeScannerViewModel @Inject constructor(
             if(qrScannerInput) {
                 setQrCode(qrCode)
             } else {
-                setQrCode(dialogState.prefixValue + qrCode)
+                setQrCode(uiDialog.value.prefixValue + qrCode)
             }
             qrPreferencesRepository.saveEveQrPreference(qrState.qrCode)
             navigateToEventScreen()
@@ -100,7 +115,7 @@ class QrCodeScannerViewModel @Inject constructor(
     }
 
     fun unbindCameraController() {
-        cameraCtrlState.cameraController.unbind()
+        uiCameraCtrl.value.cameraController.unbind()
     }
 
     fun showWrongQrCodeSnackbar() {

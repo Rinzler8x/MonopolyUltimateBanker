@@ -28,6 +28,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
 import com.example.monopolyultimatebanker.utils.ObserverAsEvents
@@ -59,6 +61,7 @@ fun QrCodeScanner(
     modifier: Modifier = Modifier,
     navigateToPropertyScreen: () -> Unit,
     navigateToEventScreen: () -> Unit,
+    navigateToCollect200: () -> Unit,
     qrCodeScannerViewModel: QrCodeScannerViewModel = hiltViewModel()
 ) {
 
@@ -67,9 +70,10 @@ fun QrCodeScanner(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraCtrlState by qrCodeScannerViewModel.uiCameraCtrl.collectAsStateWithLifecycle()
     val cameraCtrl = qrCodeScannerViewModel.getCameraController(context)
-    val qrScannerUtil = qrCodeScannerViewModel.cameraCtrlState.qrScannerUtil
-    val dialogState = qrCodeScannerViewModel.dialogState
+    val qrScannerUtil = cameraCtrlState.qrScannerUtil
+    val dialogState by qrCodeScannerViewModel.uiDialog.collectAsStateWithLifecycle()
 
     ObserverAsEvents(
         flow = SnackbarController.events,
@@ -133,6 +137,9 @@ fun QrCodeScanner(
                                                 navigateToEventScreen = navigateToEventScreen
                                             )
                                             qrCodeScannerViewModel.unbindCameraController()
+                                        } else if (tempVar.startsWith("collect")){
+                                            qrCodeScannerViewModel.unbindCameraController()
+                                            navigateToCollect200()
                                         } else {
                                             qrCodeScannerViewModel.showWrongQrCodeSnackbar()
                                         }
@@ -161,7 +168,8 @@ fun QrCodeScanner(
                 unBindCamera = qrCodeScannerViewModel::unbindCameraController,
                 radioOptions = dialogState.radioOptions,
                 selectedOption = dialogState.selectedOption,
-                onOptionSelected = qrCodeScannerViewModel::onOptionSelected
+                onOptionSelected = qrCodeScannerViewModel::onOptionSelected,
+                navigateToCollect200 = navigateToCollect200
             )
         }
     }
@@ -211,6 +219,7 @@ private fun CodeDialog(
     saveQrCodeAndNavigateToEventScreen: (String, Boolean, () -> Unit) -> Unit,
     navigateToPropertyScreen: () -> Unit,
     navigateToEventScreen: () -> Unit,
+    navigateToCollect200: () -> Unit,
     unBindCamera: () -> Unit,
     radioOptions: List<String>,
     selectedOption: String,
@@ -251,7 +260,8 @@ private fun CodeDialog(
                             }
                         }
                     },
-                    isError = (qrCode.isNotBlank() && (qrCode.toInt() !in 1..22))
+                    isError = (qrCode.isNotBlank() && (qrCode.toInt() !in 1..22)),
+                    enabled = (!selectedOption.startsWith("Collect"))
                 )
             }
         },
@@ -282,9 +292,11 @@ private fun CodeDialog(
                             false,
                             navigateToEventScreen
                         )
+                    } else if(selectedOption.startsWith("Collect")) {
+                        navigateToCollect200()
                     }
                 },
-                enabled = (qrCode.isNotBlank() && (qrCode.toInt() in 1..22))
+                enabled = ((qrCode.isNotBlank() && (qrCode.toInt() in 1..22)) || selectedOption.startsWith("Collect"))
             ) {
                 Text(text = stringResource(R.string.confirm))
             }
