@@ -1,6 +1,5 @@
 package com.example.monopolyultimatebanker.data.firebase.database
 
-import androidx.room.Update
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +30,7 @@ class FirestoreGameLogicImpl @Inject constructor(
     override suspend fun eventDeduct50PerProperty(playerId: String) {
         withContext(Dispatchers.IO) {
             val playerBalance = gameRepositoryImpl.getGamePlayer(playerId).playerBalance
-            val count = gameRepositoryImpl.gameEventDeduct50PerProperty(playerId) ?: 0
+            val count = playerPropertyRepositoryImpl.playerPropertyCountPlayerProperties(playerId)
             if(count > 0) {
                 val amount = playerBalance - (50 * count)
                 firestoreRepositoryImpl.updateGamePlayer(
