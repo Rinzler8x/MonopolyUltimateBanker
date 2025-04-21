@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.monopolyultimatebanker.data.eventtable.Event
 import com.example.monopolyultimatebanker.data.eventtable.EventRepositoryImpl
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
@@ -278,20 +279,24 @@ class EventCardViewModel @Inject constructor(
 //    }
 
     fun onClickActionCheckUserInputRequired(navigateToHome: () -> Unit) {
-        when(qrPrefState.value.event) {
+        when (qrPrefState.value.event) {
             "monoeve_1", "monoeve_9" -> {
                 onClickDoubleInput()
                 onCLickPlayerBottomSheet()
             }
+
             "monoeve_2", "monoeve_13", "monoeve_18", "monoeve_4",
             "monoeve_22", "monoeve_5", "monoeve_17", "monoeve_11",
             "monoeve_14", "monoeve_16", "monoeve_20" -> {
                 onClickPropertyDialog1()
             }
+
             "monoeve_8" -> {
                 onClickAction()
             }
-            "monoeve_3", "monoeve_6", "monoeve_7", "monoeve_12", "monoeve_19", "monoeve_15", "monoeve_21" -> {
+
+            "monoeve_3", "monoeve_6", "monoeve_7", "monoeve_12",
+            "monoeve_19", "monoeve_15", "monoeve_21" -> {
                 navigateToHome()
             }
         }
@@ -302,7 +307,7 @@ class EventCardViewModel @Inject constructor(
         viewModelScope.launch {
             val playerId = gamePreferencesRepository.gameState.first().playerId
             withContext(Dispatchers.IO) {
-                when(qrPrefState.value.event) {
+                when (qrPrefState.value.event) {
                     "monoeve_1", "monoeve_9" -> {
                         propertyOwnerCheck = playerPropertyRepositoryImpl
                             .playerPropertyCheckIfPropertyBelongsToPlayer(
@@ -315,6 +320,7 @@ class EventCardViewModel @Inject constructor(
                                 playerId = actionUserInput.playerId
                             )
                     }
+
                     "monoeve_2", "monoeve_13", "monoeve_18", "monoeve_4",
                     "monoeve_22", "monoeve_5", "monoeve_17", "monoeve_11",
                     "monoeve_14", "monoeve_16", "monoeve_20" -> {
@@ -324,34 +330,51 @@ class EventCardViewModel @Inject constructor(
                                 playerId = playerId
                             )
                     }
+
+                    "monoeve_8" -> {
+                        val count = playerPropertyRepositoryImpl
+                            .playerPropertyCountPlayerProperties(
+                                playerId = playerId
+                            )
+                        propertyOwnerCheck = (count > 0)
+                    }
                 }
             }
-            if(propertyOwnerCheck) {
-                when(qrPrefState.value.event) {
+
+            if (propertyOwnerCheck) {
+                when (qrPrefState.value.event) {
                     "monoeve_1", "monoeve_9" -> {
                         swapProperty()
                     }
+
                     "monoeve_2", "monoeve_13", "monoeve_18" -> {
                         rentLevelResetTo1()
                     }
+
                     "monoeve_20" -> {
                         rentLevelJumpsTo5()
                     }
+
                     "monoeve_4", "monoeve_22" -> {
                         rentLevelIncreaseForYouAndDecreaseForNeighbours()
                     }
+
                     "monoeve_5" -> {
                         rentLevelIncreaseForBoardSide()
                     }
+
                     "monoeve_17" -> {
                         rentLevelDecreaseForBoardSide()
                     }
+
                     "monoeve_11", "monoeve_14" -> {
                         rentLevelIncreaseForColorSet()
                     }
+
                     "monoeve_16" -> {
                         rentLevelDecreaseForColorSet()
                     }
+
                     "monoeve_8" -> {
                         pay50PerPropertyOwned()
                     }
@@ -367,6 +390,5 @@ class EventCardViewModel @Inject constructor(
             updatePropertyNo2("")
             updatePlayerId("")
         }
-
     }
 }
