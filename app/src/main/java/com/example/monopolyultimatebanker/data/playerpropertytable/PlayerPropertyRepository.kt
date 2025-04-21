@@ -13,6 +13,8 @@ interface PlayerPropertyRepository {
 
     suspend fun playerPropertyCheckIfPropertyBelongsToPlayer(propertyNo: Int, playerId: String): Boolean
 
+    suspend fun playerPropertyCountPlayerProperties(playerId: String): Int
+
 //    suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int)
 //
 //    suspend fun playerPropertyPropertySwap(player1Id: String, player2Id: String, property1No: Int, property2No: Int)

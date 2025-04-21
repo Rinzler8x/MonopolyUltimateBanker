@@ -15,6 +15,8 @@ class PlayerPropertyRepositoryImpl @Inject constructor(
 
     override suspend fun playerPropertyCheckIfPropertyBelongsToPlayer(propertyNo: Int, playerId: String): Boolean = playerPropertyDao.checkIfPropertyBelongsToPlayer(propertyNo, playerId) == 1
 
+    override suspend fun playerPropertyCountPlayerProperties(playerId: String): Int = playerPropertyDao.countPlayerProperties(playerId)
+
 //    override suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int) = playerPropertyDao.swapProperty(playerId, propertyNo)
 //
 //    override suspend fun playerPropertyPropertySwap(
