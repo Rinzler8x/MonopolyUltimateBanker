@@ -179,7 +179,7 @@ fun HomeScreen(
                         title = "Navigation",
                         description = "Pay 100$ and navigate to any property space.",
                         isNavigate = true,
-                        nagivateToNewLocation = homeViewModel::navigateToNewLocation,
+                        navigateToNewLocation = homeViewModel::navigateToNewLocation,
                     )
                 }
             }
@@ -234,7 +234,8 @@ private fun DrawerContent(
             modifier = modifier.fillMaxWidth()
         ) {
             Button(
-                onClick = onClickNavigateToNewLocationDialog
+                onClick = onClickNavigateToNewLocationDialog,
+                enabled = isGameActive
             ) {
                 Text(text = "Navigation")
             }
@@ -303,7 +304,7 @@ private fun MultiPurposeDialog(
     isLogOut: Boolean = false,
     logOut: () -> Unit = {},
     isNavigate: Boolean = false,
-    nagivateToNewLocation: () -> Unit = {},
+    navigateToNewLocation: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
@@ -325,7 +326,7 @@ private fun MultiPurposeDialog(
                     } else if(isLogOut) {
                         logOut()
                     } else if(isNavigate) {
-                        nagivateToNewLocation()
+                        navigateToNewLocation()
                     }
                     onClickDialogState()
                 }

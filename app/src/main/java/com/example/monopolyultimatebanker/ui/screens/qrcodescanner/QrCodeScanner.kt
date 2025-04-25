@@ -251,7 +251,7 @@ private fun CodeDialog(
                     visualTransformation = VisualTransformation.None,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
                     supportingText = {
-                        if(qrCode.isNotBlank()){
+                        if(qrCode.isNotBlank()) {
                             if(qrCode.toInt() !in 1..22) {
                                 Text(
                                     text = "Must be between 1 to 22.",

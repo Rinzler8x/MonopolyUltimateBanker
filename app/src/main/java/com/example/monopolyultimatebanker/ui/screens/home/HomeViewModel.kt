@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGame
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
+import com.example.monopolyultimatebanker.data.firebase.database.FirestorePlayerProperty
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
@@ -17,7 +18,6 @@ import com.example.monopolyultimatebanker.data.preferences.GamePrefState
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.UserLogin
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
-import com.example.monopolyultimatebanker.ui.screens.propertycard.PlayerPropertyState
 import com.example.monopolyultimatebanker.utils.SnackbarController
 import com.example.monopolyultimatebanker.utils.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,6 +49,10 @@ data class MultiPurposeDialogState(
 
 data class FirestoreGameState(
     val firestoreGame: List<FirestoreGame> = listOf()
+)
+
+data class FirestorePlayerPropertyState(
+    val playerProperties: List<FirestorePlayerProperty> = listOf()
 )
 
 data class GameState(
@@ -117,16 +121,16 @@ class HomeViewModel @Inject constructor(
             )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val firestorePlayerPropertyState: StateFlow<PlayerPropertyState> =
-        gamePreferenceState.flatMapLatest { it ->
-            firestoreRepositoryImpl.getPlayerProperty(it.gameId).map {
-                PlayerPropertyState(it)
+    val firestorePlayerPropertyState: StateFlow<FirestorePlayerPropertyState> =
+        gamePreferenceState.flatMapLatest { prefState ->
+            firestoreRepositoryImpl.getPlayerProperty(prefState.gameId).map { firestorePPState ->
+                FirestorePlayerPropertyState(firestorePPState)
             }
         }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = PlayerPropertyState()
+                initialValue = FirestorePlayerPropertyState()
             )
 
     /**Dialog Boxes Code*/
@@ -201,6 +205,7 @@ class HomeViewModel @Inject constructor(
             gameRepositoryImpl.deleteGame()
             playerPropertyRepositoryImpl.playerPropertyDeleteAllProperties()
             gamePreferencesRepository.resetGamePreference()
+
         }
     }
 
