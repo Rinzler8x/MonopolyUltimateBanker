@@ -1,13 +1,15 @@
 package com.example.monopolyultimatebanker.ui.screens.propertycard
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
-import com.example.monopolyultimatebanker.data.firebase.database.FirestorePlayerProperty
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
+import com.example.monopolyultimatebanker.data.playerpropertytable.OwnedPlayerProperties
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerProperty
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
-import com.example.monopolyultimatebanker.data.preferences.GamePrefState
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrType
@@ -16,19 +18,34 @@ import com.example.monopolyultimatebanker.data.propertytable.PropertyRepositoryI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.reflect.Field
 import javax.inject.Inject
 
-data class PlayerPropertyState(
-    val playerProperties: List<FirestorePlayerProperty> = listOf()
+
+data class PropertyBottomSheetState(
+    val showBottomSheet: Boolean = false,
+    val selectedProperties: List<OwnedPlayerProperties> = listOf(),
+    val ownedPlayerProperties: List<OwnedPlayerProperties> = listOf()
+)
+
+data class MultiPurposePropertyDialog(
+    val purchaseDialogState: Boolean = false,
+    val insufficientFundsDialogState: Boolean = false,
+    val resultDialogState: Boolean = false,
+    val propertyTransferDialogState: Boolean = false,
+    val rentLevelIncreaseDialogState: Boolean = false,
+    val rentLevel: Int = 1,
 )
 
 @HiltViewModel
@@ -41,20 +58,6 @@ class PropertyCardViewModel @Inject constructor(
     private val gamePreferencesRepository: GamePreferencesRepository,
     private val playerPropertyRepositoryImpl: PlayerPropertyRepositoryImpl
 ): ViewModel() {
-
-    val gamePreferenceState: StateFlow<GamePrefState> =
-        gamePreferencesRepository.gameState.map {
-            GamePrefState(
-                gameId = it.gameId,
-                playerId = it.playerId,
-                isGameActive = it.isGameActive
-            )
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = GamePrefState()
-            )
 
     val qrPrefState: StateFlow<QrType> =
         qrPreferencesRepository.qrState.map {
@@ -77,43 +80,167 @@ class PropertyCardViewModel @Inject constructor(
                 initialValue = Property()
             )
 
-    fun onClickPay(navigateToHomeScreen: () -> Unit) {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val playerPropertyState: StateFlow<PlayerProperty> = propertyState
+        .flatMapLatest {
+            playerPropertyRepositoryImpl.getPlayerPropertyFlow(it.propertyNo).map { playerProperty ->
+                playerProperty ?: PlayerProperty(rentLevel = 1)
+            }
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = PlayerProperty(propertyNo = 1)
+            )
+
+    /**Player Bottom Sheet*/
+    private val _uiPropertyBottomSheetState = MutableStateFlow(PropertyBottomSheetState())
+    val uiPropertyBottomSheetState: StateFlow<PropertyBottomSheetState> = _uiPropertyBottomSheetState.asStateFlow()
+
+    fun onCLickPropertyBottomSheet(ownedProperties: List<OwnedPlayerProperties> = emptyList()) {
+        _uiPropertyBottomSheetState.update { currentState ->
+            currentState.copy(
+                showBottomSheet = !_uiPropertyBottomSheetState.value.showBottomSheet,
+                ownedPlayerProperties = ownedProperties
+            )
+        }
+    }
+
+    fun onClickCheckBox(ppId: String, propertyNo: Int, rentLevel1: Int, isChecked: Boolean) {
+        val currentList = _uiPropertyBottomSheetState.value.selectedProperties.toMutableList()
+        if(isChecked) {
+            if(!currentList.contains(OwnedPlayerProperties(ppId, propertyNo, rentLevel1))) {
+                currentList.add(OwnedPlayerProperties(ppId, propertyNo, rentLevel1))
+            }
+        } else {
+            currentList.remove(OwnedPlayerProperties(ppId, propertyNo, rentLevel1))
+        }
+
+        _uiPropertyBottomSheetState.update { currentState ->
+            currentState.copy(selectedProperties = currentList)
+        }
+    }
+
+    /**Dialog Box*/
+    private val _uiMultiPurposePropertyDialog = MutableStateFlow(MultiPurposePropertyDialog())
+    val uiMultiPurposePropertyDialog: StateFlow<MultiPurposePropertyDialog> = _uiMultiPurposePropertyDialog.asStateFlow()
+
+    fun onClickPurchaseDialog() {
+        _uiMultiPurposePropertyDialog.update { currentState ->
+            currentState.copy(
+                purchaseDialogState = !_uiMultiPurposePropertyDialog.value.purchaseDialogState
+            )
+        }
+    }
+
+    fun onClickInsufficientFundsDialog() {
+        _uiMultiPurposePropertyDialog.update { currentState ->
+            currentState.copy(
+                insufficientFundsDialogState = !_uiMultiPurposePropertyDialog.value.insufficientFundsDialogState
+            )
+        }
+    }
+
+    fun onClickResultDialog(rentLevel: Int = 0) {
+        _uiMultiPurposePropertyDialog.update { currentState ->
+            currentState.copy(
+                resultDialogState = !_uiMultiPurposePropertyDialog.value.resultDialogState,
+                rentLevel = if(_uiMultiPurposePropertyDialog.value.resultDialogState) {
+                    rentLevel
+                } else {
+                    rentLevel
+                }
+            )
+        }
+    }
+
+    fun onClickPropertyTransferDialog() {
+        _uiMultiPurposePropertyDialog.update { currentState ->
+            currentState.copy(
+                propertyTransferDialogState = !_uiMultiPurposePropertyDialog.value.propertyTransferDialogState
+            )
+        }
+    }
+
+    fun onClickRentLevelIncreaseDialog(rentLevel: Int = 0) {
+        _uiMultiPurposePropertyDialog.update { currentState ->
+            currentState.copy(
+                rentLevelIncreaseDialogState = !_uiMultiPurposePropertyDialog.value.rentLevelIncreaseDialogState,
+                rentLevel = if(_uiMultiPurposePropertyDialog.value.rentLevelIncreaseDialogState) {
+                    rentLevel
+                } else {
+                    rentLevel
+                }
+            )
+        }
+    }
+
+    fun transferProperties() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val propertyOwner = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyState.value.propertyNo)
+                val ownedProperties = _uiPropertyBottomSheetState.value.selectedProperties
+                val player = gameRepositoryImpl.getGamePlayer(gamePreferencesRepository.gameState.first().playerId)
+                firestoreGameLogicImpl.transferPlayerProperty(
+                    recipientId = propertyOwner.playerId,
+                    playerId = player.playerId,
+                    playerBalance = player.playerBalance,
+                    playerProperties = ownedProperties
+                )
+            }
+            onClickPropertyTransferDialog()
+        }
+    }
+
+    fun onClickPay() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val player = gameRepositoryImpl.getGamePlayer(
                     playerId = gamePreferencesRepository.gameState.first().playerId
                 )
+
                 if(playerPropertyRepositoryImpl.playerPropertyExists(propertyState.value.propertyNo) == 0) {
-                    firestoreRepositoryImpl.insertPlayerProperty(
-                        gameId = gamePreferencesRepository.gameState.first().gameId,
-                        playerId = gamePreferencesRepository.gameState.first().playerId,
-                        propertyNo = propertyState.value.propertyNo
-                    )
-                    firestoreRepositoryImpl.updateGamePlayer(
-                        playerId = gamePreferencesRepository.gameState.first().playerId,
-                        playerBalance = player.playerBalance - propertyState.value.rentLevel1
-                    )
+                    if(player.playerBalance >= propertyState.value.rentLevel1) {
+                        firestoreGameLogicImpl.purchaseProperty(
+                            playerId = player.playerId,
+                            gameId = gamePreferencesRepository.gameState.first().gameId,
+                            propertyNo = propertyState.value.propertyNo,
+                            playerBalance = player.playerBalance,
+                            propertyValue = propertyState.value.rentLevel1
+                        )
+                        onClickPurchaseDialog()
+                    } else {
+                        onClickInsufficientFundsDialog()
+                    }
                 } else {
                     val propertyOwner = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyState.value.propertyNo)
-                    val propertyOwnerDetails = gameRepositoryImpl.getGamePlayer(propertyOwner.playerId)
+                    val playerProperties = playerPropertyRepositoryImpl.playerPropertyGetPlayerProperties(playerId = player.playerId) ?: emptyList()
 
                     val fieldName = "rentLevel${propertyOwner.rentLevel}"
                     val field: Field = propertyState.value.javaClass.getDeclaredField(fieldName)
                     field.isAccessible = true
                     val rentValue = field.get(propertyState.value) as Int
 
-                    firestoreGameLogicImpl.rentLevelIncrease(propertyState.value.propertyNo)
-                    if(player.playerId != propertyOwnerDetails.playerId) {
-                        firestoreGameLogicImpl.transferRent(
-                            payerId = player.playerId,
-                            recipientId = propertyOwner.playerId,
-                            addAmount = (propertyOwnerDetails.playerBalance + rentValue),
-                            deductAmount = (player.playerBalance - rentValue)
-                        )
+                    if(player.playerBalance < rentValue && playerProperties.isNotEmpty()) {
+                        onCLickPropertyBottomSheet(playerProperties)
+                    }  else {
+                        firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
+                        if(player.playerId != propertyOwner.playerId) {
+                            firestoreGameLogicImpl.transferRent(
+                                property = propertyState,
+                                player = player
+                            )
+                            firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo).forEach {
+                                Log.d(TAG, "PROMSG: ${it.propertyNo} and ${it.rentLevel}")
+                            }
+                            onClickResultDialog(propertyOwner.rentLevel + 1)
+                        } else {
+                            firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
+                            onClickRentLevelIncreaseDialog(propertyOwner.rentLevel + 1)
+                        }
                     }
                 }
             }
-            navigateToHomeScreen()
         }
     }
 }
