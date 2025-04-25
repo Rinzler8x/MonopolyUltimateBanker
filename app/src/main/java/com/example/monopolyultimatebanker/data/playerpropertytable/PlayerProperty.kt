@@ -2,10 +2,7 @@ package com.example.monopolyultimatebanker.data.playerpropertytable
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import com.example.monopolyultimatebanker.data.gametable.Game
-import com.example.monopolyultimatebanker.data.propertytable.Property
 
 @Entity(
     tableName = "player_property",
@@ -28,8 +25,8 @@ import com.example.monopolyultimatebanker.data.propertytable.Property
 )
 
 data class PlayerProperty(
-    @PrimaryKey(autoGenerate = false) @ColumnInfo(name = "ppid") val ppId: String,
-    @ColumnInfo(name = "player_id") val playerId: String,
-    @ColumnInfo(name = "property_no") val propertyNo: Int,
-    @ColumnInfo(name = "rent_level") val rentLevel: Int,
+    @PrimaryKey(autoGenerate = false) @ColumnInfo(name = "ppid") val ppId: String = "",
+    @ColumnInfo(name = "player_id") val playerId: String = "",
+    @ColumnInfo(name = "property_no") val propertyNo: Int = 1,
+    @ColumnInfo(name = "rent_level") val rentLevel: Int = 1,
 )
