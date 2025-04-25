@@ -150,12 +150,12 @@ class FirestoreRepositoryImpl @Inject constructor(
         playerPropertyRef.whereEqualTo("gameId", gameId).snapshots().map { it ->
             val temp = it.toObjects<FirestorePlayerProperty>()
             withContext(Dispatchers.IO) {
-                it.map {
+                it.map { it2 ->
                     for(i in temp) {
                         if(playerPropertyRepositoryImpl.playerPropertyExists(i.propertyNo) == 0) {
                             playerPropertyRepositoryImpl.playerPropertyInsert(
                                 PlayerProperty(
-                                    ppId = it.id,
+                                    ppId = it2.id,
                                     playerId = i.playerId,
                                     propertyNo = i.propertyNo,
                                     rentLevel = i.rentLevel
