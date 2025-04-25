@@ -1,9 +1,14 @@
 package com.example.monopolyultimatebanker.data.firebase.database
 
+import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
+import com.example.monopolyultimatebanker.data.playerpropertytable.OwnedPlayerProperties
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
+import com.example.monopolyultimatebanker.data.propertytable.Property
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
+import java.lang.reflect.Field
 import javax.inject.Inject
 
 data class UpdatedProperty(
@@ -18,12 +23,34 @@ class FirestoreGameLogicImpl @Inject constructor(
 ) : FirestoreGameLogic {
 
     /**Game*/
-    override suspend fun transferRent(payerId: String, recipientId: String, addAmount: Int, deductAmount: Int) {
-        firestoreRepositoryImpl.transferRent(
-            payerId = payerId,
-            receipentId = recipientId,
-            addAmount = addAmount,
-            deductAmount = deductAmount
+    override suspend fun transferRent(property: StateFlow<Property>, player: Game) {
+        withContext(Dispatchers.IO) {
+            val playerPropertyDetails = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = property.value.propertyNo)
+            val playerPropertyOwnerDetails = gameRepositoryImpl.getGamePlayer(playerPropertyDetails.playerId)
+
+            val fieldName = "rentLevel${playerPropertyDetails.rentLevel}"
+            val field: Field = property.value.javaClass.getDeclaredField(fieldName)
+            field.isAccessible = true
+            val rentValue = field.get(property.value) as Int
+
+            firestoreRepositoryImpl.transferRent(
+                payerId = player.playerId,
+                receipentId = playerPropertyDetails.playerId,
+                addAmount = (playerPropertyOwnerDetails.playerBalance + rentValue),
+                deductAmount = (player.playerBalance - rentValue)
+            )
+        }
+    }
+
+    override suspend fun purchaseProperty(playerId: String, gameId: String, propertyNo: Int, playerBalance: Int, propertyValue: Int) {
+        firestoreRepositoryImpl.insertPlayerProperty(
+            gameId = gameId,
+            playerId = playerId,
+            propertyNo = propertyNo
+        )
+        firestoreRepositoryImpl.updateGamePlayer(
+            playerId = playerId,
+            playerBalance = (playerBalance - propertyValue)
         )
     }
 
@@ -74,6 +101,20 @@ class FirestoreGameLogicImpl @Inject constructor(
                 ppId2 = ppId2,
                 playerId1 = playerId1,
                 playerId2 = playerId2
+            )
+        }
+    }
+
+    override suspend fun transferPlayerProperty(recipientId: String, playerId: String, playerBalance: Int, playerProperties: List<OwnedPlayerProperties>) {
+        playerProperties.forEach { property ->
+            firestoreRepositoryImpl.updatePlayerPropertyOwner(
+                ppId = property.ppId,
+                playerId = recipientId
+            )
+
+            firestoreRepositoryImpl.updateGamePlayer(
+                playerId = playerId,
+                playerBalance = (playerBalance + property.rentLevel1)
             )
         }
     }
