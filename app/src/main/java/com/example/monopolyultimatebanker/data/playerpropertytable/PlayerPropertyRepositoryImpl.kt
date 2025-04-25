@@ -1,11 +1,14 @@
 package com.example.monopolyultimatebanker.data.playerpropertytable
 
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class PlayerPropertyRepositoryImpl @Inject constructor(
     private val playerPropertyDao: PlayerPropertyDao
 ) : PlayerPropertyRepository {
     override fun getPlayerProperty(propertyNo: Int): PlayerProperty = playerPropertyDao.getPlayerProperty(propertyNo)
+
+    override fun getPlayerPropertyFlow(propertyNo: Int): Flow<PlayerProperty> = playerPropertyDao.getPlayerPropertyFlow(propertyNo)
 
     override fun playerPropertyExists(propertyNo: Int): Int = playerPropertyDao.propertyExists(propertyNo)
 
@@ -16,6 +19,8 @@ class PlayerPropertyRepositoryImpl @Inject constructor(
     override suspend fun playerPropertyCheckIfPropertyBelongsToPlayer(propertyNo: Int, playerId: String): Boolean = playerPropertyDao.checkIfPropertyBelongsToPlayer(propertyNo, playerId) == 1
 
     override suspend fun playerPropertyCountPlayerProperties(playerId: String): Int = playerPropertyDao.countPlayerProperties(playerId)
+
+    override suspend fun playerPropertyGetPlayerProperties(playerId: String): List<OwnedPlayerProperties>? = playerPropertyDao.getPlayerProperties(playerId)
 
 //    override suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int) = playerPropertyDao.swapProperty(playerId, propertyNo)
 //

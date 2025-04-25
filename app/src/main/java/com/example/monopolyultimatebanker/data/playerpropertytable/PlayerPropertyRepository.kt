@@ -1,9 +1,13 @@
 package com.example.monopolyultimatebanker.data.playerpropertytable
 
+import kotlinx.coroutines.flow.Flow
+
 
 interface PlayerPropertyRepository {
 
     fun getPlayerProperty(propertyNo: Int): PlayerProperty
+
+    fun getPlayerPropertyFlow(propertyNo: Int): Flow<PlayerProperty>
 
     fun playerPropertyExists(propertyNo: Int): Int
 
@@ -14,6 +18,8 @@ interface PlayerPropertyRepository {
     suspend fun playerPropertyCheckIfPropertyBelongsToPlayer(propertyNo: Int, playerId: String): Boolean
 
     suspend fun playerPropertyCountPlayerProperties(playerId: String): Int
+
+    suspend fun playerPropertyGetPlayerProperties(playerId: String): List<OwnedPlayerProperties>?
 
 //    suspend fun playerPropertySwapProperty(playerId: String, propertyNo: Int)
 //

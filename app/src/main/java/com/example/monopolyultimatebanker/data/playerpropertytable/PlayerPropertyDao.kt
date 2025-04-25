@@ -4,6 +4,13 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+
+data class OwnedPlayerProperties(
+    val ppId: String,
+    val propertyNo: Int,
+    val rentLevel1: Int
+)
 
 @Dao
 interface PlayerPropertyDao {
@@ -13,6 +20,9 @@ interface PlayerPropertyDao {
 
     @Query("SELECT * FROM player_property WHERE property_no = :propertyNo")
     fun getPlayerProperty(propertyNo: Int): PlayerProperty
+
+    @Query("SELECT * FROM player_property WHERE property_no = :propertyNo")
+    fun getPlayerPropertyFlow(propertyNo: Int): Flow<PlayerProperty>
 
     @Query("SELECT COUNT(*) as count FROM player_property WHERE property_no = :propertyNo")
     fun propertyExists(propertyNo: Int): Int
@@ -27,6 +37,13 @@ interface PlayerPropertyDao {
 
     @Query("SELECT COUNT(*) FROM player_property WHERE player_id = :playerId")
     fun countPlayerProperties(playerId: String): Int
+
+    @Query(
+        "SELECT player_property.ppid as ppId, property.property_no as propertyNo, property.rent_level_1 as rentLevel1 FROM property INNER JOIN player_property " +
+                "WHERE property.property_no = player_property.property_no " +
+                "AND player_property.player_id = :playerId"
+    )
+    fun getPlayerProperties(playerId: String): List<OwnedPlayerProperties>?
 
 //    @Query("UPDATE player_property SET player_id = :playerId WHERE property_no = :propertyNo")
 //    suspend fun swapProperty(playerId: String, propertyNo: Int)
