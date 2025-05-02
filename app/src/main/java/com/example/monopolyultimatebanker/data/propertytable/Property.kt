@@ -11,6 +11,7 @@ data class Property(
     @ColumnInfo(name = "property_no") val propertyNo: Int = 1,
     @ColumnInfo(name = "qr_code") val qrCode: String = "",
     @ColumnInfo(name = "property_name") val propertyName: String = "",
+    @ColumnInfo(name = "property_price") val propertyPrice: Int = 0,
     @ColumnInfo(name = "rent_level_1") val rentLevel1: Int = 0,
     @ColumnInfo(name = "rent_level_2") val rentLevel2: Int = 0,
     @ColumnInfo(name = "rent_level_3") val rentLevel3: Int = 0,
