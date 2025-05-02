@@ -27,7 +27,7 @@ interface PlayerPropertyDao {
     @Query("SELECT COUNT(*) as count FROM player_property WHERE property_no = :propertyNo")
     fun propertyExists(propertyNo: Int): Int
 
-    @Query("UPDATE player_property SET player_id = :playerId, property_no = :propertyNo, rent_level = :rentLevel WHERE property_no = :propertyNo")
+    @Query("UPDATE player_property SET player_id = :playerId, rent_level = :rentLevel WHERE property_no = :propertyNo")
     suspend fun updatePropertyState(playerId: String, propertyNo: Int, rentLevel: Int)
 
     @Query("SELECT CASE WHEN EXISTS (" +
