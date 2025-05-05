@@ -41,8 +41,6 @@ class FirestoreRepositoryImpl @Inject constructor(
     private val gameRef = db.collection("games")
     private val playerPropertyRef = db.collection("player_properties")
     private val userRef = db.collection("users")
-    private val scope = CoroutineScope(Dispatchers.IO)
-
 
     /**Game Logic*/
     override fun getGame(gameId: String) = gameRef.whereEqualTo("gameId", gameId).snapshots().map { it ->
