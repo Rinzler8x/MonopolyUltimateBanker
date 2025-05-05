@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
+import com.example.monopolyultimatebanker.data.firebase.database.UpdatedProperty
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.OwnedPlayerProperties
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerProperty
@@ -54,7 +55,6 @@ class PropertyCardViewModel @Inject constructor(
     private val propertyRepositoryImpl: PropertyRepositoryImpl,
     private val gameRepositoryImpl: GameRepositoryImpl,
     private val firestoreGameLogicImpl: FirestoreGameLogicImpl,
-    private val firestoreRepositoryImpl: FirestoreRepositoryImpl,
     private val gamePreferencesRepository: GamePreferencesRepository,
     private val playerPropertyRepositoryImpl: PlayerPropertyRepositoryImpl
 ): ViewModel() {
@@ -106,14 +106,14 @@ class PropertyCardViewModel @Inject constructor(
         }
     }
 
-    fun onClickCheckBox(ppId: String, propertyNo: Int, rentLevel1: Int, isChecked: Boolean) {
+    fun onClickCheckBox(ppId: String, propertyNo: Int, propertyPrice: Int, isChecked: Boolean) {
         val currentList = _uiPropertyBottomSheetState.value.selectedProperties.toMutableList()
         if(isChecked) {
-            if(!currentList.contains(OwnedPlayerProperties(ppId, propertyNo, rentLevel1))) {
-                currentList.add(OwnedPlayerProperties(ppId, propertyNo, rentLevel1))
+            if(!currentList.contains(OwnedPlayerProperties(ppId, propertyNo, propertyPrice))) {
+                currentList.add(OwnedPlayerProperties(ppId, propertyNo, propertyPrice))
             }
         } else {
-            currentList.remove(OwnedPlayerProperties(ppId, propertyNo, rentLevel1))
+            currentList.remove(OwnedPlayerProperties(ppId, propertyNo, propertyPrice))
         }
 
         _uiPropertyBottomSheetState.update { currentState ->
@@ -188,6 +188,7 @@ class PropertyCardViewModel @Inject constructor(
                     playerProperties = ownedProperties
                 )
             }
+            onCLickPropertyBottomSheet()
             onClickPropertyTransferDialog()
         }
     }
@@ -200,13 +201,13 @@ class PropertyCardViewModel @Inject constructor(
                 )
 
                 if(playerPropertyRepositoryImpl.playerPropertyExists(propertyState.value.propertyNo) == 0) {
-                    if(player.playerBalance >= propertyState.value.rentLevel1) {
+                    if(player.playerBalance >= propertyState.value.propertyPrice) {
                         firestoreGameLogicImpl.purchaseProperty(
                             playerId = player.playerId,
                             gameId = gamePreferencesRepository.gameState.first().gameId,
                             propertyNo = propertyState.value.propertyNo,
                             playerBalance = player.playerBalance,
-                            propertyValue = propertyState.value.rentLevel1
+                            propertyValue = propertyState.value.propertyPrice
                         )
                         onClickPurchaseDialog()
                     } else {
@@ -224,19 +225,20 @@ class PropertyCardViewModel @Inject constructor(
                     if(player.playerBalance < rentValue && playerProperties.isNotEmpty()) {
                         onCLickPropertyBottomSheet(playerProperties)
                     }  else {
-                        firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
+                        Log.d(TAG, "${player.playerId} & ${propertyOwner.playerId} & ${player.playerId == propertyOwner.playerId}")
+                        val updatedRent: List<UpdatedProperty>
                         if(player.playerId != propertyOwner.playerId) {
                             firestoreGameLogicImpl.transferRent(
-                                property = propertyState,
-                                player = player
+                                propertyNo = propertyState.value.propertyNo,
+                                playerId = player.playerId,
+                                playerBalance = player.playerBalance,
+                                rentValue = rentValue
                             )
-                            firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo).forEach {
-                                Log.d(TAG, "PROMSG: ${it.propertyNo} and ${it.rentLevel}")
-                            }
-                            onClickResultDialog(propertyOwner.rentLevel + 1)
+                            updatedRent = firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
+                            onClickResultDialog(rentLevel = if(updatedRent.isNotEmpty()) { updatedRent.first().rentLevel } else propertyOwner.rentLevel)
                         } else {
-                            firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
-                            onClickRentLevelIncreaseDialog(propertyOwner.rentLevel + 1)
+                            updatedRent = firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
+                            onClickRentLevelIncreaseDialog(rentLevel = if(updatedRent.isNotEmpty()) { updatedRent.first().rentLevel } else propertyOwner.rentLevel)
                         }
                     }
                 }
