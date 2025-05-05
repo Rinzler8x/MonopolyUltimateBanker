@@ -306,6 +306,7 @@ class EventCardViewModel @Inject constructor(
         var propertyOwnerCheck = false
         viewModelScope.launch {
             val playerId = gamePreferencesRepository.gameState.first().playerId
+            val count: Int
             withContext(Dispatchers.IO) {
                 when (qrPrefState.value.event) {
                     "monoeve_1", "monoeve_9" -> {
@@ -321,9 +322,8 @@ class EventCardViewModel @Inject constructor(
                             )
                     }
 
-                    "monoeve_2", "monoeve_13", "monoeve_18", "monoeve_4",
-                    "monoeve_22", "monoeve_5", "monoeve_17", "monoeve_11",
-                    "monoeve_14", "monoeve_16", "monoeve_20" -> {
+                    "monoeve_4", "monoeve_22", "monoeve_5", "monoeve_17",
+                    "monoeve_11", "monoeve_14", "monoeve_16", "monoeve_20" -> {
                         propertyOwnerCheck = playerPropertyRepositoryImpl
                             .playerPropertyCheckIfPropertyBelongsToPlayer(
                                 propertyNo = actionUserInput.propertyNo1.toInt(),
@@ -331,8 +331,16 @@ class EventCardViewModel @Inject constructor(
                             )
                     }
 
+                    "monoeve_2", "monoeve_13", "monoeve_18" -> {
+                        count = playerPropertyRepositoryImpl.playerPropertyExists(
+                            propertyNo = actionUserInput.propertyNo1.toInt()
+                        )
+
+                        propertyOwnerCheck = (count > 0)
+                    }
+
                     "monoeve_8" -> {
-                        val count = playerPropertyRepositoryImpl
+                        count = playerPropertyRepositoryImpl
                             .playerPropertyCountPlayerProperties(
                                 playerId = playerId
                             )
