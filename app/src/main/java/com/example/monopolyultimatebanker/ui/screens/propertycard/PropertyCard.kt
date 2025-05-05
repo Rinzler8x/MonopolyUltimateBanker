@@ -308,23 +308,28 @@ private fun PropertyBottomSheet(
                         .padding(vertical = 10.dp, horizontal = 12.dp),
                 ) {
                     Checkbox(
-                        checked = selectedProperties.contains(OwnedPlayerProperties(property.ppId, property.propertyNo, property.rentLevel1)),
+                        checked = selectedProperties.contains(OwnedPlayerProperties(property.ppId, property.propertyNo, property.propertyPrice)),
                         onCheckedChange = { isChecked ->
-                            onClickCheckBox(property.ppId, property.propertyNo, property.rentLevel1, isChecked)
+                            onClickCheckBox(property.ppId, property.propertyNo, property.propertyPrice, isChecked)
                         }
                     )
                     Text(text = property.propertyNo.toString())
-                    Text(text = property.rentLevel1.toString())
+                    Text(text = property.propertyPrice.toString())
                 }
             }
 
             item {
-                Button(
-                    onClick = {
-                        onClickTransferProperties()
-                    }
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = modifier.fillMaxWidth().padding(vertical = 8.dp)
                 ) {
-                    Text(text = "Confirm Transfer")
+                    Button(
+                        onClick = {
+                            onClickTransferProperties()
+                        },
+                    ) {
+                        Text(text = "Confirm Transfer")
+                    }
                 }
             }
         }
