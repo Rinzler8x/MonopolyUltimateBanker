@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface FirestoreGameLogic {
 
-    suspend fun transferRent(property: StateFlow<Property>, player: Game)
+    suspend fun transferRent(propertyNo: Int, playerId: String, playerBalance: Int, rentValue: Int)
 
     suspend fun purchaseProperty(playerId: String, gameId: String, propertyNo: Int, playerBalance: Int, propertyValue: Int)
 
