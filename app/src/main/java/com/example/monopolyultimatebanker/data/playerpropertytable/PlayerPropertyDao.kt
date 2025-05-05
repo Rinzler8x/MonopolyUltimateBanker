@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 data class OwnedPlayerProperties(
     val ppId: String,
     val propertyNo: Int,
-    val rentLevel1: Int
+    val propertyPrice: Int
 )
 
 @Dao
@@ -39,7 +39,7 @@ interface PlayerPropertyDao {
     fun countPlayerProperties(playerId: String): Int
 
     @Query(
-        "SELECT player_property.ppid as ppId, property.property_no as propertyNo, property.rent_level_1 as rentLevel1 FROM property INNER JOIN player_property " +
+        "SELECT player_property.ppid as ppId, property.property_no as propertyNo, property.property_price as propertyPrice FROM property INNER JOIN player_property " +
                 "WHERE property.property_no = player_property.property_no " +
                 "AND player_property.player_id = :playerId"
     )
