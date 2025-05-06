@@ -1,11 +1,12 @@
 package com.example.monopolyultimatebanker.ui.screens.eventcard
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.monopolyultimatebanker.data.eventtable.Event
 import com.example.monopolyultimatebanker.data.eventtable.EventRepositoryImpl
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
@@ -183,91 +184,91 @@ class EventCardViewModel @Inject constructor(
         actionUserInput = actionUserInput.copy(propertyNo2 = input.trim())
     }
 
-    private fun swapProperty() {
+    private fun swapProperty(playerId: String, otherPlayerId: String, propertyNo1: Int, propertyNo2: Int) {
         viewModelScope.launch {
             firestoreGameLogicImpl.propertySwap(
-                propertyNo1 = actionUserInput.propertyNo1.toInt(),
-                propertyNo2 = actionUserInput.propertyNo2.toInt(),
-                playerId1 = gamePreferencesRepository.gameState.first().playerId,
-                playerId2 = actionUserInput.playerId
+                propertyNo1 = propertyNo1,
+                propertyNo2 = propertyNo2,
+                playerId1 = playerId,
+                playerId2 = otherPlayerId
             )
         }
     }
 
-    private fun rentLevelResetTo1() {
+    private fun rentLevelResetTo1(propertyNo: Int) {
         viewModelScope.launch {
             updateResults(
                 results = firestoreGameLogicImpl.rentLevelReset1(
-                    propertyNo = actionUserInput.propertyNo1.toInt()
+                    propertyNo = propertyNo
                 )
             )
         }
     }
 
-    private fun rentLevelJumpsTo5() {
+    private fun rentLevelJumpsTo5(propertyNo: Int) {
         viewModelScope.launch {
             updateResults(
                 results = firestoreGameLogicImpl.rentLevelJumpTo5(
-                    propertyNo = actionUserInput.propertyNo1.toInt()
+                    propertyNo = propertyNo
                 )
             )
         }
     }
 
-    private fun rentLevelIncreaseForYouAndDecreaseForNeighbours() {
+    private fun rentLevelIncreaseForYouAndDecreaseForNeighbours(propertyNo: Int) {
         viewModelScope.launch {
             updateResults(
                 results = firestoreGameLogicImpl.eventRentDecreaseForNeighbors(
-                    propertyNo = actionUserInput.propertyNo1.toInt()
+                    propertyNo = propertyNo
                 )
             )
         }
     }
 
-    private fun rentLevelIncreaseForBoardSide() {
+    private fun rentLevelIncreaseForBoardSide(propertyNo: Int) {
         viewModelScope.launch {
             updateResults(
                 results = firestoreGameLogicImpl.eventRentLevelIncreaseBoardSide(
-                    propertyNo = actionUserInput.propertyNo1.toInt()
+                    propertyNo = propertyNo
                 )
             )
         }
     }
 
-    private fun rentLevelDecreaseForBoardSide() {
+    private fun rentLevelDecreaseForBoardSide(propertyNo: Int) {
         viewModelScope.launch {
             updateResults(
                 results = firestoreGameLogicImpl.eventRentLevelDecreaseBoardSide(
-                    propertyNo = actionUserInput.propertyNo1.toInt()
+                    propertyNo = propertyNo
                 )
             )
         }
     }
 
-    private fun rentLevelIncreaseForColorSet() {
+    private fun rentLevelIncreaseForColorSet(propertyNo: Int) {
         viewModelScope.launch {
             updateResults(
                 results = firestoreGameLogicImpl.eventRentLevelIncreaseColorSet(
-                    propertyNo = actionUserInput.propertyNo1.toInt()
+                    propertyNo = propertyNo
                 )
             )
         }
     }
 
-    private fun rentLevelDecreaseForColorSet() {
+    private fun rentLevelDecreaseForColorSet(propertyNo: Int) {
         viewModelScope.launch {
             updateResults(
                 results = firestoreGameLogicImpl.eventRentLevelDecreaseColorSet(
-                    propertyNo = actionUserInput.propertyNo1.toInt()
+                    propertyNo = propertyNo
                 )
             )
         }
     }
 
-    private fun pay50PerPropertyOwned() {
+    private fun pay50PerPropertyOwned(playerId: String) {
         viewModelScope.launch {
             firestoreGameLogicImpl.eventDeduct50PerProperty(
-                playerId = gamePreferencesRepository.gameState.first().playerId,
+                playerId = playerId,
             )
         }
     }
@@ -306,19 +307,22 @@ class EventCardViewModel @Inject constructor(
         var propertyOwnerCheck = false
         viewModelScope.launch {
             val playerId = gamePreferencesRepository.gameState.first().playerId
+            val otherPlayerId = actionUserInput.playerId
+            val propertyNo1 = actionUserInput.propertyNo1
+            val propertyNo2 = actionUserInput.propertyNo2
             val count: Int
             withContext(Dispatchers.IO) {
                 when (qrPrefState.value.event) {
                     "monoeve_1", "monoeve_9" -> {
                         propertyOwnerCheck = playerPropertyRepositoryImpl
                             .playerPropertyCheckIfPropertyBelongsToPlayer(
-                                propertyNo = actionUserInput.propertyNo1.toInt(),
+                                propertyNo = propertyNo1.toInt(),
                                 playerId = playerId
                             )
                         propertyOwnerCheck = playerPropertyRepositoryImpl
                             .playerPropertyCheckIfPropertyBelongsToPlayer(
-                                propertyNo = actionUserInput.propertyNo2.toInt(),
-                                playerId = actionUserInput.playerId
+                                propertyNo = propertyNo2.toInt(),
+                                playerId = otherPlayerId
                             )
                     }
 
@@ -326,14 +330,14 @@ class EventCardViewModel @Inject constructor(
                     "monoeve_11", "monoeve_14", "monoeve_16", "monoeve_20" -> {
                         propertyOwnerCheck = playerPropertyRepositoryImpl
                             .playerPropertyCheckIfPropertyBelongsToPlayer(
-                                propertyNo = actionUserInput.propertyNo1.toInt(),
+                                propertyNo = propertyNo1.toInt(),
                                 playerId = playerId
                             )
                     }
 
                     "monoeve_2", "monoeve_13", "monoeve_18" -> {
                         count = playerPropertyRepositoryImpl.playerPropertyExists(
-                            propertyNo = actionUserInput.propertyNo1.toInt()
+                            propertyNo = propertyNo1.toInt()
                         )
 
                         propertyOwnerCheck = (count > 0)
@@ -352,39 +356,44 @@ class EventCardViewModel @Inject constructor(
             if (propertyOwnerCheck) {
                 when (qrPrefState.value.event) {
                     "monoeve_1", "monoeve_9" -> {
-                        swapProperty()
+                        swapProperty(
+                            playerId = playerId,
+                            otherPlayerId = otherPlayerId,
+                            propertyNo1 = propertyNo1.toInt(),
+                            propertyNo2 = propertyNo2.toInt()
+                        )
                     }
 
                     "monoeve_2", "monoeve_13", "monoeve_18" -> {
-                        rentLevelResetTo1()
+                        rentLevelResetTo1(propertyNo1.toInt())
                     }
 
                     "monoeve_20" -> {
-                        rentLevelJumpsTo5()
+                        rentLevelJumpsTo5(propertyNo1.toInt())
                     }
 
                     "monoeve_4", "monoeve_22" -> {
-                        rentLevelIncreaseForYouAndDecreaseForNeighbours()
+                        rentLevelIncreaseForYouAndDecreaseForNeighbours(propertyNo1.toInt())
                     }
 
                     "monoeve_5" -> {
-                        rentLevelIncreaseForBoardSide()
+                        rentLevelIncreaseForBoardSide(propertyNo1.toInt())
                     }
 
                     "monoeve_17" -> {
-                        rentLevelDecreaseForBoardSide()
+                        rentLevelDecreaseForBoardSide(propertyNo1.toInt())
                     }
 
                     "monoeve_11", "monoeve_14" -> {
-                        rentLevelIncreaseForColorSet()
+                        rentLevelIncreaseForColorSet(propertyNo1.toInt())
                     }
 
                     "monoeve_16" -> {
-                        rentLevelDecreaseForColorSet()
+                        rentLevelDecreaseForColorSet(propertyNo1.toInt())
                     }
 
                     "monoeve_8" -> {
-                        pay50PerPropertyOwned()
+                        pay50PerPropertyOwned(playerId)
                     }
 //                    "monoeve_10" -> {
 //                        rentLevel1For2RentPayments()
