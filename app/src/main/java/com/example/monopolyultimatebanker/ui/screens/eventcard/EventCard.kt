@@ -356,14 +356,18 @@ private fun ResultDialog(
                 if(properties.isNotEmpty()) {
                     item {
                         Row(
-                            modifier = modifier.fillMaxWidth()
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = modifier.fillMaxWidth().padding(8.dp)
                         ) {
                             Text("Property No.")
                             Text("Rent Level")
                         }
                     }
                     items(properties, key = { it.propertyNo }) { property ->
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            modifier = modifier.fillMaxWidth().padding(8.dp)
+                        ) {
                             Text(text = "${property.propertyNo}")
                             Text(text = "${property.rentLevel}")
                         }
