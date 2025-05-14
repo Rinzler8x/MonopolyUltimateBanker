@@ -296,8 +296,8 @@ class EventCardViewModel @Inject constructor(
                 onClickAction()
             }
 
-            "monoeve_3", "monoeve_6", "monoeve_7", "monoeve_12",
-            "monoeve_19", "monoeve_15", "monoeve_21" -> {
+            "monoeve_3", "monoeve_6", "monoeve_7", "monoeve_10",
+            "monoeve_12", "monoeve_19", "monoeve_15", "monoeve_21" -> {
                 navigateToHome()
             }
         }
