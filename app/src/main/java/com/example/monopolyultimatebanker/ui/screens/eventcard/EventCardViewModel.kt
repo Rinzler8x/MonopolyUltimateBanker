@@ -1,7 +1,5 @@
 package com.example.monopolyultimatebanker.ui.screens.eventcard
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
