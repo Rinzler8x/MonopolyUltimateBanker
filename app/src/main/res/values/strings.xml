@@ -11,4 +11,7 @@
     <string name="qr_code">QR Code</string>
     <string name="confirm">Confirm</string>
     <string name="pay">Pay</string>
+    <string name="rent">RENT</string>
+    <string name="rent_level">RENT LEVEL</string>
+    <string name="collect_200">Collect 200$</string>
 </resources>
