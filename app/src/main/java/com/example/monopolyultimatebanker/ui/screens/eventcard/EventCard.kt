@@ -1,16 +1,23 @@
 package com.example.monopolyultimatebanker.ui.screens.eventcard
 
+import androidx.annotation.ColorRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -30,7 +37,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -69,11 +83,13 @@ fun EventCard(
         Column(
             modifier = modifier
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 20.dp)
+                .fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(40.dp)
+            verticalArrangement = Arrangement.Center
         ) {
             EventCardContent(
+                eventId = eventState.eventId,
                 title = eventState.title,
                 phrase = eventState.phrase,
                 action = eventState.action,
@@ -141,6 +157,7 @@ fun EventCard(
 
 @Composable
 private fun EventCardContent(
+    eventId: Int,
     title: String,
     phrase: String,
     action: String,
@@ -148,50 +165,102 @@ private fun EventCardContent(
     onClickAction: (() -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+    val colorStops = arrayOf(
+        0.0f to Color(0xFF0B4F80),
+        0.4f to Color.White
+    )
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .border(
+                width = 2.dp,
+                color = Color.Black,
+                shape = RoundedCornerShape(10.dp)
+            )
+            .padding(10.dp)
+            .background(Brush.verticalGradient(colorStops = colorStops)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(32.dp)
     ) {
-        Text(text = title)
-    }
+        Row(
+            modifier = modifier
+                .padding(10.dp)
+                .shadow(8.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color.Yellow)
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = phrase,
-            textAlign = TextAlign.Center
-        )
-    }
+        ) {
+            Text(
+                text = title,
+                fontSize = 24.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                modifier = modifier.padding(horizontal = 80.dp, vertical = 22.dp)
+            )
+        }
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            Icons.Filled.Home,
-            contentDescription = "Icon",
-            modifier = modifier.size(100.dp)
-        )
-    }
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = phrase,
+                textAlign = TextAlign.Center,
+            )
+        }
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = action,
-            textAlign = TextAlign.Center
-        )
-    }
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            val drawableId: Int = when(eventId) {
+                1, 9 -> R.drawable.monoeve_1_9_icon
+                2, 13, 18 -> R.drawable.monoeve_2_13_18_icon
+                3 -> R.drawable.monoeve_3_icon
+                4 -> R.drawable.monoeve_4_icon
+                5 -> R.drawable.monoeve_5_icon
+                6, 7, 19 -> R.drawable.monoeve_6_7_19_icon
+                8 -> R.drawable.monoeve_8_icon
+                10 -> R.drawable.monoeve_10_icon
+                11 -> R.drawable.monoeve_11_icon
+                12 -> R.drawable.monoeve_12_icon
+                14 -> R.drawable.monoeve_14_icon
+                15, 21 -> R.drawable.monoeve_15_21_icon
+                16, 17 -> R.drawable.monoeve_16_17_icon
+                20 -> R.drawable.monoeve_20_icon
+                22 -> R.drawable.monoeve_22_icon
+                else -> R.drawable.monoeve_12_icon
+            }
 
-    Button(
-        onClick = { onClickAction(navigateToHomeScreen) }
-    ) {
-        Text(
-            text = "Action"
-        )
+            Image(
+                painter = painterResource(id = drawableId),
+                contentDescription = "Swap Property Card",
+                contentScale = ContentScale.FillWidth,
+                modifier = modifier.weight(1f)
+            )
+        }
+
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = action,
+                textAlign = TextAlign.Center
+            )
+        }
+
+    }
+    Row {
+        Button(
+            onClick = { onClickAction(navigateToHomeScreen) },
+            shape = MaterialTheme.shapes.medium,
+            modifier = modifier.padding(10.dp).fillMaxWidth()
+        ) {
+            Text(
+                text = "Action"
+            )
+        }
     }
 }
 
