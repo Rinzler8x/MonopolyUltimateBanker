@@ -69,7 +69,7 @@ fun PropertyCard(
     val propertyBottomSheetState by propertyCardViewModel.uiPropertyBottomSheetState.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState()
     val multiPurposeDialogState by propertyCardViewModel.uiMultiPurposePropertyDialog.collectAsStateWithLifecycle()
-
+    val propertyColor = Color(propertyState.color)
     Scaffold { innerPadding ->
         Column(
             modifier = modifier
@@ -80,7 +80,7 @@ fun PropertyCard(
             verticalArrangement = Arrangement.Center
         ) {
             PropertyCardContent(
-                propertyColor = propertyState.color,
+                propertyColor = propertyColor,
                 propertyNo = propertyState.propertyNo,
                 propertyName = propertyState.propertyName,
                 propertyState = propertyState,
@@ -158,7 +158,7 @@ fun PropertyCard(
 
 @Composable
 private fun PropertyCardContent(
-    propertyColor: Int,
+    propertyColor: Color,
     propertyNo: Int,
     propertyName: String,
     propertyState: Property,
@@ -172,36 +172,35 @@ private fun PropertyCardContent(
             .border(
                 width = 4.dp,
                 color = Color.Black,
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(8.dp)
             )
+            .padding(12.dp)
     ) {
 
         Row(
             modifier = modifier
-                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
-                .background(Color(propertyColor))
+                .background(propertyColor)
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = modifier
-                    .clip(CircleShape)
-                    .border(
-                        width = 2.dp,
-                        color = Color.Black,
-                        shape = CircleShape
-                    )
-                    .background(Color.Yellow)
-                    .padding(vertical = 12.dp, horizontal = 20.dp)
-            ) {
-                Text(
-                    text = propertyNo.toString(),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 26.sp
-                )
-            }
+            Text(
+                text = propertyNo.toString(),
+                fontWeight = FontWeight.Bold,
+                fontSize = 26.sp,
+                modifier = if (propertyNo in 1..9) {
+                    modifier
+                        .clip(CircleShape)
+                        .background(Color.Yellow)
+                        .padding(vertical = 12.dp, horizontal = 20.dp)
+                } else {
+                    modifier
+                        .clip(CircleShape)
+                        .background(Color.Yellow)
+                        .padding(vertical = 20.dp, horizontal = 20.dp)
+                }
+            )
         }
 
         Text(
@@ -217,7 +216,7 @@ private fun PropertyCardContent(
                 modifier = modifier.weight(.65f).padding(start = 10.dp, bottom = 6.dp)
             ) {
                 Text(
-                    text = "Rent Level",
+                    text = stringResource(id = R.string.rent_level),
                     fontWeight = FontWeight.Bold,
                 )
             }
@@ -226,25 +225,18 @@ private fun PropertyCardContent(
                 modifier = modifier.weight(.35f)
             ) {
                 Text(
-                    text = "Rent",
+                    text = stringResource(id = R.string.rent),
                     fontWeight = FontWeight.Bold,
                 )
             }
         }
 
         repeat(5) { firstLoop ->
-            val gradientColor = Color(propertyColor).copy(alpha = 1f - ((4 - firstLoop) * 0.2f))
+            val gradientColor = propertyColor.copy(alpha = 1f - ((4 - firstLoop) * 0.2f))
             Row(
-                modifier = if(firstLoop == 4) {
-                    modifier
-                        .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
-                        .background(gradientColor)
-                        .padding(horizontal = 10.dp, vertical = 20.dp)
-                } else {
-                    modifier
-                        .background(gradientColor)
-                        .padding(horizontal = 10.dp, vertical = 20.dp)
-                },
+                modifier = modifier
+                    .background(gradientColor)
+                    .padding(horizontal = 10.dp, vertical = 20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
@@ -281,7 +273,6 @@ private fun PropertyCardContent(
                                     text = secondLoop.plus(1).toString(),
                                     color = if(firstLoop == secondLoop) {
                                         Color.White
-
                                     } else {
                                         Color.Black
                                     },
@@ -317,7 +308,7 @@ private fun PropertyCardContent(
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.Bottom,
-        modifier = modifier.padding(16.dp).fillMaxWidth()
+        modifier = modifier.padding(12.dp).fillMaxWidth()
     ) {
         Button(
             onClick = onClickPay,
