@@ -184,10 +184,12 @@ private fun EventCardContent(
     ) {
         Row(
             modifier = modifier
+                .fillMaxWidth()
                 .padding(10.dp)
                 .shadow(8.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .background(Color.Yellow)
+                .padding(horizontal = 12.dp, vertical = 22.dp)
 
         ) {
             Text(
@@ -195,7 +197,7 @@ private fun EventCardContent(
                 fontSize = 24.sp,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
-                modifier = modifier.padding(horizontal = 80.dp, vertical = 22.dp)
+                modifier = modifier.weight(1f)
             )
         }
 
