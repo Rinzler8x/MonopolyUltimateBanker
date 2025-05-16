@@ -1,16 +1,10 @@
 package com.example.monopolyultimatebanker.data.firebase.database
 
-import android.content.ContentValues.TAG
-import android.util.Log
-import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.OwnedPlayerProperties
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
-import com.example.monopolyultimatebanker.data.propertytable.Property
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
-import java.lang.reflect.Field
 import javax.inject.Inject
 
 data class UpdatedProperty(

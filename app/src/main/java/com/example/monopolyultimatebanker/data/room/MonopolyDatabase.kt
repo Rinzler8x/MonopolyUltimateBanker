@@ -1,8 +1,6 @@
 package com.example.monopolyultimatebanker.data.room
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.monopolyultimatebanker.data.eventtable.Event
 import com.example.monopolyultimatebanker.data.eventtable.EventDao

@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.firebase.authentication.AuthResponse
 import com.example.monopolyultimatebanker.data.firebase.authentication.FirebaseAuthRepositoryImpl
-import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepository
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
 import com.example.monopolyultimatebanker.utils.SnackbarController

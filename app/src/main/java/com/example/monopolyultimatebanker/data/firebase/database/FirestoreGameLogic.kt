@@ -1,9 +1,6 @@
 package com.example.monopolyultimatebanker.data.firebase.database
 
-import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.playerpropertytable.OwnedPlayerProperties
-import com.example.monopolyultimatebanker.data.propertytable.Property
-import kotlinx.coroutines.flow.StateFlow
 
 interface FirestoreGameLogic {
 

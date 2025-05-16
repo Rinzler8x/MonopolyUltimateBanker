@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
-import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
 import com.example.monopolyultimatebanker.data.firebase.database.UpdatedProperty
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.OwnedPlayerProperties
