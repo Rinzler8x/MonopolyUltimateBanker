@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">MonopolyUltimateBanker</string>
+    <string name="top_app_bar_title">Monopoly Ultimate Banker</string>
     <string name="username">Username</string>
     <string name="email">Email Id</string>
     <string name="password">Password</string>
@@ -14,4 +15,5 @@
     <string name="rent">RENT</string>
     <string name="rent_level">RENT LEVEL</string>
     <string name="collect_200">Collect 200$</string>
+    <string name="event_card_icon">Event Card Icon</string>
 </resources>

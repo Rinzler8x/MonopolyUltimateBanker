@@ -180,7 +180,7 @@ private fun EventCardContent(
             .padding(10.dp)
             .background(Brush.verticalGradient(colorStops = colorStops)),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(32.dp)
+        verticalArrangement = Arrangement.spacedBy(28.dp)
     ) {
         Row(
             modifier = modifier
@@ -189,30 +189,39 @@ private fun EventCardContent(
                 .shadow(8.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .background(Color.Yellow)
-                .padding(horizontal = 12.dp, vertical = 22.dp)
+                .padding(top = 22.dp, bottom = 14.dp, start = 12.dp, end = 12.dp)
 
         ) {
             Text(
                 text = title,
-                fontSize = 24.sp,
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.displaySmall,
                 modifier = modifier.weight(1f)
             )
         }
 
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 text = phrase,
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
             )
         }
 
+        Spacer(
+            modifier = modifier
+                .padding(vertical = 10.dp)
+        )
+
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+            ,
             horizontalArrangement = Arrangement.Center
         ) {
             val drawableId: Int = when(eventId) {
@@ -236,19 +245,25 @@ private fun EventCardContent(
 
             Image(
                 painter = painterResource(id = drawableId),
-                contentDescription = "Swap Property Card",
+                contentDescription = stringResource(R.string.event_card_icon),
                 contentScale = ContentScale.FillWidth,
-                modifier = modifier.weight(1f)
+                modifier = modifier
+                    .weight(1f)
             )
         }
 
+
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = 0.dp, bottom = 14.dp, start = 10.dp, end = 10.dp)
+            ,
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 text = action,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge,
             )
         }
 
@@ -260,7 +275,8 @@ private fun EventCardContent(
             modifier = modifier.padding(10.dp).fillMaxWidth()
         ) {
             Text(
-                text = "Action"
+                text = "Action",
+                style = MaterialTheme.typography.titleLarge
             )
         }
     }

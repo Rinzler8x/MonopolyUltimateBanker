@@ -187,26 +187,24 @@ private fun PropertyCardContent(
         ) {
             Text(
                 text = propertyNo.toString(),
-                fontWeight = FontWeight.Bold,
-                fontSize = 26.sp,
+                style = MaterialTheme.typography.displaySmall,
                 modifier = if (propertyNo in 1..9) {
                     modifier
                         .clip(CircleShape)
                         .background(Color.Yellow)
-                        .padding(vertical = 12.dp, horizontal = 20.dp)
+                        .padding(top = 16.dp, bottom = 8.dp, start = 20.dp, end = 20.dp)
                 } else {
                     modifier
                         .clip(CircleShape)
                         .background(Color.Yellow)
-                        .padding(vertical = 20.dp, horizontal = 20.dp)
+                        .padding(top = 22.dp, bottom = 14.dp, start = 16.dp, end = 16.dp)
                 }
             )
         }
 
         Text(
             text = propertyName,
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp,
+            style = MaterialTheme.typography.headlineMedium,
             textAlign = TextAlign.Center,
             modifier = modifier.padding(42.dp)
         )
@@ -217,7 +215,7 @@ private fun PropertyCardContent(
             ) {
                 Text(
                     text = stringResource(id = R.string.rent_level),
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
                 )
             }
 
@@ -226,7 +224,7 @@ private fun PropertyCardContent(
             ) {
                 Text(
                     text = stringResource(id = R.string.rent),
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
         }
@@ -276,8 +274,8 @@ private fun PropertyCardContent(
                                     } else {
                                         Color.Black
                                     },
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = modifier.rotate(45f)
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = modifier.rotate(45f).padding(top = 2.dp,end = 2.dp)
                                 )
                             }
                             Spacer(
@@ -296,8 +294,7 @@ private fun PropertyCardContent(
                     val rentValue = field.get(propertyState) as Int
                     Text(
                         text = if(rentLevel == firstLoop + 1) { "$${rentValue}*" } else { "$${rentValue}" },
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
             }
@@ -316,7 +313,8 @@ private fun PropertyCardContent(
             shape = MaterialTheme.shapes.medium
         ) {
             Text(
-                text = stringResource(R.string.pay)
+                text = stringResource(R.string.pay),
+                style = MaterialTheme.typography.titleLarge
             )
         }
     }
