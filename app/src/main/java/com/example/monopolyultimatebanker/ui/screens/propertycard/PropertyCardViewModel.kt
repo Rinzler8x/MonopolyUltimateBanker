@@ -220,13 +220,30 @@ class PropertyCardViewModel @Inject constructor(
                     val field: Field = propertyState.value.javaClass.getDeclaredField(fieldName)
                     field.isAccessible = true
                     val rentValue = field.get(propertyState.value) as Int
+                    val updatedRent: List<UpdatedProperty>
 
-                    if(player.playerBalance < rentValue && playerProperties.isNotEmpty()) {
-                        onCLickPropertyBottomSheet(playerProperties)
-                    }  else {
-                        Log.d(TAG, "${player.playerId} & ${propertyOwner.playerId} & ${player.playerId == propertyOwner.playerId}")
-                        val updatedRent: List<UpdatedProperty>
-                        if(player.playerId != propertyOwner.playerId) {
+//                    if(player.playerBalance < rentValue && playerProperties.isNotEmpty()) {
+//                        onCLickPropertyBottomSheet(playerProperties)
+//                    }  else {
+//                        if(player.playerId != propertyOwner.playerId) {
+//                            firestoreGameLogicImpl.transferRent(
+//                                propertyNo = propertyState.value.propertyNo,
+//                                playerId = player.playerId,
+//                                playerBalance = player.playerBalance,
+//                                rentValue = rentValue
+//                            )
+//                            updatedRent = firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
+//                            onClickResultDialog(rentLevel = if(updatedRent.isNotEmpty()) { updatedRent.first().rentLevel } else propertyOwner.rentLevel)
+//                        } else {
+//                            updatedRent = firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
+//                            onClickRentLevelIncreaseDialog(rentLevel = if(updatedRent.isNotEmpty()) { updatedRent.first().rentLevel } else propertyOwner.rentLevel)
+//                        }
+//                    }
+
+                    if(player.playerId != propertyOwner.playerId) {
+                        if(player.playerBalance < rentValue && playerProperties.isNotEmpty()) {
+                            onCLickPropertyBottomSheet(playerProperties)
+                        } else {
                             firestoreGameLogicImpl.transferRent(
                                 propertyNo = propertyState.value.propertyNo,
                                 playerId = player.playerId,
@@ -235,10 +252,10 @@ class PropertyCardViewModel @Inject constructor(
                             )
                             updatedRent = firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
                             onClickResultDialog(rentLevel = if(updatedRent.isNotEmpty()) { updatedRent.first().rentLevel } else propertyOwner.rentLevel)
-                        } else {
-                            updatedRent = firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
-                            onClickRentLevelIncreaseDialog(rentLevel = if(updatedRent.isNotEmpty()) { updatedRent.first().rentLevel } else propertyOwner.rentLevel)
                         }
+                    } else {
+                        updatedRent = firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
+                        onClickRentLevelIncreaseDialog(rentLevel = if(updatedRent.isNotEmpty()) { updatedRent.first().rentLevel } else propertyOwner.rentLevel)
                     }
                 }
             }
