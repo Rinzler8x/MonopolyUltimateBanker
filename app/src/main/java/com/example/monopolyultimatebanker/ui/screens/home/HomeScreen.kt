@@ -209,35 +209,39 @@ private fun DrawerContent(
             contentDescription = "Account Icon",
             modifier = modifier.size(120.dp)
         )
-        Text(text = "Username: $username")
-        Text("Game ID: $gameId")
-        HorizontalDivider(modifier = modifier.padding(bottom = 12.dp, top = 8.dp))
+        Text(text = "Username: $username", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = modifier.padding(vertical = 2.dp))
+        Text("Game ID: $gameId", style = MaterialTheme.typography.titleMedium)
+        HorizontalDivider(thickness = 2.dp, modifier = modifier.padding(bottom = 12.dp, top = 8.dp))
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = modifier.fillMaxWidth()
         ) {
             Button(
                 onClick = onClickLeaveGameDialog,
-                enabled = isGameActive
+                enabled = isGameActive,
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text("Leave")
+                Text(text = "Leave", style = MaterialTheme.typography.titleMedium)
             }
             Button(
                 onClick = onCLickLogOutDialog,
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text("Log Out")
+                Text("Log Out", style = MaterialTheme.typography.titleMedium)
             }
         }
-        HorizontalDivider(modifier = modifier.padding(bottom = 12.dp, top = 8.dp))
+        HorizontalDivider(thickness = 2.dp, modifier = modifier.padding(bottom = 12.dp, top = 8.dp))
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = modifier.fillMaxWidth()
         ) {
             Button(
                 onClick = onClickNavigateToNewLocationDialog,
-                enabled = isGameActive
+                enabled = isGameActive,
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text(text = "Navigation")
+                Text(text = "Navigation", style = MaterialTheme.typography.titleMedium)
             }
         }
     }
@@ -257,11 +261,11 @@ private fun ActiveGame(
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(vertical = 10.dp),
+                    .padding(top = 20.dp, bottom = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Player")
-                Text(text = "Balance")
+                Text(text = "Player", style = MaterialTheme.typography.headlineSmall)
+                Text(text = "Balance", style = MaterialTheme.typography.headlineSmall)
             }
         }
         items(items = game.sortedByDescending { it.playerBalance }, key = { it.playerId }) {
@@ -271,8 +275,8 @@ private fun ActiveGame(
                     .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = it.playerName)
-                Text(text = it.playerBalance.toString())
+                Text(text = it.playerName, style = MaterialTheme.typography.titleMedium)
+                Text(text = "${it.playerBalance}", style = MaterialTheme.typography.titleMedium)
             }
         }
     }
@@ -285,8 +289,9 @@ private fun NoActiveGame(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()
     ) {
-        Text(text = "Create or Join Game")
+        Text(text = "Create or Join Game", style = MaterialTheme.typography.titleMedium)
         HorizontalDivider(
+            thickness = 2.dp,
             modifier = modifier
                 .width(220.dp)
                 .padding(vertical = 4.dp)
@@ -309,13 +314,13 @@ private fun MultiPurposeDialog(
 ) {
     AlertDialog(
         onDismissRequest = onClickDialogState,
-        title = { Text(text = title) },
-        text = { Text(text = description) },
+        title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
+        text = { Text(text = description, style = MaterialTheme.typography.titleMedium) },
         dismissButton = {
             TextButton(
                 onClick = onClickDialogState
             ) {
-                Text(text = stringResource(R.string.dismiss))
+                Text(text = stringResource(R.string.dismiss), style = MaterialTheme.typography.bodyLarge)
             }
         },
         confirmButton = {
@@ -331,7 +336,7 @@ private fun MultiPurposeDialog(
                     onClickDialogState()
                 }
             ) {
-                Text(text = stringResource(R.string.confirm))
+                Text(text = stringResource(R.string.confirm), style = MaterialTheme.typography.bodyLarge)
             }
         }
     )
@@ -350,19 +355,20 @@ private fun CreateOrJoinGameDialog(
             updateGameId("")
             onClickCreateOrJoinGame()
         },
-        title = { Text("Create or Join Game") },
+        title = { Text(text = "Create or Join Game", style = MaterialTheme.typography.headlineSmall) },
         text = {
             Column {
                 Text(
                     text = "- Create a new game by giving it a name.\n- Enter game id to join a game.",
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = modifier.padding(vertical = 8.dp))
                 OutlinedTextField(
                     value = gameId,
                     onValueChange = updateGameId,
-                    label = { Text(text = stringResource(R.string.game_id)) },
+                    label = { Text(text = stringResource(R.string.game_id), style = MaterialTheme.typography.bodyLarge) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                    textStyle = MaterialTheme.typography.bodyLarge
                 )
             }
         },
@@ -373,7 +379,7 @@ private fun CreateOrJoinGameDialog(
                     onClickCreateOrJoinGame()
                 }
             ) {
-                Text(text = stringResource(R.string.dismiss))
+                Text(text = stringResource(R.string.dismiss), style = MaterialTheme.typography.bodyLarge)
             }
         },
         confirmButton = {
@@ -384,7 +390,7 @@ private fun CreateOrJoinGameDialog(
                 },
                 enabled = gameId.isNotBlank()
             ) {
-                Text(text = stringResource(R.string.confirm))
+                Text(text = stringResource(R.string.confirm), style = MaterialTheme.typography.bodyLarge)
             }
         }
     )
@@ -396,12 +402,13 @@ private fun QrFloatingActionButton(
     modifier: Modifier = Modifier
 ) {
     FloatingActionButton(
-        onClick = onClickQrCodeScanner
+        onClick = onClickQrCodeScanner,
+        shape = MaterialTheme.shapes.medium
     ) {
         Icon(
             painter = painterResource(R.drawable.baseline_qr_code_scanner_24),
             contentDescription = stringResource(R.string.qr_code),
-            modifier = modifier.size(42.dp)
+            modifier = modifier.size(38.dp)
         )
     }
 }
@@ -413,6 +420,7 @@ private fun CreateOrJoinGameFAB(
 ) {
     FloatingActionButton(
         onClick = onClickCreateOrJoinGame,
+        shape = MaterialTheme.shapes.medium
     ) {
         Icon(
             Icons.Filled.Add,
@@ -433,7 +441,11 @@ private fun GameTopAppBar(
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         title = {
-            Text(stringResource(R.string.app_name), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = stringResource(R.string.top_app_bar_title),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.headlineSmall
+            )
         },
         navigationIcon = {
             IconButton(

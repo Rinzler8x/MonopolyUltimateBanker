@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +19,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -34,15 +33,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
@@ -124,7 +118,7 @@ fun PropertyCard(
                 MultiPurposePropertyDialog(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickResultDialog,
                     title = "Rent Paid",
-                    description = "Property No. ${propertyState.propertyNo} rent paid.\nNew Rent Level: ${multiPurposeDialogState.rentLevel}",
+                    description = "Property No.${propertyState.propertyNo} rent paid.\nNew Rent Level: ${multiPurposeDialogState.rentLevel}",
                     isResult = true,
                     navigateToHomeScreen = navigateToHomeScreen
                 )
@@ -142,7 +136,7 @@ fun PropertyCard(
             if(multiPurposeDialogState.rentLevelIncreaseDialogState) {
                 MultiPurposePropertyDialog(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickRentLevelIncreaseDialog,
-                    title = "Property Rent Level",
+                    title = "Rent Level Increased",
                     description = if(playerPropertyState.rentLevel == 5) {
                         "Property rent level is maxed out."
                     } else {
@@ -186,7 +180,7 @@ private fun PropertyCardContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = propertyNo.toString(),
+                text = "$propertyNo",
                 style = MaterialTheme.typography.displaySmall,
                 modifier = if (propertyNo in 1..9) {
                     modifier
@@ -346,47 +340,74 @@ private fun PropertyBottomSheet(
                 .fillMaxWidth()
         ) {
             item {
-                Text(text = "Please select the properties you wish transfer to the property owner.")
+                Text(
+                    text = "Insufficient Funds",
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = modifier.padding(vertical = 10.dp).fillMaxWidth()
+                )
+                Text(
+                    text = "Please select the properties you wish to transfer to the property owner.",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = modifier.padding(horizontal = 10.dp).fillMaxWidth()
+                )
+                HorizontalDivider(thickness = 2.dp, modifier = modifier.padding(vertical = 10.dp, horizontal = 8.dp))
                 Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp, horizontal = 12.dp),
+                        .padding(top = 14.dp, bottom = 8.dp, start = 12.dp, end = 12.dp),
                 ) {
-                    Text(text = "Property No.")
-                    Text(text = "Property Value")
+                    Column( modifier = modifier.weight(0.1f) ) {  }
+                    Column( modifier = modifier.weight(0.45f) ) {
+                        Text(text = "Property No.", style = MaterialTheme.typography.titleMedium)
+                    }
+                    Column( modifier = modifier.weight(0.45f) ) {
+                        Text(text = "Property Value", style = MaterialTheme.typography.titleMedium)
+                    }
                 }
             }
 
             items(ownedPlayerProperties) { property ->
                 Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp, horizontal = 12.dp),
+                        .padding(horizontal = 12.dp),
                 ) {
-                    Checkbox(
-                        checked = selectedProperties.contains(OwnedPlayerProperties(property.ppId, property.propertyNo, property.propertyPrice)),
-                        onCheckedChange = { isChecked ->
-                            onClickCheckBox(property.ppId, property.propertyNo, property.propertyPrice, isChecked)
-                        }
-                    )
-                    Text(text = property.propertyNo.toString())
-                    Text(text = property.propertyPrice.toString())
+                    Column( modifier = modifier.weight(0.1f).padding(end = 8.dp) ) {
+                        Checkbox(
+                            checked = selectedProperties.contains(OwnedPlayerProperties(property.ppId, property.propertyNo, property.propertyPrice)),
+                            onCheckedChange = { isChecked ->
+                                onClickCheckBox(property.ppId, property.propertyNo, property.propertyPrice, isChecked)
+                            }
+                        )
+                    }
+                    Column( modifier = modifier.weight(0.45f).padding(top = 18.dp) ) {
+                        Text(text = property.propertyNo.toString(), style = MaterialTheme.typography.bodyLarge)
+                    }
+                    Column( modifier = modifier.weight(0.45f).padding(top = 18.dp) ) {
+                        Text(text = property.propertyPrice.toString(), style = MaterialTheme.typography.bodyLarge)
+                    }
                 }
             }
 
             item {
+                Text(
+                    text = "Total: ${selectedProperties.sumOf { it.propertyPrice }}",
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = modifier.fillMaxWidth().padding(vertical = 18.dp)
+                )
                 Row(
                     horizontalArrangement = Arrangement.Center,
-                    modifier = modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    modifier = modifier.fillMaxWidth()
                 ) {
                     Button(
                         onClick = {
                             onClickTransferProperties()
                         },
+                        shape = MaterialTheme.shapes.medium
                     ) {
-                        Text(text = "Confirm Transfer")
+                        Text(text = "Confirm Transfer", style = MaterialTheme.typography.titleMedium)
                     }
                 }
             }
@@ -417,8 +438,8 @@ private fun MultiPurposePropertyDialog(
                 onClickMultiPurposePropertyDialog()
             }
         },
-        title = { Text(text = title) },
-        text = { Text(text = description) },
+        title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
+        text = { Text(text = description, style = MaterialTheme.typography.titleMedium) },
         confirmButton = {
             TextButton(
                 onClick = {
@@ -430,7 +451,7 @@ private fun MultiPurposePropertyDialog(
                     }
                 },
             ) {
-                Text(text = stringResource(R.string.confirm))
+                Text(text = stringResource(R.string.confirm), style = MaterialTheme.typography.bodyLarge)
             }
         }
     )

@@ -1,6 +1,5 @@
 package com.example.monopolyultimatebanker.ui.screens.eventcard
 
-import androidx.annotation.ColorRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,21 +9,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -44,13 +38,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
@@ -252,7 +244,6 @@ private fun EventCardContent(
             )
         }
 
-
         Row(
             modifier = modifier
                 .fillMaxWidth()
@@ -263,7 +254,7 @@ private fun EventCardContent(
             Text(
                 text = action,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMedium,
             )
         }
 
@@ -310,12 +301,22 @@ private fun PlayerBottomSheet(
                 Row(
                     modifier = modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp, horizontal = 12.dp),
+                        .padding(vertical = 10.dp, horizontal = 20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Player")
-                    Text(text = "Balance")
+                    Text(
+                        text = "Player",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        text = "Balance",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
                 }
+                HorizontalDivider(
+                    thickness = 2.dp,
+                    modifier = modifier.padding(horizontal = 12.dp)
+                )
             }
             items(items = game.sortedByDescending { it.playerBalance }, key = { it.playerId }) {
                 TextButton(
@@ -328,14 +329,18 @@ private fun PlayerBottomSheet(
                     Row(
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(vertical = 10.dp),
+                            .padding(vertical = 10.dp, horizontal = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
                             text = it.playerName,
-                            fontSize = 20.sp,
+                            style = MaterialTheme.typography.titleLarge
                         )
-                        Text(text = it.playerBalance.toString(), fontSize = 20.sp)
+
+                        Text(
+                            text = it.playerBalance.toString(),
+                            style = MaterialTheme.typography.titleLarge
+                        )
                     }
                 }
             }
@@ -361,18 +366,15 @@ private fun PropertyDialog(
             updatePropertyNo("")
             onClickPropertyDialog1()
         },
-        title = { Text(text = "Property No.") },
+        title = { Text(text = "Property No.", style = MaterialTheme.typography.headlineSmall) },
         text = {
             Column {
-                Text(
-                    text = description,
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                )
+                Text(text = description, style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = modifier.padding(vertical = 8.dp))
                 OutlinedTextField(
                     value = propertyNo,
                     onValueChange = updatePropertyNo,
-                    label = { Text(text = "Property No") },
+                    label = { Text(text = "Property No", style = MaterialTheme.typography.bodyLarge) },
                     visualTransformation = VisualTransformation.None,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
                     supportingText = {
@@ -380,11 +382,13 @@ private fun PropertyDialog(
                             if(propertyNo.toInt() !in 1..22) {
                                 Text(
                                     text = "Must be between 1 to 22.",
+                                    style = MaterialTheme.typography.bodySmall,
                                     modifier = modifier.padding(bottom =  4.dp)
                                 )
                             }
                         }
                     },
+                    textStyle = MaterialTheme.typography.bodyLarge,
                     isError = (propertyNo.isNotBlank() && (propertyNo.toInt() !in 1..22))
                 )
             }
@@ -396,7 +400,10 @@ private fun PropertyDialog(
                     onClickPropertyDialog1()
                 }
             ) {
-                Text(text = stringResource(R.string.dismiss))
+                Text(
+                    text = stringResource(R.string.dismiss),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         },
         confirmButton = {
@@ -417,7 +424,11 @@ private fun PropertyDialog(
                 },
                 enabled = (propertyNo.isNotBlank() && (propertyNo.toInt() in 1..22))
             ) {
-                Text(text = stringResource(R.string.confirm))
+                Text(
+                    text = stringResource(R.string.confirm),
+                    style = MaterialTheme.typography.bodyLarge
+
+                )
             }
         }
     )
@@ -437,26 +448,41 @@ private fun ResultDialog(
             onClickResultDialog()
             navigateToHomeScreen()
         },
-        title = { Text(text = "Updated Properties") },
+        title = { Text(text = "Updated Properties", style = MaterialTheme.typography.headlineSmall) },
         text = {
             LazyColumn {
                 if(properties.isNotEmpty()) {
                     item {
                         Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            modifier = modifier.fillMaxWidth().padding(8.dp)
+                            modifier = modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 4.dp)
                         ) {
-                            Text("Property No.")
-                            Text("Rent Level")
+                            Column(
+                                modifier = modifier.weight(0.5f)
+                            ) {
+                                Text(text = "Property No.", style = MaterialTheme.typography.titleMedium)
+
+                            }
+                            Column(
+                                modifier = modifier.weight(0.5f)
+                            ) {
+                                Text(text = "Rent Level",  style = MaterialTheme.typography.titleMedium)
+                            }
                         }
                     }
                     items(properties, key = { it.propertyNo }) { property ->
                         Row(
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                            modifier = modifier.fillMaxWidth().padding(8.dp)
+                            modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 6.dp)
                         ) {
-                            Text(text = "${property.propertyNo}")
-                            Text(text = "${property.rentLevel}")
+                            Column(
+                                modifier = modifier.weight(0.5f)
+                            ) {
+                                Text(text = "${property.propertyNo}", style = MaterialTheme.typography.bodyLarge)
+                            }
+                            Column(
+                                modifier = modifier.weight(0.5f).padding(horizontal = 4.dp)
+                            ) {
+                                Text(text = "${property.rentLevel}", style = MaterialTheme.typography.bodyLarge)
+                            }
                         }
                     }
                 } else {
@@ -465,7 +491,7 @@ private fun ResultDialog(
                             horizontalArrangement = Arrangement.Start,
                             modifier = modifier.fillMaxWidth()
                         ) {
-                            Text(text = noPropertiesUpdated)
+                            Text(text = noPropertiesUpdated, style = MaterialTheme.typography.titleMedium)
                         }
                     }
                 }
@@ -479,7 +505,7 @@ private fun ResultDialog(
                     clearResults()
                 },
             ) {
-                Text(text = stringResource(R.string.confirm))
+                Text(text = stringResource(R.string.confirm), style = MaterialTheme.typography.bodyLarge)
             }
         }
     )
@@ -494,16 +520,16 @@ private fun WrongPropertyInputDialog(
         onDismissRequest = {
             onClickWrongPropertyInputDialog()
         },
-        title = { Text(text = "Invalid Input") },
+        title = { Text(text = "Invalid Input", style = MaterialTheme.typography.headlineSmall) },
         text = { Text(text = "One of property no. provided doesn't belong to the right player." +
-                "\nPlease retry again.") },
+                "\nPlease retry again.", style = MaterialTheme.typography.titleSmall) },
         confirmButton = {
             TextButton(
                 onClick = {
                     onClickWrongPropertyInputDialog()
                 },
             ) {
-                Text(text = stringResource(R.string.confirm))
+                Text(text = stringResource(R.string.confirm), style = MaterialTheme.typography.bodyLarge)
             }
         }
     )

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
@@ -187,7 +186,6 @@ fun RadioButtonSingleSelection(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
                     .selectable(
                         selected = (text == selectedOption),
                         onClick = { onOptionSelected(text) },
@@ -198,12 +196,13 @@ fun RadioButtonSingleSelection(
             ) {
                 RadioButton(
                     selected = (text == selectedOption),
-                    onClick = null
+                    onClick = null,
+                    modifier = modifier.padding(vertical = 12.dp)
                 )
                 Text(
                     text = text,
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                 )
             }
         }
@@ -231,12 +230,13 @@ private fun CodeDialog(
             setQrCode("")
             onClickCodeDialog()
         },
-        title = { Text("Card Code") },
+        title = { Text(text = "Card Code", style = MaterialTheme.typography.headlineSmall) },
         text = {
             Column {
                 Text(
                     text = "Enter a card code.",
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = modifier.padding(bottom = 4.dp)
                 )
                 RadioButtonSingleSelection(
                     radioOptions = radioOptions,
@@ -247,7 +247,7 @@ private fun CodeDialog(
                 OutlinedTextField(
                     value = qrCode,
                     onValueChange = setQrCode,
-                    label = { Text(text = stringResource(R.string.qr_code)) },
+                    label = { Text(text = stringResource(R.string.qr_code), style = MaterialTheme.typography.bodyLarge) },
                     visualTransformation = VisualTransformation.None,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
                     supportingText = {
@@ -255,6 +255,7 @@ private fun CodeDialog(
                             if(qrCode.toInt() !in 1..22) {
                                 Text(
                                     text = "Must be between 1 to 22.",
+                                    style = MaterialTheme.typography.bodySmall,
                                     modifier = modifier.padding(bottom =  4.dp)
                                 )
                             }
@@ -272,7 +273,7 @@ private fun CodeDialog(
                     onClickCodeDialog()
                 }
             ) {
-                Text(text = stringResource(R.string.dismiss))
+                Text(text = stringResource(R.string.dismiss), style = MaterialTheme.typography.bodyLarge)
             }
         },
         confirmButton = {
@@ -298,7 +299,7 @@ private fun CodeDialog(
                 },
                 enabled = ((qrCode.isNotBlank() && (qrCode.toInt() in 1..22)) || selectedOption.startsWith("Collect"))
             ) {
-                Text(text = stringResource(R.string.confirm))
+                Text(text = stringResource(R.string.confirm), style = MaterialTheme.typography.bodyLarge)
             }
         }
     )
@@ -310,7 +311,8 @@ private fun CodeFloatingActionButton(
     modifier: Modifier = Modifier
 ) {
     FloatingActionButton(
-        onClick = onClickCodeDialog
+        onClick = onClickCodeDialog,
+        shape = MaterialTheme.shapes.medium
     ) {
         Icon(
             painter = painterResource(R.drawable.baseline_dialpad_24),
