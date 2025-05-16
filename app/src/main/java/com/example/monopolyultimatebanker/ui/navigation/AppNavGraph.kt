@@ -44,7 +44,7 @@ fun AppNavHost(
         NavHost(
             navController = navController,
             startDestination = if(uiState.isLoggedIn!!) HomeDestination.route else SignUpAndLogInDestination.route,
-//            startDestination = EventCardDestination.route, //Statically set to bypass other screens, **FOR DEVELOPMENT PURPOSE ONLY**
+//            startDestination = PropertyCardDestination.route, //Statically set to bypass other screens, **FOR DEVELOPMENT PURPOSE ONLY**
             modifier = modifier
         ) {
             composable(route = SignUpAndLogInDestination.route) {
