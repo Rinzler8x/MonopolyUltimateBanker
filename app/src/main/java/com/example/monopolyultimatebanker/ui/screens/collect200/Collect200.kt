@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -87,8 +88,8 @@ private fun ResultDialog(
             onClickResultDialog()
             navigateToHome()
         },
-        title = { Text(text = "200$ Collected!") },
-        text = { Text(text = "The amount was successfully transferred to your account.") },
+        title = { Text(text = "200$ Collected!", style = MaterialTheme.typography.headlineSmall) },
+        text = { Text(text = "The amount was successfully transferred to your account.", style = MaterialTheme.typography.titleMedium) },
         confirmButton = {
             TextButton(
                 onClick = {
@@ -96,7 +97,7 @@ private fun ResultDialog(
                     navigateToHome()
                 }
             ) {
-                Text(text = stringResource(R.string.confirm))
+                Text(text = stringResource(R.string.confirm), style = MaterialTheme.typography.bodyLarge)
             }
         }
     )

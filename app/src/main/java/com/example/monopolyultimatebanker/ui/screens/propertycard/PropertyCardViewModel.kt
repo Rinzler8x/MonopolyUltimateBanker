@@ -1,7 +1,5 @@
 package com.example.monopolyultimatebanker.ui.screens.propertycard
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
