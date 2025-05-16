@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -128,14 +129,14 @@ fun LogInForm(
     OutlinedTextField(
         value = uiState.email,
         onValueChange = updateEmail,
-        label = { Text(stringResource(R.string.email)) },
+        label = { Text(text = stringResource(R.string.email), style = MaterialTheme.typography.bodyLarge) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
         modifier = Modifier.padding(vertical = 10.dp)
     )
     OutlinedTextField(
         value = uiState.password,
         onValueChange = updatePassword,
-        label = { Text(stringResource(R.string.password)) },
+        label = { Text(text = stringResource(R.string.password), style = MaterialTheme.typography.bodyLarge) },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = {
@@ -180,20 +181,20 @@ fun SignInForm(
     OutlinedTextField(
         value = uiState.userName,
         onValueChange = updateUsername,
-        label = { Text(stringResource(R.string.username)) },
+        label = { Text(text = stringResource(R.string.username), style = MaterialTheme.typography.bodyLarge) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next)
     )
     OutlinedTextField(
         value = uiState.email,
         onValueChange = updateEmail,
-        label = { Text(stringResource(R.string.email)) },
+        label = { Text(text = stringResource(R.string.email), style = MaterialTheme.typography.bodyLarge) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
         modifier = Modifier.padding(vertical = 10.dp)
     )
     OutlinedTextField(
         value = uiState.password,
         onValueChange = updatePassword,
-        label = { Text(stringResource(R.string.password)) },
+        label = { Text(text = stringResource(R.string.password), style = MaterialTheme.typography.bodyLarge) },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = {
