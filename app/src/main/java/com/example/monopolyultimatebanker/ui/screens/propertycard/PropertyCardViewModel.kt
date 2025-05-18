@@ -34,7 +34,9 @@ import javax.inject.Inject
 data class PropertyBottomSheetState(
     val showBottomSheet: Boolean = false,
     val selectedProperties: List<OwnedPlayerProperties> = listOf(),
-    val ownedPlayerProperties: List<OwnedPlayerProperties> = listOf()
+    val ownedPlayerProperties: List<OwnedPlayerProperties> = listOf(),
+    val rentValue: Int = 0,
+    val playerBalance: Int = 0,
 )
 
 data class MultiPurposePropertyDialog(
@@ -94,11 +96,13 @@ class PropertyCardViewModel @Inject constructor(
     private val _uiPropertyBottomSheetState = MutableStateFlow(PropertyBottomSheetState())
     val uiPropertyBottomSheetState: StateFlow<PropertyBottomSheetState> = _uiPropertyBottomSheetState.asStateFlow()
 
-    fun onCLickPropertyBottomSheet(ownedProperties: List<OwnedPlayerProperties> = emptyList()) {
+    fun onCLickPropertyBottomSheet(ownedProperties: List<OwnedPlayerProperties> = emptyList(), rentValue: Int = 0, playerBalance: Int = 0) {
         _uiPropertyBottomSheetState.update { currentState ->
             currentState.copy(
                 showBottomSheet = !_uiPropertyBottomSheetState.value.showBottomSheet,
-                ownedPlayerProperties = ownedProperties
+                ownedPlayerProperties = ownedProperties,
+                rentValue = rentValue,
+                playerBalance = playerBalance
             )
         }
     }
@@ -176,13 +180,17 @@ class PropertyCardViewModel @Inject constructor(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val propertyOwner = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyState.value.propertyNo)
-                val ownedProperties = _uiPropertyBottomSheetState.value.selectedProperties
+                val propertyOwnerDetails = gameRepositoryImpl.getGamePlayer(propertyOwner.playerId)
+                val selectedProperties = _uiPropertyBottomSheetState.value.selectedProperties
                 val player = gameRepositoryImpl.getGamePlayer(gamePreferencesRepository.gameState.first().playerId)
+                val rentValue = _uiPropertyBottomSheetState.value.rentValue
                 firestoreGameLogicImpl.transferPlayerProperty(
                     recipientId = propertyOwner.playerId,
+                    recipientBalance = propertyOwnerDetails.playerBalance,
                     playerId = player.playerId,
                     playerBalance = player.playerBalance,
-                    playerProperties = ownedProperties
+                    playerProperties = selectedProperties,
+                    rentValue = rentValue
                 )
             }
             onCLickPropertyBottomSheet()
@@ -240,7 +248,8 @@ class PropertyCardViewModel @Inject constructor(
 
                     if(player.playerId != propertyOwner.playerId) {
                         if(player.playerBalance < rentValue && playerProperties.isNotEmpty()) {
-                            onCLickPropertyBottomSheet(playerProperties)
+                            onCLickPropertyBottomSheet(ownedProperties = playerProperties, rentValue = rentValue, playerBalance = player.playerBalance)
+                            updatedRent = firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
                         } else {
                             firestoreGameLogicImpl.transferRent(
                                 propertyNo = propertyState.value.propertyNo,
