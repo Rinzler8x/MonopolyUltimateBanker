@@ -160,6 +160,7 @@ fun LogInForm(
     Button(
         onClick = onClickLogIn,
         enabled = isNotEmpty(),
+        shape = MaterialTheme.shapes.medium,
         modifier = Modifier.padding(vertical = 10.dp)
     ) {
         Text(text = stringResource(R.string.log_in))
@@ -212,12 +213,13 @@ fun SignInForm(
         }
         Switch(
             checked = checked,
-            onCheckedChange = { onCheckChange(it) }
+            onCheckedChange = { onCheckChange(it) },
         )
     }
     Button(
         onClick = onClickSignIn,
         enabled = isNotEmpty(),
+        shape = MaterialTheme.shapes.medium,
         modifier = Modifier.padding(vertical = 10.dp)
     ) {
         Text(text = stringResource(R.string.sign_in))
