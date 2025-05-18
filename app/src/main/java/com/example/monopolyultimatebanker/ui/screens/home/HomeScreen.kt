@@ -1,5 +1,6 @@
 package com.example.monopolyultimatebanker.ui.screens.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -141,7 +142,7 @@ fun HomeScreen(
                 if(gamePrefState.isGameActive){
                     ActiveGame(game = gameState.gameState)
                 } else {
-                    NoActiveGame()
+                    NoActiveGame(onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog)
                 }
 
                 if(newGameDialogState.createOrJoinGameDialog){
@@ -283,13 +284,17 @@ private fun ActiveGame(
 }
 
 @Composable
-private fun NoActiveGame(modifier: Modifier = Modifier) {
+private fun NoActiveGame(onClickCreateOrJoinGame: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()
     ) {
-        Text(text = "Create or Join Game", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Create or Join Game",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = modifier.clickable { onClickCreateOrJoinGame() }
+        )
         HorizontalDivider(
             thickness = 2.dp,
             modifier = modifier
