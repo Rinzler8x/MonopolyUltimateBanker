@@ -64,6 +64,7 @@ fun PropertyCard(
     val sheetState = rememberModalBottomSheetState()
     val multiPurposeDialogState by propertyCardViewModel.uiMultiPurposePropertyDialog.collectAsStateWithLifecycle()
     val propertyColor = Color(propertyState.color)
+
     Scaffold { innerPadding ->
         Column(
             modifier = modifier
@@ -91,6 +92,8 @@ fun PropertyCard(
                     selectedProperties = propertyBottomSheetState.selectedProperties,
                     onClickCheckBox = propertyCardViewModel::onClickCheckBox,
                     onClickTransferProperties = propertyCardViewModel::transferProperties,
+                    rentValue = propertyBottomSheetState.rentValue,
+                    playerBalance = propertyBottomSheetState.playerBalance
                 )
             }
 
@@ -99,7 +102,6 @@ fun PropertyCard(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickPurchaseDialog,
                     title = "Property Purchased",
                     description = "${propertyState.propertyName} was purchased successfully.",
-                    isPurchase = true,
                     navigateToHomeScreen = navigateToHomeScreen
                 )
             }
@@ -109,7 +111,6 @@ fun PropertyCard(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickInsufficientFundsDialog,
                     title = "Insufficient Funds",
                     description = "You have insufficient funds to purchase this property.",
-                    isInsufficientFunds = true,
                     navigateToHomeScreen = navigateToHomeScreen
                 )
             }
@@ -119,7 +120,6 @@ fun PropertyCard(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickResultDialog,
                     title = "Rent Paid",
                     description = "Property No.${propertyState.propertyNo} rent paid.\nNew Rent Level: ${multiPurposeDialogState.rentLevel}",
-                    isResult = true,
                     navigateToHomeScreen = navigateToHomeScreen
                 )
             }
@@ -128,8 +128,7 @@ fun PropertyCard(
                 MultiPurposePropertyDialog(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickPropertyTransferDialog,
                     title = "Properties Transfer",
-                    description = "All selected properties were transferred successfully.",
-                    isPropertyTransfer = true,
+                    description = "All selected properties were transferred successfully and debt paid.",
                 )
             }
 
@@ -142,7 +141,6 @@ fun PropertyCard(
                     } else {
                         "Property rent level increased to ${multiPurposeDialogState.rentLevel}"
                     },
-                    isOnlyRentLevelIncrease = true,
                     navigateToHomeScreen = navigateToHomeScreen
                 )
             }
@@ -324,6 +322,8 @@ private fun PropertyBottomSheet(
     selectedProperties: List<OwnedPlayerProperties>,
     onClickCheckBox: (String, Int, Int, Boolean) -> Unit,
     onClickTransferProperties: () -> Unit,
+    rentValue: Int,
+    playerBalance: Int,
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
@@ -391,8 +391,9 @@ private fun PropertyBottomSheet(
             }
 
             item {
+                val temp = playerBalance - rentValue
                 Text(
-                    text = "Total: ${selectedProperties.sumOf { it.propertyPrice }}",
+                    text = "Total: ${temp + selectedProperties.sumOf { it.propertyPrice }}",
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center,
                     modifier = modifier.fillMaxWidth().padding(vertical = 18.dp)
@@ -421,34 +422,21 @@ private fun MultiPurposePropertyDialog(
     onClickMultiPurposePropertyDialog: () -> Unit,
     title: String,
     description: String,
-    isPropertyTransfer: Boolean = false,
-    isPurchase: Boolean = false,
-    isInsufficientFunds: Boolean = false,
-    isResult: Boolean = false,
-    isOnlyRentLevelIncrease: Boolean = false,
     navigateToHomeScreen: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
         onDismissRequest = {
-            if(isPurchase || isResult || isInsufficientFunds || isOnlyRentLevelIncrease) {
-                onClickMultiPurposePropertyDialog()
-                navigateToHomeScreen()
-            } else if(isPropertyTransfer) {
-                onClickMultiPurposePropertyDialog()
-            }
+            onClickMultiPurposePropertyDialog()
+            navigateToHomeScreen()
         },
         title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
         text = { Text(text = description, style = MaterialTheme.typography.titleMedium) },
         confirmButton = {
             TextButton(
                 onClick = {
-                    if(isPurchase || isResult || isInsufficientFunds || isOnlyRentLevelIncrease) {
-                        onClickMultiPurposePropertyDialog()
-                        navigateToHomeScreen()
-                    } else if(isPropertyTransfer) {
-                        onClickMultiPurposePropertyDialog()
-                    }
+                    onClickMultiPurposePropertyDialog()
+                    navigateToHomeScreen()
                 },
             ) {
                 Text(text = stringResource(R.string.confirm), style = MaterialTheme.typography.bodyLarge)
