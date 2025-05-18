@@ -34,15 +34,17 @@ class FirestoreGameLogicImpl @Inject constructor(
     }
 
     override suspend fun purchaseProperty(playerId: String, gameId: String, propertyNo: Int, playerBalance: Int, propertyValue: Int) {
-        firestoreRepositoryImpl.insertPlayerProperty(
-            gameId = gameId,
-            playerId = playerId,
-            propertyNo = propertyNo
-        )
-        firestoreRepositoryImpl.updateGamePlayer(
-            playerId = playerId,
-            playerBalance = (playerBalance - propertyValue)
-        )
+        withContext(Dispatchers.IO) {
+            firestoreRepositoryImpl.insertPlayerProperty(
+                gameId = gameId,
+                playerId = playerId,
+                propertyNo = propertyNo
+            )
+            firestoreRepositoryImpl.updateGamePlayer(
+                playerId = playerId,
+                playerBalance = (playerBalance - propertyValue)
+            )
+        }
     }
 
     override suspend fun eventDeduct50PerProperty(playerId: String) {
@@ -96,19 +98,37 @@ class FirestoreGameLogicImpl @Inject constructor(
         }
     }
 
-    override suspend fun transferPlayerProperty(recipientId: String, playerId: String, playerBalance: Int, playerProperties: List<OwnedPlayerProperties>) {
-        var tempBalance = playerBalance
-        playerProperties.forEach { property ->
-            firestoreRepositoryImpl.updatePlayerPropertyOwner(
-                ppId = property.ppId,
-                playerId = recipientId
+    override suspend fun transferPlayerProperty(
+        recipientId: String,
+        recipientBalance: Int,
+        playerId: String,
+        playerBalance: Int,
+        playerProperties: List<OwnedPlayerProperties>,
+        rentValue: Int
+    ) {
+        withContext(Dispatchers.IO) {
+            var tempBalance = playerBalance
+            playerProperties.forEach { property ->
+                firestoreRepositoryImpl.updatePlayerPropertyOwner(
+                    ppId = property.ppId,
+                    playerId = recipientId
+                )
+                tempBalance += property.propertyPrice
+            }
+
+            val addAmount = recipientBalance + rentValue
+            val deductAmount = tempBalance - rentValue
+
+            firestoreRepositoryImpl.updateGamePlayer(
+                playerId = recipientId,
+                playerBalance = addAmount
             )
-            tempBalance += property.propertyPrice
+
+            firestoreRepositoryImpl.updateGamePlayer(
+                playerId = playerId,
+                playerBalance = deductAmount
+            )
         }
-        firestoreRepositoryImpl.updateGamePlayer(
-            playerId = playerId,
-            playerBalance = tempBalance
-        )
     }
 
     override suspend fun rentLevelReset1(propertyNo: Int): List<UpdatedProperty> {
