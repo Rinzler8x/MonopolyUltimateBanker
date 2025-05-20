@@ -1,12 +1,18 @@
 package com.example.monopolyultimatebanker.ui.screens.qrcodescanner
 
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.RectF
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.mlkit.vision.MlKitAnalyzer
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,6 +38,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,9 +51,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -106,50 +120,88 @@ fun QrCodeScanner(
             modifier = modifier.padding(innerPadding)
         ) {
             if(!dialogState.codeDialogState){
-                AndroidView(
-                    modifier = modifier
-                        .size(500.dp),
-                    factory = { ctx ->
-                        PreviewView(ctx).apply {
-                            cameraCtrl.cameraController.setImageAnalysisAnalyzer(
-                                ContextCompat.getMainExecutor(ctx),
-                                MlKitAnalyzer(
-                                    listOf(qrScannerUtil.qrScanner),
-                                    ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
-                                    ContextCompat.getMainExecutor(ctx)
-                                ) { result: MlKitAnalyzer.Result? ->
+                Box(modifier = modifier.fillMaxSize()) {
+                    AndroidView(
+                        modifier = modifier
+                            .fillMaxSize(),
+                        factory = { ctx ->
+                            PreviewView(ctx).apply {
+                                doOnLayout { view ->
 
-                                    val qrCodeResults = result?.getValue(qrScannerUtil.qrScanner)
-                                    if(!qrCodeResults.isNullOrEmpty()) {
-                                        val tempVar = qrCodeResults.first().rawValue!!
-                                        if(tempVar.startsWith("monopro")) {
-                                            qrCodeScannerViewModel.saveQrCodeAndNavigateToPropertyScreen(
-                                                qrCode =  tempVar,
-                                                qrScannerInput = true,
-                                                navigateToPropertyScreen = navigateToPropertyScreen
-                                            )
-                                            qrCodeScannerViewModel.unbindCameraController()
-                                        } else if (tempVar.startsWith("monoeve")) {
-                                            qrCodeScannerViewModel.saveQrCodeAndNavigateToEventScreen(
-                                                qrCode = tempVar,
-                                                qrScannerInput = true,
-                                                navigateToEventScreen = navigateToEventScreen
-                                            )
-                                            qrCodeScannerViewModel.unbindCameraController()
-                                        } else if (tempVar.startsWith("collect")){
-                                            qrCodeScannerViewModel.unbindCameraController()
-                                            navigateToCollect200()
-                                        } else {
-                                            qrCodeScannerViewModel.showWrongQrCodeSnackbar()
+                                    val centerRect = getCenterScanRect(view.width, view.height)
+
+                                    cameraCtrl.cameraController.setImageAnalysisAnalyzer(
+                                        ContextCompat.getMainExecutor(ctx),
+                                        MlKitAnalyzer(
+                                            listOf(qrScannerUtil.qrScanner),
+                                            ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
+                                            ContextCompat.getMainExecutor(ctx)
+                                        ) { result: MlKitAnalyzer.Result? ->
+
+                                            val qrCodeResults = result?.getValue(qrScannerUtil.qrScanner)
+
+                                            if (!qrCodeResults.isNullOrEmpty()) {
+                                                val centeredQr = qrCodeResults.firstOrNull { code ->
+                                                    val bounds = code.boundingBox
+                                                    bounds != null && centerRect.contains(bounds.centerX(), bounds.centerY())
+                                                }
+
+                                                if (centeredQr != null) {
+                                                    val tempVar = centeredQr.rawValue ?: return@MlKitAnalyzer
+
+                                                    when {
+                                                        tempVar.startsWith("monopro") -> {
+                                                            qrCodeScannerViewModel.saveQrCodeAndNavigateToPropertyScreen(
+                                                                qrCode = tempVar,
+                                                                qrScannerInput = true,
+                                                                navigateToPropertyScreen = navigateToPropertyScreen
+                                                            )
+                                                            qrCodeScannerViewModel.unbindCameraController()
+                                                        }
+                                                        tempVar.startsWith("monoeve") -> {
+                                                            qrCodeScannerViewModel.saveQrCodeAndNavigateToEventScreen(
+                                                                qrCode = tempVar,
+                                                                qrScannerInput = true,
+                                                                navigateToEventScreen = navigateToEventScreen
+                                                            )
+                                                            qrCodeScannerViewModel.unbindCameraController()
+                                                        }
+                                                        tempVar.startsWith("collect") -> {
+                                                            qrCodeScannerViewModel.unbindCameraController()
+                                                            navigateToCollect200()
+                                                        }
+                                                        else -> {
+                                                            qrCodeScannerViewModel.showWrongQrCodeSnackbar()
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
-                                    }
+                                    )
+
+                                    cameraCtrl.cameraController.bindToLifecycle(lifecycleOwner)
+                                    this.controller = cameraCtrl.cameraController
                                 }
-                            )
-                            cameraCtrl.cameraController.bindToLifecycle(lifecycleOwner)
-                            this.controller = cameraCtrl.cameraController
+                            }
                         }
+                    )
+                    ScannerOverlay()
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 260.dp),
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        Text(
+                            text = "Align QR within frame to scan",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
                     }
-                )
+
+                }
             } else {
                 cameraCtrl.cameraController.unbind()
             }
@@ -173,6 +225,79 @@ fun QrCodeScanner(
         }
     }
 }
+
+private fun getCenterScanRect(width: Int, height: Int): Rect {
+    val scanWidth = (width * 0.5).toInt()
+    val scanHeight = (height * 0.5).toInt()
+    val left = (width - scanWidth) / 2
+    val top = (height - scanHeight) / 2
+    return Rect(left, top, left + scanWidth, top + scanHeight)
+}
+
+@Composable
+private fun ScannerOverlay(
+    modifier: Modifier = Modifier,
+    scanAreaSize: Dp = 250.dp,
+    cornerLength: Dp = 20.dp,
+    cornerStrokeWidth: Dp = 4.dp,
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val canvasWidth = size.width
+            val canvasHeight = size.height
+
+            val rectSize = scanAreaSize.toPx()
+            val left = (canvasWidth - rectSize) / 2f
+            val top = (canvasHeight - rectSize) / 2f
+            val right = left + rectSize
+            val bottom = top + rectSize
+            val rect = RectF(left, top, right, bottom)
+
+            // Dim the background
+            drawRect(
+                color = Color.Black.copy(alpha = 0.6f)
+            )
+
+            // Clear the center scan area (cutout)
+            drawRoundRect(
+                color = Color.Transparent,
+                topLeft = Offset(left, top),
+                size = Size(rectSize, rectSize),
+                blendMode = BlendMode.Clear
+            )
+
+            val paint = Paint().apply {
+                color = android.graphics.Color.WHITE
+                strokeWidth = cornerStrokeWidth.toPx()
+                style = Paint.Style.STROKE
+                isAntiAlias = true
+            }
+
+            // Corner length in px
+            val cl = cornerLength.toPx()
+
+            // Draw corner lines manually
+            drawIntoCanvas { canvas ->
+                // Top-left corner
+                canvas.nativeCanvas.drawLine(left, top, left + cl, top, paint)
+                canvas.nativeCanvas.drawLine(left, top, left, top + cl, paint)
+
+                // Top-right corner
+                canvas.nativeCanvas.drawLine(right, top, right - cl, top, paint)
+                canvas.nativeCanvas.drawLine(right, top, right, top + cl, paint)
+
+                // Bottom-left corner
+                canvas.nativeCanvas.drawLine(left, bottom, left + cl, bottom, paint)
+                canvas.nativeCanvas.drawLine(left, bottom, left, bottom - cl, paint)
+
+                // Bottom-right corner
+                canvas.nativeCanvas.drawLine(right, bottom, right - cl, bottom, paint)
+                canvas.nativeCanvas.drawLine(right, bottom, right, bottom - cl, paint)
+            }
+        }
+    }
+}
+
 
 @Composable
 fun RadioButtonSingleSelection(
