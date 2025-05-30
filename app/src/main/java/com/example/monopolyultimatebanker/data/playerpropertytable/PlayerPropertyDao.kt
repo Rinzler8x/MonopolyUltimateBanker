@@ -12,6 +12,12 @@ data class OwnedPlayerProperties(
     val propertyPrice: Int
 )
 
+data class PlayerPropertiesList(
+    val propertyNo: Int,
+    val propertyName: String,
+    val rentLevel: Int
+)
+
 @Dao
 interface PlayerPropertyDao {
 
@@ -23,6 +29,11 @@ interface PlayerPropertyDao {
 
     @Query("SELECT * FROM player_property WHERE property_no = :propertyNo")
     fun getPlayerPropertyFlow(propertyNo: Int): Flow<PlayerProperty>
+
+    @Query("SELECT property.property_no as propertyNo, property.property_name as propertyName, player_property.rent_level as rentLevel FROM property " +
+            "INNER JOIN player_property ON property.property_no = player_property.property_no " +
+            "WHERE player_property.player_id = :playerId ORDER BY property.property_no ASC")
+    fun getPlayerPropertiesList(playerId: String): Flow<List<PlayerPropertiesList>?>
 
     @Query("SELECT COUNT(*) as count FROM player_property WHERE property_no = :propertyNo")
     fun propertyExists(propertyNo: Int): Int
