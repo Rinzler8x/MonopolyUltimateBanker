@@ -13,6 +13,7 @@ import com.example.monopolyultimatebanker.data.firebase.database.FirestorePlayer
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
 import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertiesList
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
 import com.example.monopolyultimatebanker.data.preferences.GamePrefState
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
@@ -45,6 +46,7 @@ data class MultiPurposeDialogState(
     val leaveGameDialog: Boolean = false,
     val logoutDialog: Boolean = false,
     val navigateToNewLocationDialog: Boolean = false,
+    val playerPropertiesListDialog: Boolean = false,
 )
 
 data class FirestoreGameState(
@@ -57,6 +59,10 @@ data class FirestorePlayerPropertyState(
 
 data class GameState(
     val gameState: List<Game> = listOf()
+)
+
+data class PlayerPropertiesListState(
+    val playerPropertiesListState: List<PlayerPropertiesList>? = listOf()
 )
 
 @HiltViewModel
@@ -133,6 +139,19 @@ class HomeViewModel @Inject constructor(
                 initialValue = FirestorePlayerPropertyState()
             )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val playerPropertiesListState: StateFlow<PlayerPropertiesListState> =
+        gamePreferenceState.flatMapLatest { prefState ->
+            playerPropertyRepositoryImpl.getPlayerPropertiesList(prefState.playerId).map { ppList ->
+                PlayerPropertiesListState(ppList ?: emptyList())
+            }
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = PlayerPropertiesListState()
+            )
+
     /**Dialog Boxes Code*/
     var newGameDialogState by mutableStateOf(NewGameDialogState())
         private set
@@ -188,6 +207,14 @@ class HomeViewModel @Inject constructor(
         _uiMultiPurposeDialog.update { currentState ->
             currentState.copy(
                 navigateToNewLocationDialog = !_uiMultiPurposeDialog.value.navigateToNewLocationDialog
+            )
+        }
+    }
+
+    fun onClickPlayerPropertiesListDialog() {
+        _uiMultiPurposeDialog.update { currentState ->
+            currentState.copy(
+                playerPropertiesListDialog = !_uiMultiPurposeDialog.value.playerPropertiesListDialog
             )
         }
     }

@@ -49,10 +49,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.monopolyultimatebanker.R
 import com.example.monopolyultimatebanker.data.gametable.Game
+import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertiesList
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
 import com.example.monopolyultimatebanker.utils.ObserverAsEvents
 import com.example.monopolyultimatebanker.utils.SnackbarController
@@ -76,7 +78,7 @@ fun HomeScreen(
     val firestorePlayerPropertyState by homeViewModel.firestorePlayerPropertyState.collectAsStateWithLifecycle()
     val gameState by homeViewModel.gameState.collectAsStateWithLifecycle()
     val multiPurposeDialogState by homeViewModel.uiMultiPurposeDialog.collectAsStateWithLifecycle()
-
+    val playerPropertiesListState by homeViewModel.playerPropertiesListState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     ObserverAsEvents(
@@ -108,11 +110,12 @@ fun HomeScreen(
                     isGameActive = gamePrefState.isGameActive,
                     onClickLeaveGameDialog = homeViewModel::onClickLeaveGameDialog,
                     onCLickLogOutDialog = homeViewModel::onClickLogOutDialog,
-                    onClickNavigateToNewLocationDialog = homeViewModel::onClickNavigateToNewLocationDialog
+                    onClickNavigateToNewLocationDialog = homeViewModel::onClickNavigateToNewLocationDialog,
+                    onClickPlayerPropertiesListDialog = homeViewModel::onClickPlayerPropertiesListDialog
                 )
             }
         },
-        gesturesEnabled = homeViewModel.navDrawerState.isOpen
+        gesturesEnabled = true
     ) {
         Scaffold(
             topBar = {
@@ -183,10 +186,19 @@ fun HomeScreen(
                         navigateToNewLocation = homeViewModel::navigateToNewLocation,
                     )
                 }
+
+                if(multiPurposeDialogState.playerPropertiesListDialog){
+                    MultiPurposeDialog(
+                        onClickDialogState = homeViewModel::onClickPlayerPropertiesListDialog,
+                        title = "Player Properties",
+                        description = "",
+                        isPlayerPropertyList = true,
+                        playerPropertyList = playerPropertiesListState.playerPropertiesListState!!
+                    )
+                }
             }
         }
     }
-
 }
 
 @Composable
@@ -197,6 +209,7 @@ private fun DrawerContent(
     onClickLeaveGameDialog: () -> Unit,
     onCLickLogOutDialog: () -> Unit,
     onClickNavigateToNewLocationDialog: () -> Unit,
+    onClickPlayerPropertiesListDialog: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -243,6 +256,19 @@ private fun DrawerContent(
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(text = "Navigation", style = MaterialTheme.typography.titleMedium)
+            }
+        }
+        HorizontalDivider(thickness = 2.dp, modifier = modifier.padding(bottom = 12.dp, top = 8.dp))
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = modifier.fillMaxWidth()
+        ) {
+            Button(
+                onClick = onClickPlayerPropertiesListDialog,
+                enabled = isGameActive,
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(text = "Properties", style = MaterialTheme.typography.titleMedium)
             }
         }
     }
@@ -315,17 +341,55 @@ private fun MultiPurposeDialog(
     logOut: () -> Unit = {},
     isNavigate: Boolean = false,
     navigateToNewLocation: () -> Unit = {},
+    isPlayerPropertyList: Boolean = false,
+    playerPropertyList: List<PlayerPropertiesList> = listOf(),
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
         onDismissRequest = onClickDialogState,
         title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
-        text = { Text(text = description, style = MaterialTheme.typography.titleMedium) },
+        text = {
+            Column {
+                if(!isPlayerPropertyList){
+                    Text(text = description, style = MaterialTheme.typography.titleMedium)
+                }
+
+                if(isPlayerPropertyList) {
+                    if(playerPropertyList.isNotEmpty()) {
+                        Spacer(modifier = modifier.padding(top = 4.dp))
+                        Row(
+                            modifier = modifier.fillMaxWidth().padding(bottom = 2.dp)
+                        ) {
+                            Column(modifier = modifier.weight(.2f)) { Text(text = "No.", style = MaterialTheme.typography.titleSmall) }
+                            Column(modifier = modifier.weight(.65f).padding(horizontal = 0.dp)) { Text(text = "Property Name", style = MaterialTheme.typography.titleMedium) }
+                            Column(modifier = modifier.weight(.15f)) { Text(text = "Rent", style = MaterialTheme.typography.titleMedium) }
+                        }
+                        playerPropertyList.forEach { playerProperty ->
+                            Row( modifier = modifier.fillMaxWidth().padding(top = 6.dp) ) {
+                                Column(modifier = modifier.weight(.2f)) {
+                                    Text(text = "${playerProperty.propertyNo}", style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
+                                }
+                                Column(modifier = modifier.weight(.65f)) {
+                                    Text(text = playerProperty.propertyName, style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
+                                }
+                                Column(modifier = modifier.weight(.15f).padding(start = 2.dp)) {
+                                    Text(text = "${playerProperty.rentLevel}", style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
+                                }
+                            }
+                        }
+                    } else {
+                        Text(text = "No Property Owned.", style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        },
         dismissButton = {
-            TextButton(
-                onClick = onClickDialogState
-            ) {
-                Text(text = stringResource(R.string.dismiss), style = MaterialTheme.typography.bodyLarge)
+            if(!isPlayerPropertyList){
+                TextButton(
+                    onClick = onClickDialogState
+                ) {
+                    Text(text = stringResource(R.string.dismiss), style = MaterialTheme.typography.bodyLarge)
+                }
             }
         },
         confirmButton = {
