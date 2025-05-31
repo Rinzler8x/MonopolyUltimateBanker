@@ -510,7 +510,7 @@ private fun GameTopAppBar(
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         title = {
-            Text(text = stringResource(R.string.top_app_bar_title),
+            Text(text = stringResource(R.string.monoploy_title),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.headlineSmall
