@@ -245,7 +245,7 @@ private fun DrawerContent(
                 Text("Log Out", style = MaterialTheme.typography.titleMedium)
             }
         }
-        HorizontalDivider(thickness = 2.dp, modifier = modifier.padding(bottom = 12.dp, top = 8.dp))
+        HorizontalDivider(thickness = 2.dp, modifier = modifier.padding(bottom = 12.dp, top = 12.dp))
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = modifier.fillMaxWidth()
@@ -258,7 +258,7 @@ private fun DrawerContent(
                 Text(text = "Navigation", style = MaterialTheme.typography.titleMedium)
             }
         }
-        HorizontalDivider(thickness = 2.dp, modifier = modifier.padding(bottom = 12.dp, top = 8.dp))
+        HorizontalDivider(thickness = 2.dp, modifier = modifier.padding(bottom = 12.dp, top = 12.dp))
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = modifier.fillMaxWidth()
