@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -131,6 +132,7 @@ fun EventCard(
             if(propertyDialogState.resultDialogState) {
                 ResultDialog(
                     onClickResultDialog = eventCardViewModel::onClickResultDialog,
+                    isLoading = propertyDialogState.isLoading,
                     properties = resultsUiState.updatedProperties,
                     noPropertiesUpdated = resultsUiState.noPropertiesUpdated,
                     navigateToHomeScreen = navigateToHomeScreen,
@@ -437,6 +439,7 @@ private fun PropertyDialog(
 @Composable
 private fun ResultDialog(
     onClickResultDialog: () -> Unit,
+    isLoading: Boolean,
     properties: List<UpdatedProperty>,
     noPropertiesUpdated: String,
     clearResults: () -> Unit,
@@ -451,47 +454,54 @@ private fun ResultDialog(
         title = { Text(text = "Updated Properties", style = MaterialTheme.typography.headlineSmall) },
         text = {
             LazyColumn {
-                if(properties.isNotEmpty()) {
-                    item {
-                        Row(
-                            modifier = modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 4.dp)
-                        ) {
-                            Column(
-                                modifier = modifier.weight(0.5f)
-                            ) {
-                                Text(text = "Property No.", style = MaterialTheme.typography.titleMedium)
-
-                            }
-                            Column(
-                                modifier = modifier.weight(0.5f)
-                            ) {
-                                Text(text = "Rent Level",  style = MaterialTheme.typography.titleMedium)
-                            }
-                        }
-                    }
-                    items(properties, key = { it.propertyNo }) { property ->
-                        Row(
-                            modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 6.dp)
-                        ) {
-                            Column(
-                                modifier = modifier.weight(0.5f)
-                            ) {
-                                Text(text = "${property.propertyNo}", style = MaterialTheme.typography.bodyLarge)
-                            }
-                            Column(
-                                modifier = modifier.weight(0.5f).padding(horizontal = 4.dp)
-                            ) {
-                                Text(text = "${property.rentLevel}", style = MaterialTheme.typography.bodyLarge)
-                            }
-                        }
-                    }
+                if(isLoading) {
+                    item { Row(
+                        modifier = modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) { CircularProgressIndicator() } }
                 } else {
-                    item {
-                        Row(
-                            horizontalArrangement = Arrangement.Start,
-                            modifier = modifier.fillMaxWidth()
-                        ) {
-                            Text(text = noPropertiesUpdated, style = MaterialTheme.typography.titleMedium)
+                    if(properties.isNotEmpty()) {
+                        item {
+                            Row(
+                                modifier = modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 4.dp)
+                            ) {
+                                Column(
+                                    modifier = modifier.weight(0.5f)
+                                ) {
+                                    Text(text = "Property No.", style = MaterialTheme.typography.titleMedium)
+
+                                }
+                                Column(
+                                    modifier = modifier.weight(0.5f)
+                                ) {
+                                    Text(text = "Rent Level",  style = MaterialTheme.typography.titleMedium)
+                                }
+                            }
+                        }
+                        items(properties, key = { it.propertyNo }) { property ->
+                            Row(
+                                modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 6.dp)
+                            ) {
+                                Column(
+                                    modifier = modifier.weight(0.5f)
+                                ) {
+                                    Text(text = "${property.propertyNo}", style = MaterialTheme.typography.bodyLarge)
+                                }
+                                Column(
+                                    modifier = modifier.weight(0.5f).padding(horizontal = 4.dp)
+                                ) {
+                                    Text(text = "${property.rentLevel}", style = MaterialTheme.typography.bodyLarge)
+                                }
+                            }
+                        }
+                    } else {
+                        item {
+                            Row(
+                                horizontalArrangement = Arrangement.Start,
+                                modifier = modifier.fillMaxWidth()
+                            ) {
+                                Text(text = noPropertiesUpdated, style = MaterialTheme.typography.titleMedium)
+                            }
                         }
                     }
                 }

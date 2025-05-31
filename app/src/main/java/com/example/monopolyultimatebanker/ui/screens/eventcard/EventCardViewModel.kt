@@ -46,7 +46,8 @@ data class PropertyDialogState(
     val propertyDialogState2: Boolean = false,
     val doubleInput: Boolean = false,
     val resultDialogState: Boolean = false,
-    val wrongPropertyInputDialogState: Boolean = false
+    val wrongPropertyInputDialogState: Boolean = false,
+    val isLoading: Boolean = false
 )
 
 data class ResultsUiState(
@@ -167,6 +168,14 @@ class EventCardViewModel @Inject constructor(
         }
     }
 
+    private fun onClickIsLoading() {
+        _uiPropertyDialog.update { currentState ->
+            currentState.copy(
+                isLoading = !_uiPropertyDialog.value.isLoading
+            )
+        }
+    }
+
     /**User Input State*/
     var actionUserInput by mutableStateOf(ActionUserInput())
 
@@ -184,90 +193,108 @@ class EventCardViewModel @Inject constructor(
 
     private fun swapProperty(playerId: String, otherPlayerId: String, propertyNo1: Int, propertyNo2: Int) {
         viewModelScope.launch {
+            onClickIsLoading()
             firestoreGameLogicImpl.propertySwap(
                 propertyNo1 = propertyNo1,
                 propertyNo2 = propertyNo2,
                 playerId1 = playerId,
                 playerId2 = otherPlayerId
             )
+            onClickIsLoading()
         }
     }
 
     private fun rentLevelResetTo1(propertyNo: Int) {
         viewModelScope.launch {
+            onClickIsLoading()
             updateResults(
                 results = firestoreGameLogicImpl.rentLevelReset1(
                     propertyNo = propertyNo
                 )
             )
         }
+        onClickIsLoading()
     }
 
     private fun rentLevelJumpsTo5(propertyNo: Int) {
         viewModelScope.launch {
+            onClickIsLoading()
             updateResults(
                 results = firestoreGameLogicImpl.rentLevelJumpTo5(
                     propertyNo = propertyNo
                 )
             )
+            onClickIsLoading()
         }
     }
 
     private fun rentLevelIncreaseForYouAndDecreaseForNeighbours(propertyNo: Int) {
         viewModelScope.launch {
+            onClickIsLoading()
             updateResults(
                 results = firestoreGameLogicImpl.eventRentDecreaseForNeighbors(
                     propertyNo = propertyNo
                 )
             )
+            onClickIsLoading()
         }
     }
 
     private fun rentLevelIncreaseForBoardSide(propertyNo: Int) {
         viewModelScope.launch {
+            onClickIsLoading()
             updateResults(
                 results = firestoreGameLogicImpl.eventRentLevelIncreaseBoardSide(
                     propertyNo = propertyNo
                 )
             )
+            onClickIsLoading()
         }
     }
 
     private fun rentLevelDecreaseForBoardSide(propertyNo: Int) {
         viewModelScope.launch {
+            onClickIsLoading()
             updateResults(
                 results = firestoreGameLogicImpl.eventRentLevelDecreaseBoardSide(
                     propertyNo = propertyNo
                 )
             )
+            onClickIsLoading()
         }
     }
 
     private fun rentLevelIncreaseForColorSet(propertyNo: Int) {
         viewModelScope.launch {
+            onClickIsLoading()
             updateResults(
                 results = firestoreGameLogicImpl.eventRentLevelIncreaseColorSet(
                     propertyNo = propertyNo
                 )
             )
+            onClickIsLoading()
         }
     }
 
     private fun rentLevelDecreaseForColorSet(propertyNo: Int) {
         viewModelScope.launch {
+            onClickIsLoading()
             updateResults(
                 results = firestoreGameLogicImpl.eventRentLevelDecreaseColorSet(
                     propertyNo = propertyNo
                 )
             )
+            onClickIsLoading()
         }
     }
 
     private fun pay50PerPropertyOwned(playerId: String) {
         viewModelScope.launch {
+            onClickIsLoading()
             firestoreGameLogicImpl.eventDeduct50PerProperty(
                 playerId = playerId,
             )
+            onClickIsLoading()
         }
     }
 
