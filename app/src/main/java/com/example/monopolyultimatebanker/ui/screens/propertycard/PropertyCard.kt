@@ -85,7 +85,7 @@ fun PropertyCard(
 
             if(propertyBottomSheetState.showBottomSheet) {
                 PropertyBottomSheet(
-                    onClickPropertyBottomSheet = propertyCardViewModel::onCLickPropertyBottomSheet,
+                    onClickPropertyBottomSheet = propertyCardViewModel::onClickPropertyBottomSheet,
                     sheetState = sheetState,
                     innerPadding = innerPadding,
                     ownedPlayerProperties = propertyBottomSheetState.ownedPlayerProperties,
@@ -127,7 +127,7 @@ fun PropertyCard(
             if(multiPurposeDialogState.propertyTransferDialogState){
                 MultiPurposePropertyDialog(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickPropertyTransferDialog,
-                    title = "Properties Transfer",
+                    title = "Properties Transferred",
                     description = "All selected properties were transferred successfully and debt paid.",
                 )
             }
