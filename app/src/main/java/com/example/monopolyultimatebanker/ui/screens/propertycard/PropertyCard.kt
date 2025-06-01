@@ -291,7 +291,6 @@ private fun PropertyCardContent(
                 }
             }
         }
-
     }
 
     Row(
@@ -367,7 +366,7 @@ private fun PropertyBottomSheet(
                 }
             }
 
-            items(ownedPlayerProperties) { property ->
+            items(items = ownedPlayerProperties.sortedBy { it.propertyNo }, key = { it.propertyNo }) { property ->
                 Row(
                     modifier = modifier
                         .fillMaxWidth()

@@ -478,7 +478,7 @@ private fun ResultDialog(
                                 }
                             }
                         }
-                        items(properties, key = { it.propertyNo }) { property ->
+                        items(properties.sortedBy { it.propertyNo }, key = { it.propertyNo }) { property ->
                             Row(
                                 modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 6.dp)
                             ) {
