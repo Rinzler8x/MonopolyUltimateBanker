@@ -65,6 +65,12 @@ data class PlayerPropertiesListState(
     val playerPropertiesListState: List<PlayerPropertiesList>? = listOf()
 )
 
+data class GamePrefUiState(
+    val gameId: String = "",
+    val playerId: String = "",
+    val isGameActive: Boolean? = null
+)
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val firestoreRepositoryImpl: FirestoreRepositoryImpl,
@@ -75,9 +81,9 @@ class HomeViewModel @Inject constructor(
     private val userLoginPreferencesRepository: UserLoginPreferencesRepository
 ): ViewModel() {
 
-    val gamePreferenceState: StateFlow<GamePrefState> =
+    val gamePreferenceState: StateFlow<GamePrefUiState> =
         gamePreferencesRepository.gameState.map {
-            GamePrefState(
+            GamePrefUiState(
                 gameId = it.gameId,
                 playerId = it.playerId,
                 isGameActive = it.isGameActive
@@ -86,7 +92,7 @@ class HomeViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = GamePrefState()
+                initialValue = GamePrefUiState()
             )
 
     val userLoginPreferenceState: StateFlow<UserLogin> =

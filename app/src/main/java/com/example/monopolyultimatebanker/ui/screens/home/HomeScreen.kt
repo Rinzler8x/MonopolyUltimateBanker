@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -107,7 +108,7 @@ fun HomeScreen(
                 DrawerContent(
                     username = userLoginState.userName,
                     gameId = gamePrefState.gameId,
-                    isGameActive = gamePrefState.isGameActive,
+                    isGameActive = gamePrefState.isGameActive ?: false,
                     onClickLeaveGameDialog = homeViewModel::onClickLeaveGameDialog,
                     onCLickLogOutDialog = homeViewModel::onClickLogOutDialog,
                     onClickNavigateToNewLocationDialog = homeViewModel::onClickNavigateToNewLocationDialog,
@@ -127,7 +128,7 @@ fun HomeScreen(
                 )
             },
             floatingActionButton = {
-                if(gamePrefState.isGameActive) {
+                if(gamePrefState.isGameActive == true) {
                     QrFloatingActionButton(
                         onClickQrCodeScanner = navigateToQrCodeScanner
                     )
@@ -141,11 +142,14 @@ fun HomeScreen(
             Column (
                 modifier = modifier.padding(contentPadding)
             ) {
-
-                if(gamePrefState.isGameActive){
-                    ActiveGame(game = gameState.gameState)
+                if(gamePrefState.isGameActive == null) {
+                    CircularProgressIndicator()
                 } else {
-                    NoActiveGame(onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog)
+                    if(gamePrefState.isGameActive == true){
+                        ActiveGame(game = gameState.gameState)
+                    } else {
+                        NoActiveGame(onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog)
+                    }
                 }
 
                 if(newGameDialogState.createOrJoinGameDialog){
