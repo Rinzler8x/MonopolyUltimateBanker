@@ -1,8 +1,6 @@
 package com.example.monopolyultimatebanker.ui.screens.qrcodescanner
 
 import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.RectF
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.mlkit.vision.MlKitAnalyzer
 import androidx.camera.view.PreviewView
@@ -55,7 +53,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.core.view.doOnLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -126,62 +123,48 @@ fun QrCodeScanner(
                             .fillMaxSize(),
                         factory = { ctx ->
                             PreviewView(ctx).apply {
-                                doOnLayout { view ->
+                                cameraCtrl.cameraController.setImageAnalysisAnalyzer(
+                                    ContextCompat.getMainExecutor(ctx),
+                                    MlKitAnalyzer(
+                                        listOf(qrScannerUtil.qrScanner),
+                                        ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
+                                        ContextCompat.getMainExecutor(ctx)
+                                    ) { result: MlKitAnalyzer.Result? ->
 
-                                    val centerRect = getCenterScanRect(view.width, view.height)
+                                        val qrCodeResults = result?.getValue(qrScannerUtil.qrScanner)
 
-                                    cameraCtrl.cameraController.setImageAnalysisAnalyzer(
-                                        ContextCompat.getMainExecutor(ctx),
-                                        MlKitAnalyzer(
-                                            listOf(qrScannerUtil.qrScanner),
-                                            ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
-                                            ContextCompat.getMainExecutor(ctx)
-                                        ) { result: MlKitAnalyzer.Result? ->
-
-                                            val qrCodeResults = result?.getValue(qrScannerUtil.qrScanner)
-
-                                            if (!qrCodeResults.isNullOrEmpty()) {
-                                                val centeredQr = qrCodeResults.firstOrNull { code ->
-                                                    val bounds = code.boundingBox
-                                                    bounds != null && centerRect.contains(bounds.centerX(), bounds.centerY())
+                                        if (!qrCodeResults.isNullOrEmpty()) {
+                                            val tempVar = qrCodeResults.first().rawValue!!
+                                            when {
+                                                tempVar.startsWith("monopro") -> {
+                                                    qrCodeScannerViewModel.saveQrCodeAndNavigateToPropertyScreen(
+                                                        qrCode = tempVar,
+                                                        qrScannerInput = true,
+                                                        navigateToPropertyScreen = navigateToPropertyScreen
+                                                    )
+                                                    qrCodeScannerViewModel.unbindCameraController()
                                                 }
-
-                                                if (centeredQr != null) {
-                                                    val tempVar = centeredQr.rawValue ?: return@MlKitAnalyzer
-
-                                                    when {
-                                                        tempVar.startsWith("monopro") -> {
-                                                            qrCodeScannerViewModel.saveQrCodeAndNavigateToPropertyScreen(
-                                                                qrCode = tempVar,
-                                                                qrScannerInput = true,
-                                                                navigateToPropertyScreen = navigateToPropertyScreen
-                                                            )
-                                                            qrCodeScannerViewModel.unbindCameraController()
-                                                        }
-                                                        tempVar.startsWith("monoeve") -> {
-                                                            qrCodeScannerViewModel.saveQrCodeAndNavigateToEventScreen(
-                                                                qrCode = tempVar,
-                                                                qrScannerInput = true,
-                                                                navigateToEventScreen = navigateToEventScreen
-                                                            )
-                                                            qrCodeScannerViewModel.unbindCameraController()
-                                                        }
-                                                        tempVar.startsWith("collect") -> {
-                                                            qrCodeScannerViewModel.unbindCameraController()
-                                                            navigateToCollect200()
-                                                        }
-                                                        else -> {
-                                                            qrCodeScannerViewModel.showWrongQrCodeSnackbar()
-                                                        }
-                                                    }
+                                                tempVar.startsWith("monoeve") -> {
+                                                    qrCodeScannerViewModel.saveQrCodeAndNavigateToEventScreen(
+                                                        qrCode = tempVar,
+                                                        qrScannerInput = true,
+                                                        navigateToEventScreen = navigateToEventScreen
+                                                    )
+                                                    qrCodeScannerViewModel.unbindCameraController()
+                                                }
+                                                tempVar.startsWith("collect") -> {
+                                                    qrCodeScannerViewModel.unbindCameraController()
+                                                    navigateToCollect200()
+                                                }
+                                                else -> {
+                                                    qrCodeScannerViewModel.showWrongQrCodeSnackbar()
                                                 }
                                             }
                                         }
-                                    )
-
-                                    cameraCtrl.cameraController.bindToLifecycle(lifecycleOwner)
-                                    this.controller = cameraCtrl.cameraController
-                                }
+                                    }
+                                )
+                                cameraCtrl.cameraController.bindToLifecycle(lifecycleOwner)
+                                this.controller = cameraCtrl.cameraController
                             }
                         }
                     )
@@ -226,14 +209,6 @@ fun QrCodeScanner(
     }
 }
 
-private fun getCenterScanRect(width: Int, height: Int): Rect {
-    val scanWidth = (width * 0.5).toInt()
-    val scanHeight = (height * 0.5).toInt()
-    val left = (width - scanWidth) / 2
-    val top = (height - scanHeight) / 2
-    return Rect(left, top, left + scanWidth, top + scanHeight)
-}
-
 @Composable
 private fun ScannerOverlay(
     modifier: Modifier = Modifier,
@@ -251,7 +226,6 @@ private fun ScannerOverlay(
             val top = (canvasHeight - rectSize) / 2f
             val right = left + rectSize
             val bottom = top + rectSize
-            val rect = RectF(left, top, right, bottom)
 
             // Dim the background
             drawRect(
