@@ -47,6 +47,7 @@ data class MultiPurposeDialogState(
     val logoutDialog: Boolean = false,
     val navigateToNewLocationDialog: Boolean = false,
     val playerPropertiesListDialog: Boolean = false,
+    val gameOverDialog: Boolean = false
 )
 
 data class FirestoreGameState(
@@ -163,7 +164,7 @@ class HomeViewModel @Inject constructor(
         private set
 
     fun updateGameId(input: String) {
-        newGameDialogState = newGameDialogState.copy(gameId = input.trim())
+        newGameDialogState = newGameDialogState.copy(gameId = input.trim().lowercase())
     }
 
     fun onClickCreateOrJoinGameDialog() {
@@ -221,6 +222,14 @@ class HomeViewModel @Inject constructor(
         _uiMultiPurposeDialog.update { currentState ->
             currentState.copy(
                 playerPropertiesListDialog = !_uiMultiPurposeDialog.value.playerPropertiesListDialog
+            )
+        }
+    }
+
+    fun onClickGameOverDialog() {
+        _uiMultiPurposeDialog.update { currentState ->
+            currentState.copy(
+                gameOverDialog = !_uiMultiPurposeDialog.value.gameOverDialog
             )
         }
     }

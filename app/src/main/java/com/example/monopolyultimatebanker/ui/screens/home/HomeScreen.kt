@@ -146,7 +146,7 @@ fun HomeScreen(
                     CircularProgressIndicator()
                 } else {
                     if(gamePrefState.isGameActive == true){
-                        ActiveGame(game = gameState.gameState)
+                        ActiveGame(game = gameState.gameState, onClickGameOverDialog = homeViewModel::onClickGameOverDialog)
                     } else {
                         NoActiveGame(onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog)
                     }
@@ -165,7 +165,7 @@ fun HomeScreen(
                     MultiPurposeDialog(
                         onClickDialogState = homeViewModel::onClickLeaveGameDialog,
                         title = "Leave Game",
-                        description = "Are you sure you want leave the game?",
+                        description = "Are you sure you want to leave the game?",
                         isLeaveGame = true,
                         leaveGame = homeViewModel::leaveGame,
                     )
@@ -195,9 +195,17 @@ fun HomeScreen(
                     MultiPurposeDialog(
                         onClickDialogState = homeViewModel::onClickPlayerPropertiesListDialog,
                         title = "Player Properties",
-                        description = "",
                         isPlayerPropertyList = true,
                         playerPropertyList = playerPropertiesListState.playerPropertiesListState!!
+                    )
+                }
+
+                if(multiPurposeDialogState.gameOverDialog) {
+                    MultiPurposeDialog(
+                        onClickDialogState = homeViewModel::onClickGameOverDialog,
+                        title = "Game Over",
+                        isGameOver = true,
+                        game = gameState.gameState
                     )
                 }
             }
@@ -282,6 +290,7 @@ private fun DrawerContent(
 private fun ActiveGame(
     modifier: Modifier = Modifier,
     game: List<Game>,
+    onClickGameOverDialog: () -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
@@ -299,15 +308,20 @@ private fun ActiveGame(
                 Text(text = "Balance", style = MaterialTheme.typography.headlineSmall)
             }
         }
-        items(items = game.sortedByDescending { it.playerBalance }, key = { it.playerId }) {
+        items(items = game.sortedByDescending { player -> player.playerBalance }, key = { player -> player.playerId })
+        { player ->
             Row(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = it.playerName, style = MaterialTheme.typography.titleMedium)
-                Text(text = "${it.playerBalance}", style = MaterialTheme.typography.titleMedium)
+                Text(text = player.playerName, style = MaterialTheme.typography.titleMedium)
+                Text(text = "${player.playerBalance}", style = MaterialTheme.typography.titleMedium)
+            }
+
+            if ((player.playerBalance < 0) && (player.playerBalance > -99999)) {
+                onClickGameOverDialog()
             }
         }
     }
@@ -338,7 +352,7 @@ private fun NoActiveGame(onClickCreateOrJoinGame: () -> Unit, modifier: Modifier
 private fun MultiPurposeDialog(
     onClickDialogState: () -> Unit,
     title: String,
-    description: String,
+    description: String = "",
     isLeaveGame: Boolean = false,
     leaveGame: () -> Unit = {},
     isLogOut: Boolean = false,
@@ -347,6 +361,8 @@ private fun MultiPurposeDialog(
     navigateToNewLocation: () -> Unit = {},
     isPlayerPropertyList: Boolean = false,
     playerPropertyList: List<PlayerPropertiesList> = listOf(),
+    isGameOver: Boolean = false,
+    game: List<Game> =  listOf(),
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
@@ -354,7 +370,7 @@ private fun MultiPurposeDialog(
         title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
         text = {
             Column {
-                if(!isPlayerPropertyList){
+                if(!isPlayerPropertyList && !isGameOver){
                     Text(text = description, style = MaterialTheme.typography.titleMedium)
                 }
 
@@ -362,21 +378,29 @@ private fun MultiPurposeDialog(
                     if(playerPropertyList.isNotEmpty()) {
                         Spacer(modifier = modifier.padding(top = 4.dp))
                         Row(
-                            modifier = modifier.fillMaxWidth().padding(bottom = 2.dp)
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 2.dp)
                         ) {
                             Column(modifier = modifier.weight(.2f)) { Text(text = "No.", style = MaterialTheme.typography.titleSmall) }
-                            Column(modifier = modifier.weight(.65f).padding(horizontal = 0.dp)) { Text(text = "Property Name", style = MaterialTheme.typography.titleMedium) }
+                            Column(modifier = modifier
+                                .weight(.65f)
+                                .padding(horizontal = 0.dp)) { Text(text = "Property Name", style = MaterialTheme.typography.titleMedium) }
                             Column(modifier = modifier.weight(.15f)) { Text(text = "Rent", style = MaterialTheme.typography.titleMedium) }
                         }
                         playerPropertyList.forEach { playerProperty ->
-                            Row( modifier = modifier.fillMaxWidth().padding(top = 6.dp) ) {
+                            Row( modifier = modifier
+                                .fillMaxWidth()
+                                .padding(top = 6.dp) ) {
                                 Column(modifier = modifier.weight(.2f)) {
                                     Text(text = "${playerProperty.propertyNo}", style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
                                 }
                                 Column(modifier = modifier.weight(.65f)) {
                                     Text(text = playerProperty.propertyName, style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
                                 }
-                                Column(modifier = modifier.weight(.15f).padding(start = 2.dp)) {
+                                Column(modifier = modifier
+                                    .weight(.15f)
+                                    .padding(start = 2.dp)) {
                                     Text(text = "${playerProperty.rentLevel}", style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
                                 }
                             }
@@ -385,10 +409,18 @@ private fun MultiPurposeDialog(
                         Text(text = "No Property Owned.", style = MaterialTheme.typography.bodyLarge)
                     }
                 }
+
+                if(isGameOver) {
+                    game.sortedBy { it.playerBalance }.forEach { player ->
+                        Row {
+                            Text(text = player.playerName)
+                        }
+                    }
+                }
             }
         },
         dismissButton = {
-            if(!isPlayerPropertyList){
+            if(!isPlayerPropertyList && !isGameOver){
                 TextButton(
                     onClick = onClickDialogState
                 ) {
