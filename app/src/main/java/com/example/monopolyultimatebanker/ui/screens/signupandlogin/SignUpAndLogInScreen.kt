@@ -1,18 +1,24 @@
 package com.example.monopolyultimatebanker.ui.screens.signupandlogin
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -27,7 +33,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -54,6 +63,8 @@ fun SignUpAndLogInScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val uiState = viewModel.uiState
+    val focusManager = LocalFocusManager.current
+    val interactionSource = remember { MutableInteractionSource() }
 
     ObserverAsEvents(
         flow = SnackbarController.events,
@@ -78,48 +89,66 @@ fun SignUpAndLogInScreen(
             SnackbarHost(
                 hostState = snackbarHostState
             )
-        }
+        },
     ) { contentPadding ->
+
+        val colorStops = arrayOf(
+            0.0f to Color(0xFF77CBDA),
+            0.8f to Color.White
+        )
         Column (
             modifier = modifier
                 .padding(contentPadding)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .background(Brush.verticalGradient(colorStops = colorStops))
+                .clickable(interactionSource = interactionSource, indication = null, onClick = { focusManager.clearFocus() }),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
+            Spacer(modifier = modifier.padding(top = 124.dp))
             Image(
                 painter = painterResource(R.drawable.monopoly_title_logo),
                 contentDescription = stringResource(R.string.monoploy_title),
                 contentScale = ContentScale.Fit,
-                modifier = modifier.size(height = 200.dp, width = 300.dp)
+                modifier = modifier.size(height = 200.dp, width = 320.dp)
             )
-            Column(
-                modifier = Modifier.width(IntrinsicSize.Min),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.elevatedCardElevation(20.dp),
+                modifier = modifier.padding(top = 20.dp)
             ) {
-                if(uiState.checked){
-                    LogInForm(
-                        uiState = uiState,
-                        onClickLogIn = { viewModel.onClickLogIn(navigateTo = { navigateToHomeScreen() }) },
-                        updateEmail = viewModel::updateEmail,
-                        updatePassword = viewModel::updatePassword,
-                        isNotEmpty = viewModel::isNotEmptyForLogIn,
-                        checked = true,
-                        onCheckChange = viewModel::onCheckedChange
-                    )
-                } else {
-                    SignInForm(
-                        uiState = uiState,
-                        onClickSignIn = { viewModel.onClickSignIn(navigateTo = { navigateToHomeScreen() }) },
-                        updateUsername = viewModel::updateUsername,
-                        updateEmail = viewModel::updateEmail,
-                        updatePassword = viewModel::updatePassword,
-                        isNotEmpty = viewModel::isNotEmptyForSignUp,
-                        checked = false,
-                        onCheckChange = viewModel::onCheckedChange
-                    )
+                Column(
+                    modifier = Modifier
+                        .width(IntrinsicSize.Min)
+                        .background(Color.White)
+                        .padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    if(uiState.checked){
+                        LogInForm(
+                            uiState = uiState,
+                            onClickLogIn = { viewModel.onClickLogIn(navigateTo = { navigateToHomeScreen() }) },
+                            updateEmail = viewModel::updateEmail,
+                            updatePassword = viewModel::updatePassword,
+                            isNotEmpty = viewModel::isNotEmptyForLogIn,
+                            checked = true,
+                            onCheckChange = viewModel::onCheckedChange
+                        )
+                    } else {
+                        SignInForm(
+                            uiState = uiState,
+                            onClickSignIn = { viewModel.onClickSignIn(navigateTo = { navigateToHomeScreen() }) },
+                            updateUsername = viewModel::updateUsername,
+                            updateEmail = viewModel::updateEmail,
+                            updatePassword = viewModel::updatePassword,
+                            isNotEmpty = viewModel::isNotEmptyForSignUp,
+                            checked = false,
+                            onCheckChange = viewModel::onCheckedChange
+                        )
+                    }
                 }
             }
+
         }
     }
 }
@@ -149,9 +178,6 @@ fun LogInForm(
         label = { Text(text = stringResource(R.string.password), style = MaterialTheme.typography.bodyLarge) },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = {
-            onClickLogIn()
-        })
     )
     Row (
         modifier = modifier.fillMaxWidth(),
@@ -208,9 +234,6 @@ fun SignInForm(
         label = { Text(text = stringResource(R.string.password), style = MaterialTheme.typography.bodyLarge) },
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = {
-            onClickSignIn()
-        })
     )
     Row (
         modifier = modifier.fillMaxWidth(),
