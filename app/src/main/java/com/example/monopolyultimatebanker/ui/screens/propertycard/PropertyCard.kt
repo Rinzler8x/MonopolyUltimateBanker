@@ -119,7 +119,7 @@ fun PropertyCard(
                 MultiPurposePropertyDialog(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickResultDialog,
                     title = "Rent Paid",
-                    description = "Property No.${propertyState.propertyNo} rent paid.\nNew Rent Level: ${multiPurposeDialogState.rentLevel}",
+                    description = "Property No.${propertyState.propertyNo} rent paid.\nNew Rent Level: ${multiPurposeDialogState.rentLevel}.",
                     navigateToHomeScreen = navigateToHomeScreen
                 )
             }
@@ -139,7 +139,7 @@ fun PropertyCard(
                     description = if(playerPropertyState.rentLevel == 5) {
                         "Property rent level is maxed out."
                     } else {
-                        "Property rent level increased to ${multiPurposeDialogState.rentLevel}"
+                        "Property rent level increased to ${multiPurposeDialogState.rentLevel}."
                     },
                     navigateToHomeScreen = navigateToHomeScreen
                 )

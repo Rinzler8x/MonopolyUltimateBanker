@@ -15,7 +15,6 @@ import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertiesList
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
-import com.example.monopolyultimatebanker.data.preferences.GamePrefState
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.UserLogin
 import com.example.monopolyultimatebanker.data.preferences.UserLoginPreferencesRepository
