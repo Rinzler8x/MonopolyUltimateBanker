@@ -17,10 +17,8 @@ import com.example.monopolyultimatebanker.data.propertytable.PropertyDao
     exportSchema = false
 )
 abstract class MonopolyDatabase: RoomDatabase() {
-
     abstract fun propertyDao(): PropertyDao
     abstract fun eventDao(): EventDao
     abstract fun gameDao(): GameDao
     abstract fun playerPropertyDao(): PlayerPropertyDao
-
 }
