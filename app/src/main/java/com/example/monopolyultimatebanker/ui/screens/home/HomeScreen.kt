@@ -1,5 +1,7 @@
 package com.example.monopolyultimatebanker.ui.screens.home
 
+import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -59,6 +61,8 @@ import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropert
 import com.example.monopolyultimatebanker.ui.navigation.NavigationDestination
 import com.example.monopolyultimatebanker.utils.ObserverAsEvents
 import com.example.monopolyultimatebanker.utils.SnackbarController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 object HomeDestination: NavigationDestination {
@@ -166,6 +170,8 @@ fun HomeScreen(
                         onClickDialogState = homeViewModel::onClickLeaveGameDialog,
                         title = "Leave Game",
                         description = "Are you sure you want to leave the game?",
+                        scope = scope,
+                        isLoading = multiPurposeDialogState.isLoading,
                         isLeaveGame = true,
                         leaveGame = homeViewModel::leaveGame,
                     )
@@ -176,8 +182,9 @@ fun HomeScreen(
                         onClickDialogState = homeViewModel::onClickLogOutDialog,
                         title = "Log Out",
                         description = "Are you sure you want to log out?",
+                        scope = scope,
                         isLogOut = true,
-                        logOut = {},
+                        logOut = homeViewModel::logOut,
                     )
                 }
 
@@ -186,6 +193,7 @@ fun HomeScreen(
                         onClickDialogState = homeViewModel::onClickNavigateToNewLocationDialog,
                         title = "Navigation",
                         description = "Pay 100$ and navigate to any property space.",
+                        scope = scope,
                         isNavigate = true,
                         navigateToNewLocation = homeViewModel::navigateToNewLocation,
                     )
@@ -195,6 +203,7 @@ fun HomeScreen(
                     MultiPurposeDialog(
                         onClickDialogState = homeViewModel::onClickPlayerPropertiesListDialog,
                         title = "Player Properties",
+                        scope = scope,
                         isPlayerPropertyList = true,
                         playerPropertyList = playerPropertiesListState.playerPropertiesListState!!
                     )
@@ -204,6 +213,7 @@ fun HomeScreen(
                     MultiPurposeDialog(
                         onClickDialogState = homeViewModel::onClickGameOverDialog,
                         title = "Game Over",
+                        scope = scope,
                         isGameOver = true,
                         game = gameState.gameState
                     )
@@ -353,10 +363,12 @@ private fun MultiPurposeDialog(
     onClickDialogState: () -> Unit,
     title: String,
     description: String = "",
+    scope: CoroutineScope,
+    isLoading: Boolean = false,
     isLeaveGame: Boolean = false,
-    leaveGame: () -> Unit = {},
+    leaveGame: (Activity) -> Job = { Job() },
     isLogOut: Boolean = false,
-    logOut: () -> Unit = {},
+    logOut: (Activity) -> Job = { Job() },
     isNavigate: Boolean = false,
     navigateToNewLocation: () -> Unit = {},
     isPlayerPropertyList: Boolean = false,
@@ -365,55 +377,66 @@ private fun MultiPurposeDialog(
     game: List<Game> =  listOf(),
     modifier: Modifier = Modifier
 ) {
+
+    val activity: Activity = LocalActivity.current!!
+
     AlertDialog(
         onDismissRequest = onClickDialogState,
         title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
         text = {
             Column {
-                if(!isPlayerPropertyList && !isGameOver){
-                    Text(text = description, style = MaterialTheme.typography.titleMedium)
-                }
-
-                if(isPlayerPropertyList) {
-                    if(playerPropertyList.isNotEmpty()) {
-                        Spacer(modifier = modifier.padding(top = 4.dp))
-                        Row(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 2.dp)
-                        ) {
-                            Column(modifier = modifier.weight(.2f)) { Text(text = "No.", style = MaterialTheme.typography.titleSmall) }
-                            Column(modifier = modifier
-                                .weight(.65f)
-                                .padding(horizontal = 0.dp)) { Text(text = "Property Name", style = MaterialTheme.typography.titleMedium) }
-                            Column(modifier = modifier.weight(.15f)) { Text(text = "Rent", style = MaterialTheme.typography.titleMedium) }
-                        }
-                        playerPropertyList.forEach { playerProperty ->
-                            Row( modifier = modifier
-                                .fillMaxWidth()
-                                .padding(top = 6.dp) ) {
-                                Column(modifier = modifier.weight(.2f)) {
-                                    Text(text = "${playerProperty.propertyNo}", style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
-                                }
-                                Column(modifier = modifier.weight(.65f)) {
-                                    Text(text = playerProperty.propertyName, style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
-                                }
-                                Column(modifier = modifier
-                                    .weight(.15f)
-                                    .padding(start = 2.dp)) {
-                                    Text(text = "${playerProperty.rentLevel}", style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
-                                }
-                            }
-                        }
-                    } else {
-                        Text(text = "No Property Owned.", style = MaterialTheme.typography.bodyLarge)
+                if(isLoading) {
+                    Row(
+                        modifier = modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) { CircularProgressIndicator() }
+                } else {
+                    if(!isPlayerPropertyList && !isGameOver){
+                        Text(text = description, style = MaterialTheme.typography.titleMedium)
                     }
-                }
 
-                if(isGameOver) {
-                    game.sortedBy { it.playerBalance }.forEach { player ->
-                        Row {
-                            Text(text = player.playerName)
+                    if(isPlayerPropertyList) {
+                        if(playerPropertyList.isNotEmpty()) {
+                            Spacer(modifier = modifier.padding(top = 4.dp))
+                            Row(
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp)
+                            ) {
+                                Column(modifier = modifier.weight(.2f)) { Text(text = "No.", style = MaterialTheme.typography.titleSmall) }
+                                Column(modifier = modifier
+                                    .weight(.65f)
+                                    .padding(horizontal = 0.dp)) { Text(text = "Property Name", style = MaterialTheme.typography.titleMedium) }
+                                Column(modifier = modifier.weight(.15f)) { Text(text = "Rent", style = MaterialTheme.typography.titleMedium) }
+                            }
+                            playerPropertyList.forEach { playerProperty ->
+                                Row( modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 6.dp) ) {
+                                    Column(modifier = modifier.weight(.2f).padding(start = 1.dp)) {
+                                        Text(text = "${playerProperty.propertyNo}", style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
+                                    }
+                                    Column(modifier = modifier.weight(.65f)) {
+                                        Text(text = playerProperty.propertyName, style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
+                                    }
+                                    Column(modifier = modifier
+                                        .weight(.15f)
+                                        .padding(start = 2.dp)) {
+                                        Text(text = "${playerProperty.rentLevel}", style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
+                                    }
+                                }
+                                HorizontalDivider(modifier = modifier.padding(vertical = 2.dp), thickness = 2.dp)
+                            }
+                        } else {
+                            Text(text = "No Property Owned.", style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+
+                    if(isGameOver) {
+                        game.sortedBy { it.playerBalance }.forEach { player ->
+                            Row {
+                                Text(text = player.playerName)
+                            }
                         }
                     }
                 }
@@ -431,14 +454,19 @@ private fun MultiPurposeDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    if(isLeaveGame) {
-                        leaveGame()
-                    } else if(isLogOut) {
-                        logOut()
-                    } else if(isNavigate) {
-                        navigateToNewLocation()
+                    scope.launch {
+                        var job: Job? = null
+                        if(isLeaveGame) {
+                            job = leaveGame(activity)
+                        } else if(isLogOut) {
+                            job = logOut(activity)
+                        } else if(isNavigate) {
+                            navigateToNewLocation()
+                        }
+
+                        job?.join()
+                        onClickDialogState()
                     }
-                    onClickDialogState()
                 }
             ) {
                 Text(text = stringResource(R.string.confirm), style = MaterialTheme.typography.bodyLarge)
