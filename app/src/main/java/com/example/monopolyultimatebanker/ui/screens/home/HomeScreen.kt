@@ -3,6 +3,7 @@ package com.example.monopolyultimatebanker.ui.screens.home
 import android.app.Activity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -85,6 +86,7 @@ fun HomeScreen(
     val multiPurposeDialogState by homeViewModel.uiMultiPurposeDialog.collectAsStateWithLifecycle()
     val playerPropertiesListState by homeViewModel.playerPropertiesListState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val interactionSource = remember { MutableInteractionSource() }
 
     ObserverAsEvents(
         flow = SnackbarController.events,
@@ -152,7 +154,7 @@ fun HomeScreen(
                     if(gamePrefState.isGameActive == true){
                         ActiveGame(game = gameState.gameState, onClickGameOverDialog = homeViewModel::onClickGameOverDialog)
                     } else {
-                        NoActiveGame(onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog)
+                        NoActiveGame(onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog, interactionSource = interactionSource)
                     }
                 }
 
@@ -338,7 +340,7 @@ private fun ActiveGame(
 }
 
 @Composable
-private fun NoActiveGame(onClickCreateOrJoinGame: () -> Unit, modifier: Modifier = Modifier) {
+private fun NoActiveGame(onClickCreateOrJoinGame: () -> Unit, interactionSource: MutableInteractionSource, modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -347,7 +349,7 @@ private fun NoActiveGame(onClickCreateOrJoinGame: () -> Unit, modifier: Modifier
         Text(
             text = "Create or Join Game",
             style = MaterialTheme.typography.titleMedium,
-            modifier = modifier.clickable { onClickCreateOrJoinGame() }
+            modifier = modifier.clickable(interactionSource = interactionSource, indication = null, onClick = { onClickCreateOrJoinGame() })
         )
         HorizontalDivider(
             thickness = 2.dp,
