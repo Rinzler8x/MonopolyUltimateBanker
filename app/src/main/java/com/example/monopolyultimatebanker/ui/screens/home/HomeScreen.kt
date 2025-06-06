@@ -310,10 +310,14 @@ private fun ActiveGame(
             .padding(horizontal = 50.dp),
     ) {
         item {
+            Row(modifier = modifier.fillMaxWidth().padding(top = 20.dp, bottom = 10.dp), horizontalArrangement = Arrangement.Center) {
+                Text(text = "Leaderboard", style = MaterialTheme.typography.headlineLarge)
+            }
+            HorizontalDivider(thickness = 2.dp)
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(top = 20.dp, bottom = 10.dp),
+                    .padding(top = 14.dp, bottom = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Player", style = MaterialTheme.typography.headlineSmall)
@@ -372,7 +376,7 @@ private fun MultiPurposeDialog(
     isLogOut: Boolean = false,
     logOut: (Activity) -> Job = { Job() },
     isNavigate: Boolean = false,
-    navigateToNewLocation: () -> Unit = {},
+    navigateToNewLocation: () -> Job = { Job() },
     isPlayerPropertyList: Boolean = false,
     playerPropertyList: List<PlayerPropertiesList> = listOf(),
     isGameOver: Boolean = false,
@@ -463,7 +467,7 @@ private fun MultiPurposeDialog(
                         } else if(isLogOut) {
                             job = logOut(activity)
                         } else if(isNavigate) {
-                            navigateToNewLocation()
+                            job = navigateToNewLocation()
                         }
 
                         job?.join()
