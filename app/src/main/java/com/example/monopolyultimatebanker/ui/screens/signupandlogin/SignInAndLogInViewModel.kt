@@ -97,7 +97,6 @@ class SignUpAndLogInViewModel @Inject constructor(
                 val response: AuthResponse = firebaseAuthRepositoryImpl.logInUser(uiState.email, uiState.password)
                 if(response.result) {
                     val username = firestoreRepositoryImpl.getUsername(uiState.email)
-                    Log.d(TAG, "VM MSG: $username")
                     uiState = uiState.copy(userName = username)
                     userLoginPreferencesRepository.saveUserLoginPreference(
                         isLoggedIn = true,
