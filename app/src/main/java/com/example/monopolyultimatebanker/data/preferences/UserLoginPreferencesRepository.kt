@@ -58,4 +58,10 @@ class UserLoginPreferencesRepository @Inject constructor (
         }
 
     }
+
+    suspend fun resetUserLoginPreference() {
+        dataStore.edit {
+            it.clear()
+        }
+    }
 }
