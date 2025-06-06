@@ -65,6 +65,7 @@ fun EventCard(
 
     val eventState by eventCardViewModel.eventState.collectAsStateWithLifecycle()
     val qrPrefState by eventCardViewModel.qrPrefState.collectAsStateWithLifecycle()
+    val gamePrefState by eventCardViewModel.gamePrefState.collectAsStateWithLifecycle()
     val gameState by eventCardViewModel.gameState.collectAsStateWithLifecycle()
     val playerBottomSheetState by eventCardViewModel.uiPlayerBottomSheet.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState()
@@ -97,7 +98,8 @@ fun EventCard(
                     updatePlayerName = eventCardViewModel::updatePlayerId,
                     sheetState = sheetState,
                     innerPadding = innerPadding,
-                    game = gameState.gameState
+                    game = gameState.gameState,
+                    playerId = gamePrefState.playerId
                 )
             }
 
@@ -265,7 +267,9 @@ private fun EventCardContent(
         Button(
             onClick = { onClickAction(navigateToHomeScreen) },
             shape = MaterialTheme.shapes.medium,
-            modifier = modifier.padding(10.dp).fillMaxWidth()
+            modifier = modifier
+                .padding(10.dp)
+                .fillMaxWidth()
         ) {
             Text(
                 text = "Action",
@@ -284,6 +288,7 @@ private fun PlayerBottomSheet(
     sheetState: SheetState,
     innerPadding: PaddingValues,
     game: List<Game>,
+    playerId: String,
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
@@ -306,43 +311,36 @@ private fun PlayerBottomSheet(
                         .padding(vertical = 10.dp, horizontal = 20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "Player",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    Text(
-                        text = "Balance",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
+                    Text(text = "Player", style = MaterialTheme.typography.headlineSmall)
+                    Text(text = "Balance", style = MaterialTheme.typography.headlineSmall)
                 }
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    modifier = modifier.padding(horizontal = 12.dp)
-                )
+                HorizontalDivider(thickness = 2.dp, modifier = modifier.padding(horizontal = 12.dp))
             }
-            items(items = game.sortedByDescending { it.playerBalance }, key = { it.playerId }) {
-                TextButton(
-                    onClick = {
-                        updatePlayerName(it.playerId)
-                        onClickPlayerBottomSheet()
-                        onClickPropertyDialog()
-                    },
-                ) {
-                    Row(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 10.dp, horizontal = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+            items(items = game.sortedByDescending { it.playerBalance }, key = { it.playerId }) { player ->
+                if(player.playerId != playerId) {
+                    TextButton(
+                        onClick = {
+                            updatePlayerName(player.playerId)
+                            onClickPlayerBottomSheet()
+                            onClickPropertyDialog()
+                        },
                     ) {
-                        Text(
-                            text = it.playerName,
-                            style = MaterialTheme.typography.titleLarge
-                        )
+                        Row(
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp, horizontal = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = player.playerName,
+                                style = MaterialTheme.typography.titleLarge
+                            )
 
-                        Text(
-                            text = it.playerBalance.toString(),
-                            style = MaterialTheme.typography.titleLarge
-                        )
+                            Text(
+                                text = "${player.playerBalance}",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
                     }
                 }
             }
@@ -462,34 +460,29 @@ private fun ResultDialog(
                 } else {
                     if(properties.isNotEmpty()) {
                         item {
-                            Row(
-                                modifier = modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 4.dp)
-                            ) {
-                                Column(
-                                    modifier = modifier.weight(0.5f)
-                                ) {
+                            Row(modifier = modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 2.dp, vertical = 4.dp)) {
+                                Column(modifier = modifier.weight(0.5f)) {
                                     Text(text = "Property No.", style = MaterialTheme.typography.titleMedium)
-
                                 }
-                                Column(
-                                    modifier = modifier.weight(0.5f)
-                                ) {
+                                Column(modifier = modifier.weight(0.5f)) {
                                     Text(text = "Rent Level",  style = MaterialTheme.typography.titleMedium)
                                 }
                             }
                         }
                         items(properties.sortedBy { it.propertyNo }, key = { it.propertyNo }) { property ->
                             Row(
-                                modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 6.dp)
+                                modifier = modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 4.dp, vertical = 6.dp)
                             ) {
-                                Column(
-                                    modifier = modifier.weight(0.5f)
-                                ) {
+                                Column(modifier = modifier.weight(0.5f)) {
                                     Text(text = "${property.propertyNo}", style = MaterialTheme.typography.bodyLarge)
                                 }
-                                Column(
-                                    modifier = modifier.weight(0.5f).padding(horizontal = 4.dp)
-                                ) {
+                                Column(modifier = modifier
+                                    .weight(0.5f)
+                                    .padding(horizontal = 4.dp)) {
                                     Text(text = "${property.rentLevel}", style = MaterialTheme.typography.bodyLarge)
                                 }
                             }

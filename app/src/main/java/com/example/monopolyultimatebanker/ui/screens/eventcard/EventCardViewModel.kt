@@ -11,6 +11,7 @@ import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLo
 import com.example.monopolyultimatebanker.data.firebase.database.UpdatedProperty
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerPropertyRepositoryImpl
+import com.example.monopolyultimatebanker.data.preferences.GamePrefState
 import com.example.monopolyultimatebanker.data.preferences.GamePreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrPreferencesRepository
 import com.example.monopolyultimatebanker.data.preferences.QrType
@@ -75,6 +76,20 @@ class EventCardViewModel @Inject constructor(
                 initialValue = QrType()
             )
 
+    val gamePrefState: StateFlow<GamePrefState> =
+        gamePreferencesRepository.gameState.map {
+            GamePrefState(
+                gameId = it.gameId,
+                playerId = it.playerId,
+                isGameActive = it.isGameActive
+            )
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = GamePrefState()
+            )
+
     val gameState: StateFlow<GameState> =
         gameRepositoryImpl.getGameStream().map {
             GameState(it)
@@ -84,7 +99,6 @@ class EventCardViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = GameState()
             )
-
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val eventState: StateFlow<Event> = qrPrefState
