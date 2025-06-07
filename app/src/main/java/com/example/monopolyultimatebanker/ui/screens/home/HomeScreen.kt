@@ -342,7 +342,7 @@ private fun ActiveGame(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = player.playerName, style = MaterialTheme.typography.titleMedium)
-                Text(text = "${player.playerBalance}", style = MaterialTheme.typography.titleMedium)
+                Text(text = "$${player.playerBalance}", style = MaterialTheme.typography.titleMedium)
             }
 
             if ((player.playerBalance < 0) && (player.playerBalance > -99999)) {

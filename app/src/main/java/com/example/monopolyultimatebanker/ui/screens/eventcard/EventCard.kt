@@ -337,7 +337,7 @@ private fun PlayerBottomSheet(
                             )
 
                             Text(
-                                text = "${player.playerBalance}",
+                                text = "$${player.playerBalance}",
                                 style = MaterialTheme.typography.titleLarge
                             )
                         }
