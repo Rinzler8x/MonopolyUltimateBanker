@@ -2,6 +2,8 @@ package com.example.monopolyultimatebanker.ui.screens.home
 
 import android.app.Activity
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -47,10 +50,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -388,7 +395,14 @@ private fun MultiPurposeDialog(
 
     AlertDialog(
         onDismissRequest = onClickDialogState,
-        title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = if(isGameOver) { modifier.fillMaxWidth() } else { modifier },
+                textAlign = if(isGameOver) { TextAlign.Center } else { TextAlign.Start },
+            )
+        },
         text = {
             Column {
                 if(isLoading) {
@@ -439,9 +453,61 @@ private fun MultiPurposeDialog(
                     }
 
                     if(isGameOver) {
-                        game.sortedBy { it.playerBalance }.forEach { player ->
-                            Row {
-                                Text(text = player.playerName)
+                        val playerList = game.sortedByDescending { it.playerBalance }.map { if(it.playerBalance >= 0) { it.playerName } else { "Unknown" } }
+                        val winnersList: MutableList<String> = mutableListOf()
+                        for (i in 0..2) {
+                            winnersList.add(playerList.getOrElse(i) { "Unknown" })
+                        }
+
+                        Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+                            val horizontalDividerColor = Color(0xFF468DB4)
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.weight(0.3f)) {
+                                Image(
+                                    painter = painterResource(R.drawable.silver_medal),
+                                    contentDescription = "silver medal",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = modifier.size(90.dp)
+                                )
+                                HorizontalDivider(thickness = 60.dp, color = horizontalDividerColor, modifier = modifier.clip(RoundedCornerShape(topStart = 8.dp)))
+                            }
+                            Column(modifier = modifier.weight(0.3f)) {
+                                Image(
+                                    painter = painterResource(R.drawable.gold_medal),
+                                    contentDescription = "gold medal",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = modifier.size(110.dp)
+                                )
+                                HorizontalDivider(thickness = 90.dp, color = horizontalDividerColor, modifier = modifier.clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)))
+                            }
+                            Column(modifier = modifier.weight(0.3f)) {
+                                Image(
+                                    painter = painterResource(R.drawable.bronze_medal),
+                                    contentDescription = "bronze medal",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = modifier.size(90.dp)
+                                )
+                                HorizontalDivider(thickness = 35.dp, color = horizontalDividerColor, modifier = modifier.clip(RoundedCornerShape(topEnd = 8.dp)))
+                            }
+                        }
+
+                        Row(modifier = modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.Top,) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.weight(0.3f)) {
+                                Text(
+                                    text = winnersList[1],
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.weight(0.3f)) {
+                                Text(
+                                    text = winnersList[0],
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.weight(0.3f)) {
+                                Text(
+                                    text = winnersList[2],
+                                    style = MaterialTheme.typography.titleSmall
+                                )
                             }
                         }
                     }
