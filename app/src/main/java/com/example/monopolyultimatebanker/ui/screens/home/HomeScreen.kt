@@ -156,7 +156,9 @@ fun HomeScreen(
                 modifier = modifier.padding(contentPadding)
             ) {
                 if(gamePrefState.isGameActive == null) {
-                    CircularProgressIndicator()
+                    Row(modifier = modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator()
+                    }
                 } else {
                     if(gamePrefState.isGameActive == true){
                         ActiveGame(game = gameState.gameState, onClickGameOverDialog = homeViewModel::onClickGameOverDialog)
