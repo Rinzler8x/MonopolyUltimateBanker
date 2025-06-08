@@ -19,6 +19,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -29,8 +31,11 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -42,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.monopolyultimatebanker.R
@@ -105,7 +111,7 @@ fun SignUpAndLogInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Spacer(modifier = modifier.padding(top = 124.dp))
+            Spacer(modifier = modifier.padding(top = 100.dp))
             Image(
                 painter = painterResource(R.drawable.monopoly_title_logo),
                 contentDescription = stringResource(R.string.monoploy_title),
@@ -165,6 +171,8 @@ fun LogInForm(
     onCheckChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showPassword by remember { mutableStateOf(false) }
+
     OutlinedTextField(
         value = uiState.email,
         onValueChange = updateEmail,
@@ -176,7 +184,18 @@ fun LogInForm(
         value = uiState.password,
         onValueChange = updatePassword,
         label = { Text(text = stringResource(R.string.password), style = MaterialTheme.typography.bodyLarge) },
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if(showPassword){ VisualTransformation.None } else { PasswordVisualTransformation() },
+        trailingIcon = @Composable {
+            IconButton(
+                onClick = { showPassword = !showPassword }
+            ) {
+                if(showPassword) {
+                    Icon(painter = painterResource(R.drawable.password_visibility_off), contentDescription = "visibility on")
+                } else {
+                    Icon(painter = painterResource(R.drawable.password_visibility_on), contentDescription = "visibility off")
+                }
+            }
+        },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
     )
     Row (
@@ -215,6 +234,8 @@ fun SignInForm(
     onCheckChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showPassword by remember { mutableStateOf(false) }
+
     OutlinedTextField(
         value = uiState.userName,
         onValueChange = updateUsername,
@@ -232,7 +253,18 @@ fun SignInForm(
         value = uiState.password,
         onValueChange = updatePassword,
         label = { Text(text = stringResource(R.string.password), style = MaterialTheme.typography.bodyLarge) },
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if(showPassword){ VisualTransformation.None } else { PasswordVisualTransformation() },
+        trailingIcon = @Composable {
+            IconButton(
+                onClick = { showPassword = !showPassword }
+            ) {
+                if(showPassword) {
+                    Icon(painter = painterResource(R.drawable.password_visibility_off), contentDescription = "visibility")
+                } else {
+                    Icon(painter = painterResource(R.drawable.password_visibility_on), contentDescription = "visibility")
+                }
+            }
+        },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
     )
     Row (
