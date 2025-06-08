@@ -107,7 +107,10 @@ fun SignUpAndLogInScreen(
                 .padding(contentPadding)
                 .fillMaxSize()
                 .background(Brush.verticalGradient(colorStops = colorStops))
-                .clickable(interactionSource = interactionSource, indication = null, onClick = { focusManager.clearFocus() }),
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = { focusManager.clearFocus() }),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -154,7 +157,6 @@ fun SignUpAndLogInScreen(
                     }
                 }
             }
-
         }
     }
 }
@@ -273,8 +275,7 @@ fun SignInForm(
         horizontalArrangement = Arrangement.SpaceBetween,
     ){
         Row {
-            Text(text = stringResource(R.string.log_in))
-            Text(text = "?")
+            Text(text = "${stringResource(R.string.log_in)}?")
         }
         Switch(
             checked = checked,
