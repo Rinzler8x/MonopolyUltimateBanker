@@ -192,9 +192,9 @@ fun LogInForm(
                 onClick = { showPassword = !showPassword }
             ) {
                 if(showPassword) {
-                    Icon(painter = painterResource(R.drawable.password_visibility_off), contentDescription = "visibility on")
+                    Icon(painter = painterResource(R.drawable.password_visibility_on), contentDescription = "visibility on")
                 } else {
-                    Icon(painter = painterResource(R.drawable.password_visibility_on), contentDescription = "visibility off")
+                    Icon(painter = painterResource(R.drawable.password_visibility_off), contentDescription = "visibility off")
                 }
             }
         },
@@ -261,9 +261,9 @@ fun SignInForm(
                 onClick = { showPassword = !showPassword }
             ) {
                 if(showPassword) {
-                    Icon(painter = painterResource(R.drawable.password_visibility_off), contentDescription = "visibility")
+                    Icon(painter = painterResource(R.drawable.password_visibility_on), contentDescription = "visibility on")
                 } else {
-                    Icon(painter = painterResource(R.drawable.password_visibility_on), contentDescription = "visibility")
+                    Icon(painter = painterResource(R.drawable.password_visibility_off), contentDescription = "visibility off")
                 }
             }
         },
