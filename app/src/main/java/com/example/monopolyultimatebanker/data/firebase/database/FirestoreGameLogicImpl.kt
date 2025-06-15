@@ -98,15 +98,8 @@ class FirestoreGameLogicImpl @Inject constructor(
         }
     }
 
-    override suspend fun transferPlayerProperty(
-        recipientId: String,
-        recipientBalance: Int,
-        playerId: String,
-        playerBalance: Int,
-        playerProperties: List<OwnedPlayerProperties>,
-        rentValue: Int
-    ) {
-        withContext(Dispatchers.IO) {
+    override suspend fun transferPlayerProperty(playerProperties: List<OwnedPlayerProperties>, recipientId: String, playerBalance: Int): Int {
+        return withContext(Dispatchers.IO) {
             var tempBalance = playerBalance
             playerProperties.forEach { property ->
                 firestoreRepositoryImpl.updatePlayerPropertyOwner(
@@ -116,18 +109,7 @@ class FirestoreGameLogicImpl @Inject constructor(
                 tempBalance += property.propertyPrice
             }
 
-            val addAmount = recipientBalance + rentValue
-            val deductAmount = tempBalance - rentValue
-
-            firestoreRepositoryImpl.updateGamePlayer(
-                playerId = recipientId,
-                playerBalance = addAmount
-            )
-
-            firestoreRepositoryImpl.updateGamePlayer(
-                playerId = playerId,
-                playerBalance = deductAmount
-            )
+            tempBalance
         }
     }
 

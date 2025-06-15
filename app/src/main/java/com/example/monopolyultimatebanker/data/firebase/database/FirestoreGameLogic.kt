@@ -16,7 +16,7 @@ interface FirestoreGameLogic {
 
     suspend fun propertySwap(propertyNo1: Int, propertyNo2: Int, playerId1: String, playerId2: String)
 
-    suspend fun transferPlayerProperty(recipientId: String, recipientBalance: Int, playerId: String, playerBalance: Int, playerProperties: List<OwnedPlayerProperties>, rentValue: Int)
+    suspend fun transferPlayerProperty(playerProperties: List<OwnedPlayerProperties>, recipientId: String, playerBalance: Int): Int
 
     suspend fun rentLevelReset1(propertyNo: Int): List<UpdatedProperty>
 
