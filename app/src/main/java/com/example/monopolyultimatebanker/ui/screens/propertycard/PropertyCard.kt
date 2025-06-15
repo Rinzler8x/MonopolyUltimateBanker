@@ -129,6 +129,7 @@ fun PropertyCard(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickPropertyTransferDialog,
                     title = "Properties Transferred",
                     description = "All selected properties were transferred successfully and debt paid.",
+                    navigateToHomeScreen = navigateToHomeScreen
                 )
             }
 
