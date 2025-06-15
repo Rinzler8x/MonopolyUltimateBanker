@@ -3,7 +3,9 @@ package com.example.monopolyultimatebanker.ui.screens.propertycard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.monopolyultimatebanker.data.firebase.database.FirestoreGameLogicImpl
+import com.example.monopolyultimatebanker.data.firebase.database.FirestoreRepositoryImpl
 import com.example.monopolyultimatebanker.data.firebase.database.UpdatedProperty
+import com.example.monopolyultimatebanker.data.gametable.Game
 import com.example.monopolyultimatebanker.data.gametable.GameRepositoryImpl
 import com.example.monopolyultimatebanker.data.playerpropertytable.OwnedPlayerProperties
 import com.example.monopolyultimatebanker.data.playerpropertytable.PlayerProperty
@@ -178,21 +180,31 @@ class PropertyCardViewModel @Inject constructor(
 
     fun transferProperties() {
         viewModelScope.launch {
+            lateinit var propertyOwner: PlayerProperty
+            lateinit var selectedProperties: List<OwnedPlayerProperties>
+            lateinit var player: Game
+            var rentValue: Int
+
             withContext(Dispatchers.IO) {
-                val propertyOwner = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyState.value.propertyNo)
-                val propertyOwnerDetails = gameRepositoryImpl.getGamePlayer(propertyOwner.playerId)
-                val selectedProperties = _uiPropertyBottomSheetState.value.selectedProperties
-                val player = gameRepositoryImpl.getGamePlayer(gamePreferencesRepository.gameState.first().playerId)
-                val rentValue = _uiPropertyBottomSheetState.value.rentValue
-                firestoreGameLogicImpl.transferPlayerProperty(
-                    recipientId = propertyOwner.playerId,
-                    recipientBalance = propertyOwnerDetails.playerBalance,
-                    playerId = player.playerId,
-                    playerBalance = player.playerBalance,
-                    playerProperties = selectedProperties,
-                    rentValue = rentValue
-                )
+                propertyOwner = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyState.value.propertyNo)
+                selectedProperties = _uiPropertyBottomSheetState.value.selectedProperties
+                player = gameRepositoryImpl.getGamePlayer(gamePreferencesRepository.gameState.first().playerId)
+                rentValue = _uiPropertyBottomSheetState.value.rentValue
             }
+
+            val playerBalance = firestoreGameLogicImpl.transferPlayerProperty(
+                playerProperties = selectedProperties,
+                recipientId = propertyOwner.playerId,
+                playerBalance = player.playerBalance,
+            )
+
+            firestoreGameLogicImpl.transferRent(
+                propertyNo = propertyState.value.propertyNo,
+                playerId = player.playerId,
+                playerBalance = playerBalance,
+                rentValue = rentValue
+            )
+
             onClickPropertyBottomSheet()
             onClickPropertyTransferDialog()
         }
