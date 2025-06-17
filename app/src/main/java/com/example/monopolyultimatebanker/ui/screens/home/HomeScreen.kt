@@ -160,7 +160,13 @@ fun HomeScreen(
                     }
                 } else {
                     if(gamePrefState.isGameActive == true){
-                        ActiveGame(game = gameState.gameState, onClickGameOverDialog = homeViewModel::onClickGameOverDialog)
+                        ActiveGame(
+                            game = gameState.gameState,
+                            gameOverCount = gamePrefState.gameOverCount,
+                            gameOverCountUpdate = homeViewModel::gameOverCountUpdate,
+                            gameOverComputeTotalPlayerBalance = homeViewModel::gameOverComputeTotalPlayerBalance,
+                            onClickGameOverDialog = homeViewModel::onClickGameOverDialog
+                        )
                     } else {
                         NoActiveGame(onClickCreateOrJoinGame = homeViewModel::onClickCreateOrJoinGameDialog, interactionSource = interactionSource)
                     }
@@ -219,12 +225,13 @@ fun HomeScreen(
                     )
                 }
 
-                if(multiPurposeDialogState.gameOverDialog) {
+                if(multiPurposeDialogState.gameOverDialog && gamePrefState.gameOverCount == 1) {
                     MultiPurposeDialog(
                         onClickDialogState = homeViewModel::onClickGameOverDialog,
                         title = "Game Over",
                         scope = scope,
                         isGameOver = true,
+                        gameOverCountUpdate = homeViewModel::gameOverCountUpdate,
                         game = gameState.gameState
                     )
                 }
@@ -310,6 +317,9 @@ private fun DrawerContent(
 private fun ActiveGame(
     modifier: Modifier = Modifier,
     game: List<Game>,
+    gameOverCount: Int,
+    gameOverCountUpdate: (Int) -> Unit,
+    gameOverComputeTotalPlayerBalance: () -> Unit,
     onClickGameOverDialog: () -> Unit,
 ) {
     LazyColumn(
@@ -318,7 +328,9 @@ private fun ActiveGame(
             .padding(horizontal = 50.dp),
     ) {
         item {
-            Row(modifier = modifier.fillMaxWidth().padding(top = 20.dp, bottom = 10.dp), horizontalArrangement = Arrangement.Center) {
+            Row(modifier = modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp, bottom = 10.dp), horizontalArrangement = Arrangement.Center) {
                 Text(text = "Leaderboard", style = MaterialTheme.typography.headlineLarge)
             }
             HorizontalDivider(thickness = 2.dp)
@@ -344,7 +356,9 @@ private fun ActiveGame(
                 Text(text = "$${player.playerBalance}", style = MaterialTheme.typography.titleMedium)
             }
 
-            if ((player.playerBalance < 0) && (player.playerBalance > -99999)) {
+            if ((player.playerBalance < 0) && (player.playerBalance > -99999) && gameOverCount == 0) {
+                gameOverComputeTotalPlayerBalance()
+                gameOverCountUpdate(1)
                 onClickGameOverDialog()
             }
         }
@@ -388,6 +402,7 @@ private fun MultiPurposeDialog(
     isPlayerPropertyList: Boolean = false,
     playerPropertyList: List<PlayerPropertiesList> = listOf(),
     isGameOver: Boolean = false,
+    gameOverCountUpdate: (Int) -> Unit = {},
     game: List<Game> =  listOf(),
     modifier: Modifier = Modifier
 ) {
@@ -395,7 +410,12 @@ private fun MultiPurposeDialog(
     val activity: Activity = LocalActivity.current!!
 
     AlertDialog(
-        onDismissRequest = onClickDialogState,
+        onDismissRequest = {
+            if (isGameOver) {
+                gameOverCountUpdate(2)
+            }
+            onClickDialogState()
+        },
         title = {
             Text(
                 text = title,
@@ -434,7 +454,9 @@ private fun MultiPurposeDialog(
                                 Row( modifier = modifier
                                     .fillMaxWidth()
                                     .padding(top = 6.dp) ) {
-                                    Column(modifier = modifier.weight(.2f).padding(start = 1.dp)) {
+                                    Column(modifier = modifier
+                                        .weight(.2f)
+                                        .padding(start = 1.dp)) {
                                         Text(text = "${playerProperty.propertyNo}", style = MaterialTheme.typography.bodyLarge, lineHeight = 18.sp)
                                     }
                                     Column(modifier = modifier.weight(.65f)) {
@@ -491,7 +513,9 @@ private fun MultiPurposeDialog(
                             }
                         }
 
-                        Row(modifier = modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.Top,) {
+                        Row(modifier = modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp), verticalAlignment = Alignment.Top,) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.weight(0.3f)) {
                                 Text(
                                     text = winnersList[1],
@@ -536,8 +560,9 @@ private fun MultiPurposeDialog(
                         } else if(isNavigate) {
                             job = navigateToNewLocation()
                         }
-
                         job?.join()
+
+                        if(isGameOver) { gameOverCountUpdate(2) }
                         onClickDialogState()
                     }
                 }

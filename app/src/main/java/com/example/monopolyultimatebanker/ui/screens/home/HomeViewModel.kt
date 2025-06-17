@@ -74,7 +74,8 @@ data class PlayerPropertiesListState(
 data class GamePrefUiState(
     val gameId: String = "",
     val playerId: String = "",
-    val isGameActive: Boolean? = null
+    val isGameActive: Boolean? = null,
+    val gameOverCount: Int = 0,
 )
 
 @HiltViewModel
@@ -93,7 +94,8 @@ class HomeViewModel @Inject constructor(
             GamePrefUiState(
                 gameId = it.gameId,
                 playerId = it.playerId,
-                isGameActive = it.isGameActive
+                isGameActive = it.isGameActive,
+                gameOverCount = it.gameOverCount
             )
         }
             .stateIn(
@@ -196,6 +198,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun gameOverComputeTotalPlayerBalance() {
+        viewModelScope.launch {
+            firestoreGameLogicImpl.computeTotalPlayerBalance(playerId = gamePreferenceState.value.playerId)
+        }
+    }
+
+    fun gameOverCountUpdate(countValue: Int) {
+        viewModelScope.launch {
+            gamePreferencesRepository.gameOverCountUpdate(countValue)
+        }
+    }
+
     /**Multipurpose Dialog Box*/
     private val _uiMultiPurposeDialog = MutableStateFlow(MultiPurposeDialogState())
     val uiMultiPurposeDialog: StateFlow<MultiPurposeDialogState> = _uiMultiPurposeDialog.asStateFlow()
@@ -263,29 +277,22 @@ class HomeViewModel @Inject constructor(
             playerPropertyRepositoryImpl.playerPropertyDeleteAllProperties()
             gamePreferencesRepository.resetGamePreference()
             onClickIsLoading()
-            Log.w(TAG, "Inside Leave game.")
             if(!isLogOut) { activity.finish() }
-            Log.w(TAG, "Inside Leave game, after if-block.")
-
         }
     }
 
     fun logOut(activity: Activity): Job {
         return viewModelScope.launch {
-            Log.w(TAG, "Before Leave game.")
             leaveGame(activity, true).join()
             firebaseAuthRepositoryImpl.logOutUser()
             userLoginPreferencesRepository.resetUserLoginPreference()
-            Log.w(TAG, "After Leave game.")
             activity.finish()
         }
     }
 
     fun navigateToNewLocation(): Job {
         return viewModelScope.launch {
-            firestoreGameLogicImpl.navigateToNewLocation(
-                playerId = gamePreferenceState.value.playerId
-            )
+            firestoreGameLogicImpl.navigateToNewLocation(playerId = gamePreferenceState.value.playerId)
         }
     }
 
