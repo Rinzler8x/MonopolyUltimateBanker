@@ -14,6 +14,8 @@ interface FirestoreGameLogic {
 
     suspend fun navigateToNewLocation(playerId: String)
 
+    suspend fun computeTotalPlayerBalance(playerId: String)
+
     suspend fun propertySwap(propertyNo1: Int, propertyNo2: Int, playerId1: String, playerId2: String)
 
     suspend fun transferPlayerProperty(playerProperties: List<OwnedPlayerProperties>, recipientId: String, playerBalance: Int): Int

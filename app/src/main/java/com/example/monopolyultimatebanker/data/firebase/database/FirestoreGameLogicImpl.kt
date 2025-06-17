@@ -82,9 +82,20 @@ class FirestoreGameLogicImpl @Inject constructor(
             )
         }
     }
+    
+    override suspend fun computeTotalPlayerBalance(playerId: String) {
+        withContext(Dispatchers.IO) {
+            val totalSum = playerPropertyRepositoryImpl.playerPropertyGetTotalAssetsValue(playerId) ?: 0
+            val playerBalance = gameRepositoryImpl.getGamePlayer(playerId).playerBalance
+
+            firestoreRepositoryImpl.updateGamePlayer(
+                playerId = playerId,
+                playerBalance = (playerBalance + totalSum)
+            )
+        }
+    }
 
     /**PlayerProperty*/
-
     override suspend fun propertySwap(propertyNo1: Int, propertyNo2: Int, playerId1: String, playerId2: String) {
         withContext(Dispatchers.IO) {
             val ppId1 = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyNo1).ppId
