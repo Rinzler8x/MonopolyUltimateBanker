@@ -12,6 +12,8 @@ class PlayerPropertyRepositoryImpl @Inject constructor(
 
     override fun getPlayerPropertiesList(playerId: String): Flow<List<PlayerPropertiesList>?> = playerPropertyDao.getPlayerPropertiesList(playerId)
 
+    override fun playerPropertyGetTotalAssetsValue(playerId: String): Int? = playerPropertyDao.getTotalAssetsValue(playerId)
+
     override fun playerPropertyExists(propertyNo: Int): Int = playerPropertyDao.propertyExists(propertyNo)
 
     override suspend fun playerPropertyGetAllPlayerProperties(playerId: String): List<Int>? = playerPropertyDao.getAllPlayerProperties(playerId)

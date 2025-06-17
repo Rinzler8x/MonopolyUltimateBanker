@@ -11,6 +11,8 @@ interface PlayerPropertyRepository {
 
     fun getPlayerPropertiesList(playerId: String): Flow<List<PlayerPropertiesList>?>
 
+    fun playerPropertyGetTotalAssetsValue(playerId: String): Int?
+
     fun playerPropertyExists(propertyNo: Int): Int
 
     suspend fun playerPropertyGetAllPlayerProperties(playerId: String): List<Int>?

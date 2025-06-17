@@ -35,6 +35,11 @@ interface PlayerPropertyDao {
             "WHERE player_property.player_id = :playerId ORDER BY property.property_no ASC")
     fun getPlayerPropertiesList(playerId: String): Flow<List<PlayerPropertiesList>?>
 
+    @Query("SELECT SUM(property.property_price) as totalAssetsValue FROM player_property " +
+            "INNER JOIN property ON player_property.property_no = property.property_no " +
+            "WHERE player_property.player_id = :playerId")
+    fun getTotalAssetsValue(playerId: String): Int?
+
     @Query("SELECT COUNT(*) as count FROM player_property WHERE property_no = :propertyNo")
     fun propertyExists(propertyNo: Int): Int
 
