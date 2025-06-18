@@ -225,13 +225,12 @@ fun HomeScreen(
                     )
                 }
 
-                if(multiPurposeDialogState.gameOverDialog && gamePrefState.gameOverCount == 1) {
+                if(multiPurposeDialogState.gameOverDialog) {
                     MultiPurposeDialog(
                         onClickDialogState = homeViewModel::onClickGameOverDialog,
                         title = "Game Over",
                         scope = scope,
                         isGameOver = true,
-                        gameOverCountUpdate = homeViewModel::gameOverCountUpdate,
                         game = gameState.gameState
                     )
                 }
@@ -318,7 +317,7 @@ private fun ActiveGame(
     modifier: Modifier = Modifier,
     game: List<Game>,
     gameOverCount: Int,
-    gameOverCountUpdate: (Int) -> Unit,
+    gameOverCountUpdate: () -> Unit,
     gameOverComputeTotalPlayerBalance: () -> Unit,
     onClickGameOverDialog: () -> Unit,
 ) {
@@ -358,7 +357,7 @@ private fun ActiveGame(
 
             if ((player.playerBalance < 0) && (player.playerBalance > -99999) && gameOverCount == 0) {
                 gameOverComputeTotalPlayerBalance()
-                gameOverCountUpdate(1)
+                gameOverCountUpdate()
                 onClickGameOverDialog()
             }
         }
@@ -402,20 +401,12 @@ private fun MultiPurposeDialog(
     isPlayerPropertyList: Boolean = false,
     playerPropertyList: List<PlayerPropertiesList> = listOf(),
     isGameOver: Boolean = false,
-    gameOverCountUpdate: (Int) -> Unit = {},
     game: List<Game> =  listOf(),
     modifier: Modifier = Modifier
 ) {
-
     val activity: Activity = LocalActivity.current!!
-
     AlertDialog(
-        onDismissRequest = {
-            if (isGameOver) {
-                gameOverCountUpdate(2)
-            }
-            onClickDialogState()
-        },
+        onDismissRequest = onClickDialogState,
         title = {
             Text(
                 text = title,
@@ -561,8 +552,6 @@ private fun MultiPurposeDialog(
                             job = navigateToNewLocation()
                         }
                         job?.join()
-
-                        if(isGameOver) { gameOverCountUpdate(2) }
                         onClickDialogState()
                     }
                 }

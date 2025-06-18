@@ -204,9 +204,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun gameOverCountUpdate(countValue: Int) {
+    fun gameOverCountUpdate() {
         viewModelScope.launch {
-            gamePreferencesRepository.gameOverCountUpdate(countValue)
+            gamePreferencesRepository.gameOverCountUpdate()
         }
     }
 

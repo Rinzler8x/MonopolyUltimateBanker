@@ -63,9 +63,9 @@ class GamePreferencesRepository @Inject constructor(
         }
     }
 
-    suspend fun gameOverCountUpdate(countValue: Int) {
+    suspend fun gameOverCountUpdate() {
         dataStore.edit { pref ->
-            pref[GAME_OVER_COUNT] = countValue
+            pref[GAME_OVER_COUNT] = 1
         }
     }
 
