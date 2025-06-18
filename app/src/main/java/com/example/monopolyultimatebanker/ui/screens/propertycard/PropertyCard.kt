@@ -106,7 +106,7 @@ fun PropertyCard(
                 )
             }
 
-            if(multiPurposeDialogState.propertyTransferDialogState){
+            if(multiPurposeDialogState.insufficientFundsDialogState){
                 MultiPurposePropertyDialog(
                     onClickMultiPurposePropertyDialog = propertyCardViewModel::onClickInsufficientFundsDialog,
                     title = "Insufficient Funds",
