@@ -56,6 +56,7 @@ class PropertyCardViewModel @Inject constructor(
     private val propertyRepositoryImpl: PropertyRepositoryImpl,
     private val gameRepositoryImpl: GameRepositoryImpl,
     private val firestoreGameLogicImpl: FirestoreGameLogicImpl,
+    private val firestoreRepositoryImpl: FirestoreRepositoryImpl,
     private val gamePreferencesRepository: GamePreferencesRepository,
     private val playerPropertyRepositoryImpl: PlayerPropertyRepositoryImpl
 ): ViewModel() {
@@ -181,28 +182,35 @@ class PropertyCardViewModel @Inject constructor(
     fun transferProperties() {
         viewModelScope.launch {
             lateinit var propertyOwner: PlayerProperty
+            lateinit var propertyOwnerDetails: Game
             lateinit var selectedProperties: List<OwnedPlayerProperties>
             lateinit var player: Game
             var rentValue: Int
+            var playerBalance: Int
 
             withContext(Dispatchers.IO) {
                 propertyOwner = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyState.value.propertyNo)
+                propertyOwnerDetails = gameRepositoryImpl.getGamePlayer(playerId = propertyOwner.playerId)
                 selectedProperties = _uiPropertyBottomSheetState.value.selectedProperties
                 player = gameRepositoryImpl.getGamePlayer(gamePreferencesRepository.gameState.first().playerId)
                 rentValue = _uiPropertyBottomSheetState.value.rentValue
+                playerBalance = player.playerBalance
             }
 
-            val playerBalance = firestoreGameLogicImpl.transferPlayerProperty(
-                playerProperties = selectedProperties,
-                recipientId = propertyOwner.playerId,
-                playerBalance = player.playerBalance,
+            firestoreRepositoryImpl.updateGamePlayer(
+                playerId = propertyOwner.playerId,
+                playerBalance = (propertyOwnerDetails.playerBalance + playerBalance)
             )
 
-            firestoreGameLogicImpl.transferRent(
-                propertyNo = propertyState.value.propertyNo,
+            playerBalance = firestoreGameLogicImpl.transferPlayerProperty(
+                playerProperties = selectedProperties,
+                recipientId = propertyOwner.playerId,
+                playerBalance = (playerBalance - rentValue),
+            )
+
+            firestoreRepositoryImpl.updateGamePlayer(
                 playerId = player.playerId,
-                playerBalance = playerBalance,
-                rentValue = rentValue
+                playerBalance = playerBalance
             )
 
             onClickPropertyBottomSheet()
