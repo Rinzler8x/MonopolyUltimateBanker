@@ -162,6 +162,7 @@ fun HomeScreen(
                     if(gamePrefState.isGameActive == true){
                         ActiveGame(
                             game = gameState.gameState,
+                            playerId = gamePrefState.playerId,
                             gameOverCount = gamePrefState.gameOverCount,
                             gameOverCountUpdate = homeViewModel::gameOverCountUpdate,
                             gameOverComputeTotalPlayerBalance = homeViewModel::gameOverComputeTotalPlayerBalance,
@@ -315,6 +316,7 @@ private fun DrawerContent(
 @Composable
 private fun ActiveGame(
     modifier: Modifier = Modifier,
+    playerId: String,
     game: List<Game>,
     gameOverCount: Int,
     gameOverCountUpdate: () -> Unit,
@@ -356,7 +358,7 @@ private fun ActiveGame(
             }
 
             if ((player.playerBalance < 0) && (player.playerBalance > -99999) && gameOverCount == 0) {
-                gameOverComputeTotalPlayerBalance()
+                if(player.playerId != playerId) { gameOverComputeTotalPlayerBalance() }
                 gameOverCountUpdate()
                 onClickGameOverDialog()
             }
