@@ -240,8 +240,6 @@ class PropertyCardViewModel @Inject constructor(
                     }
                 } else {
                     val propertyOwner = playerPropertyRepositoryImpl.getPlayerProperty(propertyNo = propertyState.value.propertyNo)
-                    val playerProperties = playerPropertyRepositoryImpl.playerPropertyGetPlayerProperties(playerId = player.playerId) ?: emptyList()
-
                     val fieldName = "rentLevel${propertyOwner.rentLevel}"
                     val field: Field = propertyState.value.javaClass.getDeclaredField(fieldName)
                     field.isAccessible = true
@@ -249,8 +247,26 @@ class PropertyCardViewModel @Inject constructor(
                     val updatedRent: List<UpdatedProperty>
 
                     if(player.playerId != propertyOwner.playerId) {
-                        if(player.playerBalance < rentValue && playerProperties.isNotEmpty()) {
-                            onClickPropertyBottomSheet(ownedProperties = playerProperties, rentValue = rentValue, playerBalance = player.playerBalance)
+                        if(player.playerBalance < rentValue) {
+                            val playerProperties = playerPropertyRepositoryImpl.playerPropertyGetPlayerProperties(playerId = player.playerId) ?: emptyList()
+
+                            if(playerProperties.isNotEmpty()) {
+                                onClickPropertyBottomSheet(ownedProperties = playerProperties, rentValue = rentValue, playerBalance = player.playerBalance)
+                            } else {
+                                val propertyOwnerDetails = gameRepositoryImpl.getGamePlayer(propertyOwner.playerId)
+
+                                firestoreRepositoryImpl.updateGamePlayer(
+                                    playerId = propertyOwner.playerId,
+                                    playerBalance = (propertyOwnerDetails.playerBalance + player.playerBalance)
+                                )
+
+                                firestoreRepositoryImpl.updateGamePlayer(
+                                    playerId = player.playerId,
+                                    playerBalance = (player.playerBalance - rentValue)
+                                )
+                                updatedRent = firestoreGameLogicImpl.rentLevelIncrease(propertyNo = propertyState.value.propertyNo)
+                                onClickResultDialog(rentLevel = if(updatedRent.isNotEmpty()) { updatedRent.first().rentLevel } else propertyOwner.rentLevel)
+                            }
                         } else {
                             firestoreGameLogicImpl.transferRent(
                                 propertyNo = propertyState.value.propertyNo,
