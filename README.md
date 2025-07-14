@@ -3,7 +3,7 @@
 
 **Tech Stack:** Kotlin, Jetpack Compose, Firebase, SQLite with Room and Dagger Hilt
 
-**Setup:**
+## Setup:
 - Git clone the repo.
 - Open the project in Android Studio.
 - Connect Firebase to the project and make sure the project has the google-services.json.
