@@ -7,7 +7,7 @@
 - Git clone the repo.
 - Open the project in Android Studio.
 - Connect Firebase to the project and make sure the project has the google-services.json.
-- Load the app on an emulator or physical device and play. (Property and Event card QR codes have been provided.)
+- Players can load the app on an emulator or physical device and play. (Property and Event card QR codes have been provided.)
 
 ### Application Screenshots:
 
