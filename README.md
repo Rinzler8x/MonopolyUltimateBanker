@@ -1,7 +1,7 @@
 # Monopoly Ultimate Banker
 - Android Application that replicates the functionality of the game's card reader.
 
-**Tech Stack:** Kotlin, Jetpack Compose, Firebase, SQLite with Room and Dagger Hilt
+**Tech Stack:** Kotlin, Jetpack Compose, ML Kit, Firebase, SQLite with Room and Dagger Hilt
 
 ## Setup:
 - Git clone the repo.
