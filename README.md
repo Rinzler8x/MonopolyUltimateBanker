@@ -13,39 +13,39 @@
 
 <div align="center">
   <h2>Sign Up / Log In Screen</h2>
-  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/login_screen.png" width="360" height="780"/>
+  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/login_screen.png" width="800" height="1280"/>
   <br /><br />
 
   <h2>Home Screen</h2>
-  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/home_screen.png" width="360" height="780"/>
+  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/home_screen.png" width="800" height="1280"/>
   <br /><br />
 
   <h2>Navigation Drawer and Player Properties List</h2>
-  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/player_properties.png" width="360" height="780"/>
+  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/player_properties.png" width="800" height="1280"/>
   <br /><br />
 
   <h2>QR Scanner Screen</h2>
-  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/qr_scanner_screen.png" width="360" height="780"/>
+  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/qr_scanner_screen.png" width="800" height="1280"/>
   <br /><br />
 
   <h2>Property Cards Screen 1</h2>
-  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/property_cards_1.png" width="360" height="780"/>
+  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/property_cards_1.png" width="800" height="1280"/>
   <br /><br />
 
   <h2>Property Cards Screen 2</h2>
-  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/property_cards_2.png" width="360" height="780"/>
+  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/property_cards_2.png" width="800" height="1280"/>
   <br /><br />
 
   <h2>Property Dialog Boxes</h2>
-  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/property_dialog_boxes.png" width="360" height="780"/>
+  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/property_dialog_boxes.png" width="800" height="1280"/>
   <br /><br />
 
   <h2>Event Cards Screen 1</h2>
-  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/event_cards_1.png" width="360" height="780"/>
+  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/event_cards_1.png" width="800" height="1280"/>
   <br /><br />
 
   <h2>Event Cards Screen 2</h2>
-  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/event_cards_2.png" width="360" height="780"/>
+  <img src="https://github.com/Rinzler8x/MonopolyUltimateBanker/blob/master/README%20props/event_cards_2.png" width="800" height="1280"/>
   <br /><br />
   
   <h2>Game Over Screen</h2>
